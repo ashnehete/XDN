@@ -1,0 +1,8 @@
+# start RC
+java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=gigapaxos.properties edu.umass.cs.reconfiguration.ReconfigurableNode RC
+
+# start AR
+java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=gigapaxos.properties -Dcontainer=127.0.0.1 edu.umass.cs.reconfiguration.ReconfigurableNode AR
+
+# start API server
+java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=gigapaxos.properties edu.umass.cs.xdn.api.XDNHttpServer 
