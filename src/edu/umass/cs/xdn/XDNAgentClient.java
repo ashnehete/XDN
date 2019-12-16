@@ -56,7 +56,12 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
 
         try {
             // coordinate request through GigaPaxos
-            AppRequest response = (AppRequest) this.sendRequest(request);
+            this.sendRequest(request, new RequestCallback() {
+                @Override
+                public void handleResponse(Request response) {
+                    System.out.println("Response received:"+response);
+                }
+            });
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -108,7 +113,8 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
 
         client.execute("1", PaxosConfig.getDefaultServiceName());
 
-        System.out.println("Service name has been created successfully.");
+        Thread.sleep(1000);
+        // System.out.println("Service name has been created successfully.");
         System.exit(0);
     }
 }
