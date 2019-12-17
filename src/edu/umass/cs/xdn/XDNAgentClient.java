@@ -11,6 +11,7 @@ import edu.umass.cs.reconfiguration.examples.noopsimple.NoopApp;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.CreateServiceName;
 import edu.umass.cs.reconfiguration.reconfigurationutils.RequestParseException;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -56,10 +57,11 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
 
         try {
             // coordinate request through GigaPaxos
-            this.sendRequest(request, new RequestCallback() {
+            this.sendRequest(request
+                    , new RequestCallback() {
                 @Override
                 public void handleResponse(Request response) {
-                    System.out.println("Response received:"+response);
+                     System.out.println("Response received:"+response);
                 }
             });
 
@@ -89,7 +91,7 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
 
         final int sent = 1;
 
-
+        /*
         client.sendRequest(new CreateServiceName(testServiceName,
                         "0", initGroup),
                 new RequestCallback() {
@@ -109,13 +111,23 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
         while (sent < received) {
             Thread.sleep(500);
         }
+         */
 
+        JSONObject json = new JSONObject();
+        try {
+            json.put("value", "1");
+            json.put("id", 0);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        client.execute("1", PaxosConfig.getDefaultServiceName());
+        client.execute(json.toString(), testServiceName);
 
-        Thread.sleep(1000);
-        // System.out.println("Service name has been created successfully.");
-        System.exit(0);
+        System.out.println("ServiceName:"+testServiceName);
+
+        Thread.sleep(2000);
+
+        System.out.println("Done.");
     }
 }
 

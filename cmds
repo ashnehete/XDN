@@ -1,7 +1,6 @@
 # start RC
 java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/gigapaxos.properties -Djavax.net.ssl.keyStorePassword=qwerty -Djavax.net.ssl.trustStorePassword=qwerty -Djavax.net.ssl.keyStore=/Users/gaozy/git/gigapaxos-master/conf/keyStore.jks -Djavax.net.ssl.trustStore=/Users/gaozy/git/gigapaxos-master/conf/trustStore.jks edu.umass.cs.reconfiguration.ReconfigurableNode RC
 
-# -Djavax.net.ssl.keyStorePassword=qwerty -Djavax.net.ssl.trustStorePassword=qwerty -Djavax.net.ssl.keyStore=/Users/gaozy/git/gigapaxos-master/conf/keyStore.jks -Djavax.net.ssl.trustStore=/Users/gaozy/git/gigapaxos-master/conf/trustStore.jks
 
 # start AR
 java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/gigapaxos.properties -Djavax.net.ssl.keyStorePassword=qwerty -Djavax.net.ssl.trustStorePassword=qwerty -Djavax.net.ssl.keyStore=/Users/gaozy/git/gigapaxos-master/conf/keyStore.jks -Djavax.net.ssl.trustStore=/Users/gaozy/git/gigapaxos-master/conf/trustStore.jks -Dcontainer=127.0.0.1 edu.umass.cs.reconfiguration.ReconfigurableNode AR

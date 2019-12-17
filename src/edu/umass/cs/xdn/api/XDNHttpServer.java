@@ -75,25 +75,27 @@ public class XDNHttpServer implements Runnable {
 
             // System.out.println(getRequest(is));
             JSONObject req = new JSONObject(getRequest(is));
+
             // App value to coordinate
-            String value = req.getString("value");
+            // String value = req.getString("value");
+            // int id = req.getInt("id");
             String serviceName = req.getString("serviceName");
-            serviceName = PaxosConfig.getDefaultServiceName();
-            System.out.println("Response:"+value+", ServiceName:"+serviceName);
+            // serviceName = PaxosConfig.getDefaultServiceName();
+
+            // System.out.println("Response:"+req.getString("value")+", ServiceName:"+serviceName);
 
             // FIXME: Coordinate the request with a GigaPaxos ReconfigurableAppClientAsync
-            if ( client.execute(value, serviceName) ) {
-                exchange.sendResponseHeaders(200, 0);
+            if ( client.execute(req.toString(), serviceName) ) {
+                exchange.sendResponseHeaders(200, req.toString().getBytes().length);
             } else {
                 // The server refuses the attempt to brew coffee with a teapot
-                exchange.sendResponseHeaders(418, 0);
+                exchange.sendResponseHeaders(418, req.toString().getBytes().length);
             }
-            System.out.println("Header sent back to nodejs app.");
 
             // exchange.sendResponseHeaders(200, value.getBytes().length);
 
             OutputStream os = exchange.getResponseBody();
-            os.write(value.getBytes());
+            os.write(req.toString().getBytes());
             os.flush();
 
         } catch (IOException | JSONException e) {

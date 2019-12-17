@@ -41,7 +41,7 @@ public class XDNAgentApp implements Replicable {
 
     @Override
     public boolean execute(Request request) {
-        System.out.println("Request "+request+" has been coordinated successfully!");
+        // System.out.println("Request "+request+" has been coordinated successfully!");
 
         AppRequest gReq = ((AppRequest) request);
         String value = gReq.getValue();
@@ -49,8 +49,8 @@ public class XDNAgentApp implements Replicable {
 
         String str = "";
         try {
-            JSONObject json = new JSONObject();
-            json.put("value", gReq.getValue());
+            JSONObject json = new JSONObject(value);
+            // json.put("value", gReq.getValue());
             str = json.toString();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -67,7 +67,7 @@ public class XDNAgentApp implements Replicable {
 
         try (Response response = httpClient.newCall(req).execute()) {
 
-            System.out.println("Received response from nodejs app:"+response);
+            // System.out.println("Received response from nodejs app:"+response);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
