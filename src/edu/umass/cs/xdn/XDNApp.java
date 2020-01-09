@@ -1,5 +1,6 @@
 package edu.umass.cs.xdn;
 
+import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;
 import edu.umass.cs.gigapaxos.interfaces.Replicable;
 import edu.umass.cs.gigapaxos.interfaces.Request;
@@ -22,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -61,6 +63,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         System.out.println("Container URL is:"+containerUrl);
 
         services = new HashMap<>();
+        // avoid throwing an exception when bootup
+        services.put(PaxosConfig.getDefaultServiceName(), new DockerService(PaxosConfig.getDefaultServiceName(), PaxosConfig.getDefaultServiceName(), null, -1));
+
+        File checkpointFolder = new File(XDNConfig.checkpointDir);
+        if (!checkpointFolder.exists())
+            checkpointFolder.mkdir();
     }
 
     @Override
@@ -86,7 +94,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 }
             } else if (HttpActiveReplicaPacketType.SNAPSHOT.equals(r.getRequestType())) {
                 String name = r.getServiceName();
-                List<String> command = getCheckpointCommand(name);
+                List<String> command = getCheckpointCreateCommand(name);
                 return run(command);
             } else if (HttpActiveReplicaPacketType.RECOVER.equals(r.getRequestType())) {
                 String name = r.getServiceName();
@@ -101,13 +109,23 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     @Override
     public String checkpoint(String name) {
-        // Checkpoint the state of the corresponding name
+        // Checkpoint the state of the name service
+        // need to use LargeCheckpoint
         return null;
     }
 
     @Override
     public boolean restore(String name, String state) {
-        // System.out.println("Name:"+name+"\nState: "+state);
+        System.out.println("Name:"+name+"\nState: "+state);
+        if ( state == null ){
+            // TODO: delete the service images
+            if (services.containsKey(name))
+                services.remove(name);
+            else{
+                System.out.println("Non-existing service name");
+            }
+        }
+
         if (services.containsKey(name)){
             // this is a registered service
             Service service = services.get(name);
@@ -179,11 +197,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return true;
     }
 
-    // docker run -p 8080:3000 -e ADDR=172.17.0.1 -d oversky710/xdn-demo-app --ip 172.17.0.100
+    // docker run --name xdn-demo-app -p 8080:3000 -e ADDR=172.17.0.1 -d oversky710/xdn-demo-app --ip 172.17.0.100
     private List<String> getStartCommand(String name, int port, List<String> env, String url) {
         List<String> command = new ArrayList<>();
         command.add("docker");
         command.add("run");
+
+        // name is unique globally, otherwise it won't be created successfully
+        command.add("--name");
+        command.add(name);
 
         //FIXME: only works on cloud node
         if (port > 0){
@@ -204,18 +226,36 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return command;
     }
 
-    // docker checkpoint create --leave-running=true --checkpoint-dir=/tmp/test 9ac1990b3d76 test
-    private List<String> getCheckpointCommand(String name) {
+    private List<String> getCheckpointCreateCommand(String name){
+        return getCheckpointCreateCommand(name, false);
+    }
+
+    // docker checkpoint create --leave-running=true --checkpoint-dir=/tmp/test name test
+    private List<String> getCheckpointCreateCommand(String name, boolean leaveRunning) {
         List<String> command = new ArrayList<>();
         command.add("docker");
         command.add("checkpoint");
         command.add("create");
-        command.add("--leave-running=true");
+        if (leaveRunning)
+            command.add("--leave-running=true");
         command.add("--checkpoint-dir="+XDNConfig.checkpointDir+name);
         command.add(name);
         command.add(name);
         return command;
     }
+
+    private List<String> getCheckpointRemoveCommand(String name) {
+        List<String> command = new ArrayList<>();
+        command.add("docker");
+        command.add("checkpoint");
+        command.add("rm");
+        command.add("--checkpoint-dir="+XDNConfig.checkpointDir+name);
+        command.add(name);
+        command.add(name);
+        return command;
+    }
+
+
 
     // docker start --checkpoint-dir=/tmp/test 9ac1990b3d76
     private List<String> getRestoreCommand(String name) {
