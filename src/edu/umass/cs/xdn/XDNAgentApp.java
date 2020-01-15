@@ -5,6 +5,8 @@ import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
 import edu.umass.cs.reconfiguration.examples.AppRequest;
 import edu.umass.cs.reconfiguration.examples.noopsimple.NoopApp;
+import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
+import edu.umass.cs.reconfiguration.interfaces.Reconfigurable;
 import edu.umass.cs.reconfiguration.reconfigurationutils.RequestParseException;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -17,8 +19,9 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
- *
+ * Old async app
  */
+@Deprecated
 public class XDNAgentApp implements Replicable {
 
     private static final MediaType JSON
@@ -28,13 +31,16 @@ public class XDNAgentApp implements Replicable {
     // used to propagate coordinated result to applications
     private static OkHttpClient httpClient;
 
+    /**
+     * 
+     */
     public XDNAgentApp() {
         httpClient = new OkHttpClient();
 
         String cAddr = "localhost";
         if (System.getProperty("container") != null)
             cAddr = System.getProperty("container");
-        containerUrl = "http://" + cAddr + XDNConfig.xdnRoute;
+        containerUrl = "http://" + cAddr + "/xdn";
 
         System.out.println("Container URL is:"+containerUrl);
     }
@@ -43,23 +49,27 @@ public class XDNAgentApp implements Replicable {
     public boolean execute(Request request) {
         // System.out.println("Request "+request+" has been coordinated successfully!");
 
-        AppRequest gReq = ((AppRequest) request);
+        // HttpActiveReplicaRequest gReq = ((HttpActiveReplicaRequest) request);
+    	/*
+        AppRequest gReq = (AppRequest) request;
+        
         String value = gReq.getValue();
         System.out.println(">>>>>>>>>> Value:"+value);
-
+        
         String str = "";
         try {
-            JSONObject json = new JSONObject(value);
-            // json.put("value", gReq.getValue());
+            JSONObject json = new JSONObject();
+            json.put("value", gReq.getValue());
+            json.put("id", gReq.getRequestID());
             str = json.toString();
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         System.out.println(">>>>>>>>>>> JSON:"+str);
-
+         */
         // post to app with a HttpClient
-        RequestBody body = RequestBody.create(JSON, str);
+        RequestBody body = RequestBody.create(JSON, request.toString());
         okhttp3.Request req = new okhttp3.Request.Builder()
                 .url(containerUrl)
                 .post(body)

@@ -1,19 +1,17 @@
-package edu.umass.cs.xdn.api;
+package edu.umass.cs.xdn.http;
 
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-import edu.umass.cs.gigapaxos.PaxosConfig;
-import edu.umass.cs.utils.Config;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 
-import edu.umass.cs.xdn.XDNAgentClient;
 
+@Deprecated
 public class XDNHttpServer implements Runnable {
 
     /**

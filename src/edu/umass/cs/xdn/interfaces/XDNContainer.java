@@ -5,7 +5,7 @@ import java.util.List;
 /**
  *
  */
-public interface Service {
+public interface XDNContainer {
 
     /**
      * @param name

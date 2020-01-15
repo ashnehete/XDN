@@ -5,7 +5,7 @@ public enum DockerKeys {
     // String name, String id, String imageUrl, int port
 
     NAME,
-    ID,
+    SERVICE_NAMES,
     IMAGE_URL,
     PORT,
     ENV,
