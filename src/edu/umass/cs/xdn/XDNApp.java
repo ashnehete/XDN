@@ -5,6 +5,7 @@ import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;
 import edu.umass.cs.gigapaxos.interfaces.Replicable;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.paxosutil.LargeCheckpointer;
+import edu.umass.cs.nio.JSONPacket;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
 import edu.umass.cs.reconfiguration.examples.AbstractReconfigurablePaxosApp;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
@@ -34,7 +35,7 @@ import java.util.*;
 public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         implements Replicable, Reconfigurable, AppRequestParserBytes {
 
-    private String myID;
+    // private String myID;
 
     private static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
@@ -72,7 +73,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         gatewayIPAddress = "localhost";
         if (System.getProperty("gateway") != null)
-            // TODO: we can also get this from docker runtime directly
+            // TODO: we can also get this from docker command directly
             gatewayIPAddress = System.getProperty("gateway");
 
         // containerUrl = "http://" + cAddr + XDNConfig.xdnRoute;
@@ -102,7 +103,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         if ( !result.getResult().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
             // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
-            System.out.println("");
+            System.out.println("LargeCheckpointer is enabled, must run with root privilege.");
             System.exit(1);
         }
 
@@ -234,7 +235,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 return null;
             // assert(cp.exists());
 
-            // FIXME: this only works with root privilege
+            // Note: this only works with root privilege
             String image = XDNConfig.defaultCheckpointDir+containerizedApps.get(appName).getID()+"/checkpoints/"+appName;
             List<String> tarCommand = getTarCommand(appName+".tar.gz", image, XDNConfig.checkpointDir);
             assert(run(tarCommand));
@@ -251,7 +252,30 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (containerUrl == null)
                 return null;
 
-            // TODO: send checkpoint request to the underlying app
+            // send checkpoint request to the underlying app
+            JSONObject json = new JSONObject();
+            try {
+                json.put(HttpActiveReplicaRequest.Keys.NAME.toString(), name);
+                json.put(JSONPacket.PACKET_TYPE.toUpperCase(), HttpActiveReplicaPacketType.SNAPSHOT.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            RequestBody body = RequestBody.create(JSON, json.toString());
+            okhttp3.Request req = new okhttp3.Request.Builder()
+                    .url(containerUrl)
+                    .post(body)
+                    .build();
+
+            try (Response response = httpClient.newCall(req).execute()) {
+                System.out.println("Received response from nodejs app:"+response);
+                // System.out.println("Content:"+response.body().string());
+
+                return response.body()!=null? response.body().string(): null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             return null;
         }
     }
@@ -337,8 +361,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     removed = run(removeImageCommand);
                     assert (removed);
 
-                    // Remove appName from the list of containerized Apps
-                    containerizedApps.remove(appName);
+                    // Note: we must keep the docker info in containerizedApps
+                    // Because the associated information can only be acquired upon service name creation
+                    // containerizedApps.remove(appName);
 
                     runningApps.remove(appName);
                 }
@@ -352,16 +377,63 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     Therefore, we have to copy it to the corresponding location of the docker image.
                     */
 
+                    // If the instance is running, stop and prepare to restart
+                    if (runningApps.contains(appName)) {
+                        List<String> stopCommand = getStopCommand(appName);
+                        assert (run(stopCommand));
+                    }
+
                     String dest = XDNConfig.defaultCheckpointDir+containerizedApps.get(appName).getID()+"/checkpoints/";
                     String filename = XDNConfig.checkpointDir+appName+".tar.gz";
                     File cp = new File(filename);
                     LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
-                    List<String> untarCommand = getUntarCommand(filename, dest);
-                    assert(run(untarCommand));
+                    List<String> unTarCommand = getUntarCommand(filename, dest);
+                    assert(run(unTarCommand));
 
-                    // TODO: run docker from a new image
+                    // When largeCheckPointerEnabled is true, each user service is run in different containers
+                    // This implies it won't work for a general scenario with the typical DNS service discovery process
+
+                    List<String> startCommand = getStartCommand(appName);
+                    assert (run(startCommand));
+                    DockerContainer c = containerizedApps.get(appName);
+
+                    updateServiceAndApps(appName, name, c);
+
+                    return true;
                 } else {
                     // send restore request to the underlying app
+                    String containerUrl = null;
+                    if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name)))
+                        containerUrl = getContainerUrl(containerizedApps.get(serviceNames.get(name)).getAddr());
+
+                    if (containerUrl == null)
+                        return false;
+
+                    // send checkpoint request to the underlying app
+                    JSONObject json = new JSONObject();
+                    try {
+                        json.put(HttpActiveReplicaRequest.Keys.NAME.toString(), name);
+                        json.put(JSONPacket.PACKET_TYPE.toUpperCase(), HttpActiveReplicaPacketType.RECOVER.toString());
+                        json.put(HttpActiveReplicaRequest.Keys.QVAL.toString(), state);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    RequestBody body = RequestBody.create(JSON, json.toString());
+                    okhttp3.Request req = new okhttp3.Request.Builder()
+                            .url(containerUrl)
+                            .post(body)
+                            .build();
+
+                    try (Response response = httpClient.newCall(req).execute()) {
+                        System.out.println("Received response from nodejs app:"+response);
+                        // System.out.println("Content:"+response.body().string());
+                        return response.code()==200;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    return false;
                 }
             }
 
@@ -460,31 +532,36 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     e.printStackTrace();
                     return false;
                 }
-            } else {
-                // there is already an app instance, check whether it's running, boot it from a checkpoint up if it's not running
+            } else if ( !runningApps.contains(appName) ) {
+                // there is already an app instance, if it's not running, boot it up
 
+            } else {
+                // TODO: the app is running, then what to do?
             }
         }
         return true;
     }
 
     private void updateServiceAndApps(String appName, String name, DockerContainer container){
-        List<String> inspectCommand = getInspectCommand(appName);
-        try {
-            ProcessResult result = ProcessRuntime.executeCommand(inspectCommand);
-            JSONArray arr = new JSONArray(result.getResult());
-            JSONObject json = arr.getJSONObject(0);
-            // "id"
-            String id = json.getString("Id");
-            container.setID(id);
-            // "NetworkSettings" -> "IPAddress"
-            String ipAddr = json.getJSONObject("NetworkSettings").getString("IPAddress");
-            container.setAddr(ipAddr);
-        } catch (IOException | InterruptedException | JSONException e) {
-            e.printStackTrace();
+        if (container != null) {
+            List<String> inspectCommand = getInspectCommand(appName);
+            try {
+                ProcessResult result = ProcessRuntime.executeCommand(inspectCommand);
+                JSONArray arr = new JSONArray(result.getResult());
+                JSONObject json = arr.getJSONObject(0);
+                // "id"
+                String id = json.getString("Id");
+                container.setID(id);
+                // "NetworkSettings" -> "IPAddress"
+                String ipAddr = json.getJSONObject("NetworkSettings").getString("IPAddress");
+                container.setAddr(ipAddr);
+            } catch (IOException | InterruptedException | JSONException e) {
+                e.printStackTrace();
+            }
+            container.addServiceName(name);
+            containerizedApps.put(appName, container);
+            runningApps.add(appName);
         }
-        container.addServiceName(name);
-        containerizedApps.put(appName, container);
         serviceNames.put(name, appName);
     }
 
@@ -637,6 +714,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     private List<String> getUntarCommand(String filename, String dest) {
         List<String> command = new ArrayList<>();
+        command.add("sudo");
         command.add("tar");
         command.add("zxf");
         command.add(filename);
@@ -680,7 +758,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName()+"("+myID+")";
+        return this.getClass().getSimpleName(); //+"("+myID+")";
     }
 
     public static void main(String[] args) {
