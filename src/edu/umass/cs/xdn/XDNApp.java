@@ -534,10 +534,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 }
             } else if ( !runningApps.contains(appName) ) {
                 // there is already an app instance, if it's not running, boot it up
+                List<String> startCommand = getStartCommand(appName);
+                assert (run(startCommand));
+                DockerContainer c = containerizedApps.get(appName);
 
-            } else {
-                // TODO: the app is running, then what to do?
-            }
+                updateServiceAndApps(appName, name, c);
+                return true;
+            } // else { container exists and running, use it as is }
+
         }
         return true;
     }
@@ -568,7 +572,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     private boolean selectAndStopContainer() {
         // select a container to stop
         Iterator<String> iter = runningApps.iterator();
-        // FIXME: select a random one and stop it
+        // TODO: select a proper running container (rather than the first one) and stop it
         if (iter.hasNext()){
             DockerContainer container = containerizedApps.get(iter.next());
             List<String> stopCommand = getStopCommand(container.getName());
@@ -700,10 +704,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return command;
     }
 
-    private List<String> getTarCommand(String filename, String path, String dest) {
+    private List<String> getTar() {
         List<String> command = new ArrayList<>();
         command.add("sudo");
         command.add("tar");
+        return command;
+    }
+
+    private List<String> getTarCommand(String filename, String path, String dest) {
+        List<String> command = getTar();
         command.add("zcf");
         command.add(filename);
         command.add("-C");
@@ -713,9 +722,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     private List<String> getUntarCommand(String filename, String dest) {
-        List<String> command = new ArrayList<>();
-        command.add("sudo");
-        command.add("tar");
+        List<String> command = getTar();
         command.add("zxf");
         command.add(filename);
         command.add("-C");
