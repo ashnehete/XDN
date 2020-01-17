@@ -1,4 +1,4 @@
-package edu.umass.cs.xdn.http;
+package edu.umass.cs.xdn.deprecated;
 
 import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;

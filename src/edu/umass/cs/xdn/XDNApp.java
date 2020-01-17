@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *  XDNApp is an umbrella application.
@@ -80,7 +81,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         // System.out.println("Container URL is:"+containerUrl);
 
-        containerizedApps = new HashMap<>();
+        containerizedApps = new ConcurrentHashMap<>();
         // avoid throwing an exception when bootup
         containerizedApps.put(PaxosConfig.getDefaultServiceName(),
                 new DockerContainer(PaxosConfig.getDefaultServiceName(),
@@ -88,7 +89,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         // FIXME change HashSet to a sorted list to track resource usage
         runningApps = new HashSet<>();
 
-        serviceNames = new HashMap<>();
+        serviceNames = new ConcurrentHashMap<>();
 
         List<String> whoCommand = new ArrayList<>();
         whoCommand.add("whoami");
@@ -546,7 +547,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return true;
     }
 
-    private void updateServiceAndApps(String appName, String name, DockerContainer container){
+    /**
+     * The method needs to be synchronized because we have a few map to update
+     */
+    private synchronized void updateServiceAndApps(String appName, String name, DockerContainer container){
         if (container != null) {
             List<String> inspectCommand = getInspectCommand(appName);
             try {

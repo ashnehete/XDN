@@ -1,4 +1,4 @@
-package edu.umass.cs.xdn.http;
+package edu.umass.cs.xdn.deprecated;
 
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
