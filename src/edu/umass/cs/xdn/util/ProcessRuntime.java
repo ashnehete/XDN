@@ -15,8 +15,8 @@ public class ProcessRuntime {
 
         ProcessBuilder builder = new ProcessBuilder(command);
 
-        builder.redirectError(ProcessBuilder.Redirect.INHERIT);
-        builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        //builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+        //builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         //builder.redirectInput(Redirect.INHERIT);
 
         Process process = builder.start();
@@ -27,8 +27,11 @@ public class ProcessRuntime {
             String line;
 
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                // System.out.println(line);
+                result.append(line);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         int ret = process.waitFor();

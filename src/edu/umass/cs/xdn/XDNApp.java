@@ -102,7 +102,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         assert (result != null);
 
-        if ( !result.getResult().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
+        if ( !result.getResult().trim().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
             // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
             System.out.println("LargeCheckpointer is enabled, must run with root privilege.");
             System.exit(1);
