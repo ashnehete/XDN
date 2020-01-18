@@ -36,6 +36,7 @@ public class CreateServices {
             initGroup.add(servers.get(name));
         }
 
+        System.out.println("InitGroup:"+initGroup);
         XDNAgentClient client = new XDNAgentClient();
 
         JSONArray arr = new JSONArray();
@@ -49,8 +50,10 @@ public class CreateServices {
 
         final int sent = 1;
 
+        //client.sendRequest(new CreateServiceName(testServiceName,
+        //                json.toString(), initGroup),
         client.sendRequest(new CreateServiceName(testServiceName,
-                        json.toString(), initGroup),
+                json.toString()),
                 new RequestCallback() {
                     final long createTime = System.currentTimeMillis();
                     @Override
