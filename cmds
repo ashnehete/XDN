@@ -6,4 +6,4 @@ java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.proper
 java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -Djavax.net.ssl.keyStorePassword=qwerty -Djavax.net.ssl.trustStorePassword=qwerty -Djavax.net.ssl.keyStore=conf/keyStore.jks -Djavax.net.ssl.trustStore=conf/trustStore.jks -DgigapaxosConfig=conf/xdn.local.properties edu.umass.cs.reconfiguration.ReconfigurableNode AR
 
 # start API server
-java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/xdn.local.properties edu.umass.cs.xdn.deprecated.XDNHttpServer
+java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/xdn.local.properties test.CreateServices
