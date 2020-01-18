@@ -50,6 +50,8 @@ public class CreateServices {
 
         final int sent = 1;
 
+        testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
+
         //client.sendRequest(new CreateServiceName(testServiceName,
         //                json.toString(), initGroup),
         client.sendRequest(new CreateServiceName(testServiceName,
