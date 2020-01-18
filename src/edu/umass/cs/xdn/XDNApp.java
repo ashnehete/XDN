@@ -292,6 +292,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
         System.out.println("Name: "+name+"\nAppName: "+appName+"\nState: "+state);
 
+        if (name.contains(XDNConfig.xdnServiceDecimal))
+            return true;
+
         // handle XDN service restore
         if (name.equals(PaxosConfig.getDefaultServiceName())){
             // Don't do any thing, this is the default app
