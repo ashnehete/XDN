@@ -473,10 +473,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                     // 2. Pull service and boot-up
                     List<String> pullCommand = getPullCommand(url);
-                    boolean pulled = run(pullCommand);
-                    if (!pulled)
-                        return false;
-
+                    ProcessRuntime.executeCommand(pullCommand);
+                    
                     // 3. Boot up the service
                     List<String> startCommand = getRunCommand(appName, port, env, url);
                     ProcessResult result = null;
@@ -535,6 +533,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 } catch (JSONException e) {
                     e.printStackTrace();
                     return false;
+                } catch (InterruptedException | IOException e) {
+                    e.printStackTrace();
                 }
             } else if ( !runningApps.contains(appName) ) {
                 // there is already an app instance, if it's not running, boot it up
@@ -738,6 +738,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     private boolean run(List<String> command) {
+        System.out.println("Command:"+command);
         ProcessResult result;
         try {
             result = ProcessRuntime.executeCommand(command);
