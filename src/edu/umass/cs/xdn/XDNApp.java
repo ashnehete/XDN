@@ -469,7 +469,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         }
                     }
 
-                    System.out.println(">>>>>>>> container info: name="+name+",json="+json);
+                    System.out.println(">>>>>>>> container info: name="+name+",state="+state+",json="+json);
 
                     // 2. Pull service and boot-up
                     List<String> pullCommand = getPullCommand(url);
