@@ -328,6 +328,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
         }
 
+        System.out.println(">>>>>>>> XDN containerized app to restore:"+name);
         // Handle serviceName (name) restore
         if (serviceNames.containsKey(name)){
             // if service name exists, app name must also exist
@@ -467,6 +468,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             env.add(jEnv.getString(i));
                         }
                     }
+
+                    System.out.println(">>>>>>>> container info: name="+name+",json="+json);
 
                     // 2. Pull service and boot-up
                     List<String> pullCommand = getPullCommand(url);
