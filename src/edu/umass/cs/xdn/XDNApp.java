@@ -474,7 +474,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     // 2. Pull service and boot-up
                     List<String> pullCommand = getPullCommand(url);
                     ProcessRuntime.executeCommand(pullCommand);
-                    
+
                     // 3. Boot up the service
                     List<String> startCommand = getRunCommand(appName, port, env, url);
                     ProcessResult result = null;
