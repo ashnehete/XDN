@@ -1,6 +1,12 @@
 package edu.umass.cs.xdn;
 
+import edu.umass.cs.gigapaxos.PaxosConfig;
+
+import java.util.logging.Logger;
+
 public class XDNConfig {
+
+    public static Logger log = Logger.getLogger(XDNConfig.class.getName());
 
     /**
      *

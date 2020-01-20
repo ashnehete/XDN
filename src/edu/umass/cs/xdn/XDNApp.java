@@ -458,7 +458,13 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if ( !containerizedApps.containsKey(appName) ) {
                 log.fine("Restore: app "+appName+" does not exist, restore from a new image.");
                 try {
+
+                    //FIXME: for test only
+                    if (appName.equals("xdn-demo-app"))
+                        return true;
+
                     // 1. Extract the initial service information
+                    assert(state != null);
                     JSONObject json = new JSONObject(state);
                     int port = json.has(DockerKeys.PORT.toString()) ? json.getInt(DockerKeys.PORT.toString()) : -1;
                     String url = json.has(DockerKeys.IMAGE_URL.toString()) ? json.getString(DockerKeys.IMAGE_URL.toString()) : null;
