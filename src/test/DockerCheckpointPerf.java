@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DockerCommand {
+public class DockerCheckpointPerf {
 
     private static final boolean CRASH_ENABLED = false;
     private static final int ACTION_ON_OUT_OF_MEMORY = 1024;
