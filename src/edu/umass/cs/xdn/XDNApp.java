@@ -241,8 +241,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             List<String> tarCommand = getTarCommand(appName+".tar.gz", image, XDNConfig.checkpointDir);
             assert(run(tarCommand));
             File cp = new File(XDNConfig.checkpointDir+appName+".tar.gz");
+            String chp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+            log.fine("Checkpoint: LargeCheckpointer "+chp);
 
-            return LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+            return chp;
 
         } else {
             // send checkpoint request to the underlying app
@@ -276,7 +278,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+            log.fine("Checkpoint: something wrong with underlying app, no checkpoint is taken.");
             // underlying app may not implement checkpoint, return an empty string as a checkpoint
             return "";
         }
@@ -458,10 +460,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if ( !containerizedApps.containsKey(appName) ) {
                 log.fine("Restore: app "+appName+" does not exist, restore from a new image.");
                 try {
-
-                    //FIXME: for test only
-                    if (appName.equals("xdn-demo-app"))
-                        return true;
 
                     // 1. Extract the initial service information
                     assert(state != null);
