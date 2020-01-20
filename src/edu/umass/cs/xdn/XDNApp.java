@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 /**
  *  XDNApp is an umbrella application.
@@ -37,11 +38,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         implements Replicable, Reconfigurable, AppRequestParserBytes {
 
     // private String myID;
-
     private static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 
-    // private static String containerUrl;
+    private static Logger log = PaxosConfig.getLogger();
 
     // used to propagate coordinated result to applications
     private static OkHttpClient httpClient;
@@ -77,10 +77,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             // TODO: we can also get this from docker command directly
             gatewayIPAddress = System.getProperty("gateway");
 
-        // containerUrl = "http://" + cAddr + XDNConfig.xdnRoute;
-
-        // System.out.println("Container URL is:"+containerUrl);
-
         containerizedApps = new ConcurrentHashMap<>();
         // avoid throwing an exception when bootup
         containerizedApps.put(PaxosConfig.getDefaultServiceName(),
@@ -104,7 +100,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         if ( !result.getResult().trim().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
             // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
-            System.out.println("LargeCheckpointer is enabled, must run with root privilege.");
+            log.severe("LargeCheckpointer is enabled, must run with root privilege.");
             System.exit(1);
         }
 
@@ -115,7 +111,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         if (!checkpointFolder.exists()) {
             boolean created = checkpointFolder.mkdir();
             if (!created)
-                System.out.println(this+" failed to create checkpoint folder!");
+                log.fine(this+" failed to create checkpoint folder!");
         }
 
     }
@@ -145,8 +141,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         .build();
 
                 try (Response response = httpClient.newCall(req).execute()) {
-                    // System.out.println("Received response from nodejs app:"+response);
-                    // System.out.println("Content:"+response.body().string());
+                    log.fine("Received response from nodejs app:"+response);
+                    // log.fine("Content:"+response.body().string());
                     ((HttpActiveReplicaRequest) request).setResponse(response.body() != null?
                             response.body().string():
                             "");
@@ -173,7 +169,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     @Override
     public String checkpoint(String name) {
-        System.out.println("About to checkpoint serviceName"+name);
+
+        log.fine("About to checkpoint serviceName"+name);
 
         if (name.equals(PaxosConfig.getDefaultServiceName())){
             // do nothing for the default app
@@ -272,7 +269,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     .build();
 
             try (Response response = httpClient.newCall(req).execute()) {
-                System.out.println("Received response from nodejs app:"+response);
+                log.fine("Checkpoint: received response from app:"+response);
                 // System.out.println("Content:"+response.body().string());
 
                 return response.body()!=null? response.body().string(): "";
@@ -294,7 +291,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     public boolean restore(String name, String state) {
         // app name is the name before xdnServiceDecimal "_xdn_"
         String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
-        System.out.println("Name: "+name+"\nAppName: "+appName+"\nState: "+state);
+        log.fine("Name: "+name+"\nAppName: "+appName+"\nState: "+state);
 
         // handle XDN service restore
         if (name.equals(PaxosConfig.getDefaultServiceName())){
@@ -332,7 +329,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
         }
 
-        System.out.println(">>>>>>>> XDN containerized app to restore:"+name);
+        log.fine(">>>>>>>> XDN containerized app to restore:"+name);
         // Handle serviceName (name) restore
         if (serviceNames.containsKey(name)){
             // if service name exists, app name must also exist
@@ -432,7 +429,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             .build();
 
                     try (Response response = httpClient.newCall(req).execute()) {
-                        System.out.println("Received response from nodejs app:"+response);
+                        log.fine("Restore1: received response from app:"+response);
 
                         return response.code()==200;
                     } catch (IOException e) {
@@ -445,6 +442,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
 
         } else {
+            log.fine("Restore: service name "+name+" does not exist.");
+
             /*
              * This is not a registered service name, follow the steps to set up the service if the app does not exist yet
              * 1. Extract the initial service information:
@@ -457,6 +456,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
              * 5. restore user state
              */
             if ( !containerizedApps.containsKey(appName) ) {
+                log.fine("Restore: app "+appName+" does not exist, restore from a new image.");
                 try {
                     if (state == null)
                         // The first time to create a service name, state can not be null
@@ -477,7 +477,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         }
                     }
 
-                    System.out.println(">>>>>>>> container info: name="+name+",state="+state+",json="+json);
+                    log.fine(">>>>>>>> container info: name="+name+",state="+state+",json="+json);
 
                     // 2. Pull service and boot-up
                     List<String> pullCommand = getPullCommand(url);
@@ -506,7 +506,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         } else {
                             DockerContainer container = new DockerContainer(appName, url, port, jEnv);
                             updateServiceAndApps(appName, name, container);
-                            System.out.println(">>>>>>>>> Service name " + name + " has been created successfully after retry.");
+                            log.fine(">>>>>>>>> Service name " + name + " has been created successfully after retry.");
                             return true;
                         }
                     } else {
@@ -524,7 +524,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             if (result.getRetCode() == 0 ) {
                                 DockerContainer container = new DockerContainer(appName, url, port, jEnv);
                                 updateServiceAndApps(appName, name, container);
-                                System.out.println(">>>>>>>>> Service name " + name + " has been created successfully after stop and retry.");
+                                log.fine(">>>>>>>>> Service name " + name + " has been created successfully after stop and retry.");
                                 return true;
                             }
                             return false;
@@ -532,7 +532,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             // String id = result.getResult().trim();
                             DockerContainer container = new DockerContainer(appName, url, port, jEnv);
                             updateServiceAndApps(appName, name, container);
-                            System.out.println(">>>>>>>>> Service name " + name + " has been created successfully.");
+                            log.fine(">>>>>>>>> Service name " + name + " has been created successfully.");
                             return true;
                         }
 
