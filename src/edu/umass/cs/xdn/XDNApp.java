@@ -110,14 +110,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         // customized checkpoint directory does not work for criu restore,
         // use the default directory (/var/lib/docker/containers)
-        /*
+
         File checkpointFolder = new File(XDNConfig.checkpointDir);
         if (!checkpointFolder.exists()) {
             boolean created = checkpointFolder.mkdir();
             if (!created)
                 System.out.println(this+" failed to create checkpoint folder!");
         }
-        */
+
     }
 
     private String getContainerUrl(String addr) {
@@ -173,6 +173,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     @Override
     public String checkpoint(String name) {
+        System.out.println("About to checkpoint serviceName"+name);
+
         if (name.equals(PaxosConfig.getDefaultServiceName())){
             // do nothing for the default app
             return "";
@@ -231,9 +233,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
 
             List<String> checkpointCreateCommand = getCheckpointCreateCommand(appName, true);
-            if (!run(checkpointCreateCommand))
+            if (!run(checkpointCreateCommand)) {
                 // checkpoint container failed
                 return null;
+            }
             // assert(cp.exists());
 
             // Note: this only works with root privilege
