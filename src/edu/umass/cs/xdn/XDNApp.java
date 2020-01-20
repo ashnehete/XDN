@@ -275,12 +275,13 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 System.out.println("Received response from nodejs app:"+response);
                 // System.out.println("Content:"+response.body().string());
 
-                return response.body()!=null? response.body().string(): null;
+                return response.body()!=null? response.body().string(): "";
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            return null;
+            // underlying app may not implement checkpoint, return an empty string as a checkpoint
+            return "";
         }
     }
 
@@ -432,13 +433,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                     try (Response response = httpClient.newCall(req).execute()) {
                         System.out.println("Received response from nodejs app:"+response);
-                        // System.out.println("Content:"+response.body().string());
+
                         return response.code()==200;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
-                    return false;
+                    // underlying app may not implement checkpoint, return an empty string as a checkpoint
+                    return true;
                 }
             }
 
