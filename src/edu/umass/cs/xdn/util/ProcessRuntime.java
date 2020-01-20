@@ -1,12 +1,17 @@
 package edu.umass.cs.xdn.util;
 
+import edu.umass.cs.gigapaxos.PaxosConfig;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ProcessRuntime {
+
+    private static Logger log = PaxosConfig.getLogger();
 
     public static ProcessResult executeCommand(List<String> command) throws IOException, InterruptedException {
 
@@ -27,7 +32,7 @@ public class ProcessRuntime {
             String line;
 
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                log.fine(line);
                 result.append(line);
             }
         } catch (Exception e) {

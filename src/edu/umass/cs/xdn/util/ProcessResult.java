@@ -21,4 +21,9 @@ public class ProcessResult {
     public int getRetCode() {
         return this.ret;
     }
+
+    @Override
+    public String toString() {
+        return "return code:"+ret+"\nresult:"+result;
+    }
 }

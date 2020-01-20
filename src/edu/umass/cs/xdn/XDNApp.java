@@ -492,6 +492,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         e.printStackTrace();
                     }
 
+                    log.fine("Restore: start app instance command result is "+result);
                     if (result == null) {
                         // there may be an interruption, let's retry. No need to stop another instance
                         try {
@@ -538,12 +539,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                     }
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    return false;
-                } catch (InterruptedException | IOException e) {
+                } catch (JSONException | InterruptedException | IOException e) {
                     e.printStackTrace();
                 }
+                return false;
             } else if ( !runningApps.contains(appName) ) {
                 // there is already an app instance, if it's not running, boot it up
                 List<String> startCommand = getStartCommand(appName);
