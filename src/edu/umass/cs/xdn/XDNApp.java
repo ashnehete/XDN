@@ -12,6 +12,7 @@ import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.interfaces.Reconfigurable;
 import edu.umass.cs.reconfiguration.reconfigurationutils.RequestParseException;
+import edu.umass.cs.xdn.dns.LocalDNSResolver;
 import edu.umass.cs.xdn.docker.DockerKeys;
 import edu.umass.cs.xdn.docker.DockerContainer;
 import edu.umass.cs.xdn.util.ProcessResult;
@@ -48,9 +49,17 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     /**
      * A map of app name to containerizedApps
-     * FIXME: use Service interface rather than DockerService if we decide to switch to another container
+     * TODO: use Service interface rather than DockerService if we decide to switch to another container
      */
     private Map<String, DockerContainer> containerizedApps;
+
+    public boolean nameExists(String name) {
+        return containerizedApps.containsKey(name);
+    }
+
+    public String getIpAddrForDomainName(String name) {
+        return containerizedApps.get(name).getAddr();
+    }
 
     /**
      * A map of service name to container app name
@@ -58,6 +67,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     private Map<String, String> serviceNames;
 
     private Set<String> runningApps;
+
+    public boolean isRunning(String name) {
+        return runningApps.contains(name);
+    }
 
     private String gatewayIPAddress;
 
@@ -113,7 +126,13 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (!created)
                 log.fine(this+" failed to create checkpoint folder!");
         }
-
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                LocalDNSResolver resolver = new LocalDNSResolver(XDNApp.this);
+            }
+        };
+        new Thread(runnable).start();
     }
 
     private String getContainerUrl(String addr) {
