@@ -100,23 +100,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         serviceNames = new ConcurrentHashMap<>();
 
-        List<String> whoCommand = new ArrayList<>();
-        whoCommand.add("whoami");
-        ProcessResult result = null;
-        try {
-            result = ProcessRuntime.executeCommand(whoCommand);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        assert (result != null);
-
-        if ( !result.getResult().trim().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
-            // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
-            log.severe("LargeCheckpointer is enabled, must run with root privilege.");
-            System.exit(1);
-        }
-
         // customized checkpoint directory does not work for criu restore,
         // use the default directory (/var/lib/docker/containers)
 
@@ -127,6 +110,27 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 log.fine(this+" failed to create checkpoint folder!");
         }
         if (XDNConfig.isEdgeNode) {
+            /**
+             * Check whether the current process has root privilege to bind to port 53 for DNS.
+             * If not, exit as edge server must bind to port 53.
+             */
+            List<String> whoCommand = new ArrayList<>();
+            whoCommand.add("whoami");
+            ProcessResult result = null;
+            try {
+                result = ProcessRuntime.executeCommand(whoCommand);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            assert (result != null);
+
+            if ( !result.getResult().trim().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
+                // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
+                log.severe("LargeCheckpointer is enabled, must run with root privilege.");
+                System.exit(1);
+            }
+
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
