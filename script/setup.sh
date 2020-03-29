@@ -18,5 +18,6 @@ cp -r /proj/lsn-PG0/groups/XDN .
 
 # compile code
 cd XDN
+git pull
 ant jar
 cd ~

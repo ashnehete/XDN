@@ -126,13 +126,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (!created)
                 log.fine(this+" failed to create checkpoint folder!");
         }
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                LocalDNSResolver resolver = new LocalDNSResolver(XDNApp.this);
-            }
-        };
-        new Thread(runnable).start();
+        if (XDNConfig.isEdgeNode) {
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    LocalDNSResolver resolver = new LocalDNSResolver(XDNApp.this);
+                }
+            };
+            new Thread(runnable).start();
+        }
     }
 
     private String getContainerUrl(String addr) {
@@ -188,6 +190,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     @Override
     public String checkpoint(String name) {
+        long start = System.currentTimeMillis();
 
         log.fine("About to checkpoint serviceName"+name);
 
@@ -298,6 +301,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 e.printStackTrace();
             }
             log.fine("Checkpoint: something wrong with underlying app, no checkpoint is taken.");
+            long elapsed = System.currentTimeMillis() - start;
+            System.out.println(">>>>>>> It takes "+elapsed+"ms to checkpoint.");
             // underlying app may not implement checkpoint, return an empty string as a checkpoint
             return "";
         }
@@ -310,6 +315,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
      */
     @Override
     public boolean restore(String name, String state) {
+        long start = System.currentTimeMillis();
         // app name is the name before xdnServiceDecimal "_xdn_"
         String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
         log.fine("Name: "+name+"\nAppName: "+appName+"\nState: "+state);
@@ -570,6 +576,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             } // else { container exists and running, use it as is }
 
         }
+        long elapsed = System.currentTimeMillis() - start;
+        System.out.println(">>>>>>> It takes "+elapsed+"ms to restore.");
         return true;
     }
 

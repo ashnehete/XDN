@@ -23,6 +23,8 @@ public class CreateServices {
 
     public static void main(String[] args) throws IOException, InterruptedException, JSONException {
 
+        String userName = args[0];
+
         String testServiceName = PaxosConfig.getDefaultServiceName()+0; // PaxosConfig.getDefaultServiceName();
 
         Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
@@ -43,7 +45,7 @@ public class CreateServices {
         arr.put("");
 
         JSONObject json = new JSONObject();
-        json.put(DockerKeys.NAME.toString(), "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin");
+        json.put(DockerKeys.NAME.toString(), "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+userName);
         json.put(DockerKeys.IMAGE_URL.toString(), "oversky710/xdn-demo-app");
         // json.put(DockerKeys.ENV.toString(), null);
         json.put(DockerKeys.PORT.toString(), 3000);

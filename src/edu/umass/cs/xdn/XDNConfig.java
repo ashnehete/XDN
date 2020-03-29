@@ -14,6 +14,11 @@ public class XDNConfig {
     public static String xdnRoute = "/xdnapp";
 
     /**
+     * Indicate whether this node is edge node, default is false, means it is a cloud node
+     */
+    public static boolean isEdgeNode = false;
+
+    /**
      *
      */
     public static String checkpointDir =  "checkpoints/"; // customized location does not work: "/users/oversky/checkpoint/";
