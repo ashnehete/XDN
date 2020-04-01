@@ -390,10 +390,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     boolean removed = run(removeCheckpointCommand);
                     assert (removed);
 
-                    // We also need to remove the image
+                    // We do not want to remove the image as in the future, we may still need to use it
+                    /**
                     List<String> removeImageCommand = getRemoveImageCommand(container.getUrl());
                     removed = run(removeImageCommand);
                     assert (removed);
+                     */
 
                     // Note: we must keep the docker info in containerizedApps
                     // Because the associated information can only be acquired upon service name creation
