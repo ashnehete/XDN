@@ -196,7 +196,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     public String checkpoint(String name) {
         long start = System.currentTimeMillis();
 
-        log.fine("About to checkpoint serviceName"+name);
+        log.fine("Checkpoint ServiceName="+name);
 
         if (name.equals(PaxosConfig.getDefaultServiceName())){
             // do nothing for the default app
