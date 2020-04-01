@@ -35,7 +35,7 @@ public class DeleteServices {
         while (sent < received) {
             Thread.sleep(500);
         }
-
-        System.exit(0);
+        client.close();
+        // System.exit(0);
     }
 }
