@@ -23,15 +23,9 @@ public class CreateServices {
 
     public static void main(String[] args) throws IOException, InterruptedException, JSONException {
 
-        String userName = args[0];
-
         String testServiceName = PaxosConfig.getDefaultServiceName()+0; // PaxosConfig.getDefaultServiceName();
 
         Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
-
-        if (args.length > 0) {
-            testServiceName = args[0];
-        }
 
         Set<InetSocketAddress> initGroup = new HashSet<>();
         for(String name: servers.keySet()){
@@ -45,7 +39,7 @@ public class CreateServices {
         arr.put("");
 
         JSONObject json = new JSONObject();
-        json.put(DockerKeys.NAME.toString(), "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+userName);
+        json.put(DockerKeys.NAME.toString(), "xdn-demo-app");
         json.put(DockerKeys.IMAGE_URL.toString(), "oversky710/xdn-demo-app");
         // json.put(DockerKeys.ENV.toString(), null);
         json.put(DockerKeys.PORT.toString(), 3000);
@@ -56,7 +50,7 @@ public class CreateServices {
 
         //client.sendRequest(new CreateServiceName(testServiceName,
         //                json.toString(), initGroup),
-        client.sendRequest(new CreateServiceName(testServiceName,
+        client.sendRequest(new edu.umass.cs.reconfiguration.reconfigurationpackets.CreateServiceName(testServiceName,
                 json.toString()),
                 new RequestCallback() {
                     final long createTime = System.currentTimeMillis();
@@ -67,7 +61,7 @@ public class CreateServices {
                                 + " received in "
                                 + (System.currentTimeMillis() - createTime)
                                 + "ms");
-                        // received += 1;
+                        received += 1;
                     }
                 }
         );
@@ -75,5 +69,7 @@ public class CreateServices {
         while (sent < received) {
             Thread.sleep(500);
         }
+
+        System.exit(0);
     }
 }
