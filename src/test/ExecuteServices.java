@@ -24,7 +24,7 @@ public class ExecuteServices {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        final int total = 1000;
+        final int total = 100;
 
         for (int i=0; i<100; i++) {
             int sent = 0;
@@ -38,6 +38,7 @@ public class ExecuteServices {
                             @Override
                             public void handleResponse(Request response) {
                                 System.out.println("Response received:" + response);
+                                received = 1;
                             }
                         });
 
@@ -49,8 +50,8 @@ public class ExecuteServices {
             while (sent < received) {
                 Thread.sleep(500);
             }
+            received = 0;
         }
-
 
         client.close();
     }
