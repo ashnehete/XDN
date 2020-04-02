@@ -148,8 +148,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     @Override
     public boolean execute(Request request,
                            boolean doNotReplyToClient) {
-        if (XDNConfig.noopEnabled)
+        if (XDNConfig.noopEnabled){
+            ((HttpActiveReplicaRequest) request).setResponse("");
             return true;
+        }
         if (request instanceof HttpActiveReplicaRequest) {
             HttpActiveReplicaRequest r = (HttpActiveReplicaRequest) request;
             String name = r.getServiceName();
