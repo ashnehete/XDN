@@ -90,10 +90,10 @@ public class HttpClient {
         }
 
         for (int i =0; i<1100; i++) {
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             post();
-            long elapsed = System.currentTimeMillis() - start;
-            System.out.println(elapsed);
+            long elapsed = System.nanoTime() - start;
+            System.out.println(elapsed/1000.0);
         }
     }
 }
