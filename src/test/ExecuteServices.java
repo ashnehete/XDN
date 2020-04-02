@@ -24,29 +24,33 @@ public class ExecuteServices {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        final int sent = 1;
-        
-        AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
+        final int total = 1000;
 
-        try {
-            // coordinate request through GigaPaxos
-            client.sendRequest(request
-                    , new RequestCallback() {
-                        @Override
-                        public void handleResponse(Request response) {
-                            System.out.println("Response received:"+response);
-                        }
-                    });
+        for (int i=0; i<100; i++) {
+            int sent = 0;
+            AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            // request coordination failed
+            long start = System.currentTimeMillis();
+            try {
+                // coordinate request through GigaPaxos
+                client.sendRequest(request
+                        , new RequestCallback() {
+                            @Override
+                            public void handleResponse(Request response) {
+                                System.out.println("Response received:" + response);
+                            }
+                        });
 
+            } catch (IOException e) {
+                e.printStackTrace();
+                // request coordination failed
+
+            }
+            while (sent < received) {
+                Thread.sleep(500);
+            }
         }
 
-        while (sent < received) {
-            Thread.sleep(500);
-        }
 
         client.close();
     }
