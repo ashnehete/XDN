@@ -51,7 +51,7 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
         return NoopApp.staticGetRequestTypes();
     }
      */
-    
+
     @Override
     public Request getRequest(String s) throws RequestParseException {
         try {

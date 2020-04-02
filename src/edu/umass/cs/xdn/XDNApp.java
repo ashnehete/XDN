@@ -158,7 +158,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (containerUrl == null)
                 return false;
 
+            containerUrl = "http://localhost:3000";
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
+                log.fine("About to execute request "+r);
                 RequestBody body = RequestBody.create(JSON, request.toString());
                 okhttp3.Request req = new okhttp3.Request.Builder()
                         .url(containerUrl)
@@ -166,7 +168,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         .build();
 
                 try (Response response = httpClient.newCall(req).execute()) {
-                    log.fine("Received response from nodejs app:"+response);
+                    log.fine("Received response from XDN app:"+response);
                     // log.fine("Content:"+response.body().string());
                     ((HttpActiveReplicaRequest) request).setResponse(response.body() != null?
                             response.body().string():
