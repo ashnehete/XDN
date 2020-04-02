@@ -44,14 +44,14 @@ public class ExecuteServices {
             AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
             // System.out.println("About to send "+i+"th request.");
 
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             try {
                 // coordinate request through GigaPaxos
                 client.sendRequest(ReplicableClientRequest.wrap(req)
                         , new RequestCallback() {
                             @Override
                             public void handleResponse(Request response) {
-                                System.out.println(System.currentTimeMillis()-start);
+                                System.out.println((System.nanoTime()-start)/1000.0);
                                 received = 1;
                             }
                         });
