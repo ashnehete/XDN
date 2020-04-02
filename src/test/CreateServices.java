@@ -70,6 +70,9 @@ public class CreateServices {
             Thread.sleep(500);
         }
 
+        Thread.sleep(1000);
+
+        System.out.println("Service name created successfully.");
         client.close();
         // System.exit(0);
     }

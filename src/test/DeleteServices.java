@@ -35,6 +35,9 @@ public class DeleteServices {
         while (sent < received) {
             Thread.sleep(500);
         }
+
+        System.out.println("Service name deleted successfully.");
+
         client.close();
         // System.exit(0);
     }

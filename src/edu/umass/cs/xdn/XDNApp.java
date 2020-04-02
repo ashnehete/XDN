@@ -775,7 +775,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     private boolean run(List<String> command) {
-        System.out.println("Command:"+command);
+        log.info("Command: "+command);
         ProcessResult result;
         try {
             result = ProcessRuntime.executeCommand(command);
