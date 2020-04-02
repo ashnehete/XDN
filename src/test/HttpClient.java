@@ -13,7 +13,7 @@ import java.net.URL;
 public class HttpClient {
     private static final String USER_AGENT = "Mozilla/5.0";
 
-    private static final String TEST_URL = "http://localhost:3000";
+    private static String TEST_URL = "http://localhost:3000";
 
     private static void get() throws IOException {
         URL obj = new URL(TEST_URL);
@@ -85,6 +85,9 @@ public class HttpClient {
     }
 
     public static void main(String[] args) throws IOException {
+        if (args.length >= 1){
+            TEST_URL = args[0];
+        }
 
         long start = System.currentTimeMillis();
         post();
