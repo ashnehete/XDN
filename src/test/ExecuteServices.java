@@ -32,7 +32,7 @@ public class ExecuteServices {
 
         System.out.println("Start testing... ");
         for (int i=0; i<1000; i++) {
-            int sent = 0;
+            int sent = 1;
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
                     testServiceName,
                     id++,
