@@ -25,8 +25,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -37,6 +39,8 @@ import java.util.logging.Logger;
  */
 public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         implements Replicable, Reconfigurable, AppRequestParserBytes {
+
+    private static final String USER_AGENT = "Mozilla/5.0";
 
     // private String myID;
     private static final MediaType JSON
@@ -165,12 +169,13 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             containerUrl = "http://localhost:3000";
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
                 log.fine("About to execute request "+r);
+
+                /*
                 RequestBody body = RequestBody.create(JSON, request.toString());
                 okhttp3.Request req = new okhttp3.Request.Builder()
                         .url(containerUrl)
                         .post(body)
                         .build();
-
                 try (Response response = httpClient.newCall(req).execute()) {
                     log.fine("Received response from XDN app:"+response);
                     // log.fine("Content:"+response.body().string());
@@ -182,6 +187,45 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     e.printStackTrace();
                     return false;
                 }
+                */
+
+                URL obj = null;
+                try {
+                    obj = new URL(containerUrl);
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("User-Agent", USER_AGENT);
+                    con.setDoOutput(true);
+                    OutputStream os = con.getOutputStream();
+                    os.write(request.toString().getBytes());
+                    os.flush();
+                    os.close();
+
+                    int responseCode = con.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) { //success
+                        BufferedReader in = new BufferedReader(new InputStreamReader(
+                                con.getInputStream()));
+                        String inputLine;
+                        StringBuffer response = new StringBuffer();
+
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        in.close();
+
+                        ((HttpActiveReplicaRequest) request).setResponse(response != null?
+                                response.toString():
+                                "");
+                        return true;
+
+                    } else {
+                        return false;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
             }
             /*
             else if (HttpActiveReplicaPacketType.SNAPSHOT.equals(r.getRequestType())) {

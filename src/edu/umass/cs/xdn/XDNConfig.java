@@ -38,5 +38,5 @@ public class XDNConfig {
     /**
      * Used to test overhead with noop for XDNApp
      */
-    public static boolean noopEnabled = true;
+    public static boolean noopEnabled = false;
 }
