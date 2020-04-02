@@ -34,4 +34,9 @@ public class XDNConfig {
      * Otherwise, XDN just uses stringified checkpoint.
      */
     public static boolean largeCheckPointerEnabled = true; //false;
+
+    /**
+     * Used to test overhead with noop for XDNApp
+     */
+    public static boolean noopEnabled = true;
 }
