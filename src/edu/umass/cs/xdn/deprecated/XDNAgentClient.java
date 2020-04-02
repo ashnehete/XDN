@@ -8,12 +8,15 @@ import edu.umass.cs.nio.interfaces.IntegerPacketType;
 import edu.umass.cs.reconfiguration.ReconfigurableAppClientAsync;
 import edu.umass.cs.reconfiguration.examples.AppRequest;
 import edu.umass.cs.reconfiguration.examples.noopsimple.NoopApp;
+import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
+import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.reconfigurationutils.RequestParseException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +34,7 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
             super();
     }
 
+    /*
     @Override
     public Request getRequest(String stringified) throws RequestParseException {
         try {
@@ -45,6 +49,24 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
     @Override
     public Set<IntegerPacketType> getRequestTypes() {
         return NoopApp.staticGetRequestTypes();
+    }
+     */
+    
+    @Override
+    public Request getRequest(String s) throws RequestParseException {
+        try {
+            JSONObject json = new JSONObject(s);
+            return new HttpActiveReplicaRequest(json);
+        } catch (JSONException e) {
+            throw new RequestParseException(e);
+        }
+    }
+
+    private static HttpActiveReplicaPacketType[] types = HttpActiveReplicaPacketType.values();
+
+    @Override
+    public Set<IntegerPacketType> getRequestTypes() {
+        return new HashSet<>(Arrays.asList(types));
     }
 
     /**
