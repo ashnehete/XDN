@@ -59,12 +59,12 @@ public class ExecuteServices {
                 // request coordination failed
 
             }
-            while (sent < received) {
+            while (received < sent ) {
                 Thread.sleep(500);
             }
             received = 0;
         }
 
-        client.close();
+        // client.close();
     }
 }

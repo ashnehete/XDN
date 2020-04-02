@@ -32,7 +32,7 @@ public class DeleteServices {
                 }
         );
 
-        while (sent < received) {
+        while (sent > received) {
             Thread.sleep(500);
         }
 

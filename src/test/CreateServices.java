@@ -66,7 +66,7 @@ public class CreateServices {
                 }
         );
 
-        while (sent < received) {
+        while (sent > received) {
             Thread.sleep(500);
         }
 
