@@ -48,6 +48,7 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
     }
 
     /**
+     * This implementation is wrong
      * Coordinate a request with the value
      * @return
      */
