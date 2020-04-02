@@ -64,7 +64,7 @@ public class HttpClient {
         // For POST only - END
 
         int responseCode = con.getResponseCode();
-        System.out.println("POST Response Code :: " + responseCode);
+        // System.out.println("POST Response Code :: " + responseCode);
 
         if (responseCode == HttpURLConnection.HTTP_OK) { //success
             BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -78,9 +78,9 @@ public class HttpClient {
             in.close();
 
             // print result
-            System.out.println(response.toString());
+            // System.out.println(response.toString());
         } else {
-            System.out.println("POST request not worked");
+            // System.out.println("POST request not worked");
         }
     }
 
@@ -89,9 +89,11 @@ public class HttpClient {
             TEST_URL = args[0];
         }
 
-        long start = System.currentTimeMillis();
-        post();
-        long elapsed = System.currentTimeMillis() - start;
-        System.out.println(elapsed);
+        for (int i =0; i<1100; i++) {
+            long start = System.currentTimeMillis();
+            post();
+            long elapsed = System.currentTimeMillis() - start;
+            System.out.println(elapsed);
+        }
     }
 }
