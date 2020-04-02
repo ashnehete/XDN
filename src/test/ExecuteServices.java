@@ -5,6 +5,7 @@ import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.examples.AppRequest;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
+import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 import org.json.JSONException;
@@ -46,7 +47,7 @@ public class ExecuteServices {
             long start = System.currentTimeMillis();
             try {
                 // coordinate request through GigaPaxos
-                client.sendRequest(req
+                client.sendRequest(ReplicableClientRequest.wrap(req)
                         , new RequestCallback() {
                             @Override
                             public void handleResponse(Request response) {
