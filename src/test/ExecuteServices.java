@@ -11,8 +11,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 public class ExecuteServices {
+    static int received = 0;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         XDNAgentClient client = new XDNAgentClient();
         String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
 
@@ -23,7 +24,8 @@ public class ExecuteServices {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+        final int sent = 1;
+        
         AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
 
         try {
@@ -41,7 +43,11 @@ public class ExecuteServices {
             // request coordination failed
 
         }
-        
+
+        while (sent < received) {
+            Thread.sleep(500);
+        }
+
         client.close();
     }
 }
