@@ -30,7 +30,7 @@ public class ExecuteServices {
         final int total = 100;
         int id = 0;
 
-        System.out.println("Start testing... ");
+        // System.out.println("Start testing... ");
         for (int i=0; i<1000; i++) {
             int sent = 1;
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
@@ -42,7 +42,7 @@ public class ExecuteServices {
                     0
                     );
             AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
-            System.out.println("About to send "+i+"th request.");
+            // System.out.println("About to send "+i+"th request.");
 
             long start = System.currentTimeMillis();
             try {
