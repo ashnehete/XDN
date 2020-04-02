@@ -27,7 +27,7 @@ public class ExecuteServices {
         final int total = 100;
 
         System.out.println("Start testing... ");
-        for (int i=0; i<100; i++) {
+        for (int i=0; i<1; i++) {
             int sent = 0;
             AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
             System.out.println("About to send "+i+"th request.");
