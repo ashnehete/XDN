@@ -27,7 +27,6 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -113,6 +112,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (!created)
                 log.fine(this+" failed to create checkpoint folder!");
         }
+
         if (XDNConfig.isEdgeNode) {
             /**
              * Check whether the current process has root privilege to bind to port 53 for DNS.
@@ -131,10 +131,11 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             if ( !result.getResult().trim().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
                 // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
-                log.severe("LargeCheckpointer is enabled, must run with root privilege.");
+                log.severe("LargeCheckpointer is enabled, must run with root privilege, please restart with root privilege.");
                 System.exit(1);
             }
 
+            // start LDNS server on the edge node
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -170,7 +171,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
                 log.fine("About to execute request "+r);
 
-                /*
+                /**
+                 // old implementation with okhttp lib
                 RequestBody body = RequestBody.create(JSON, request.toString());
                 okhttp3.Request req = new okhttp3.Request.Builder()
                         .url(containerUrl)
@@ -189,6 +191,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 }
                 */
 
+                // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
                 URL obj = null;
                 try {
                     obj = new URL(containerUrl);
@@ -280,49 +283,62 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         // Now let's handle app state and user state event
         if (XDNConfig.largeCheckPointerEnabled) {
-            // use {@link LargeCheckpointer} to checkpoint
+
             String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
 
-            List<String> checkpointListCommand = getCheckpointListCommand(appName);
-            ProcessResult result = null;
-            try {
-                result = ProcessRuntime.executeCommand(checkpointListCommand);
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
+            if (XDNConfig.volumeCheckpointEnabled) {
+                // checkpoint volume
+                String volume = getVolumeDir(appName);
+                List<String> tarCommand = getTarCommand(appName + ".tar.gz", volume, XDNConfig.checkpointDir);
+                assert (run(tarCommand));
+                File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
+                String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+                log.fine("Checkpoint: Volume " + chkp);
+                return chkp;
+            } else {
+                // use {@link LargeCheckpointer} to checkpoint
+                List<String> checkpointListCommand = getCheckpointListCommand(appName);
+                ProcessResult result = null;
+                try {
+                    result = ProcessRuntime.executeCommand(checkpointListCommand);
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-            assert (result != null);
+                assert (result != null);
 
-            // checkpoint exists
-            boolean exists = result.getResult().contains(appName);
-            if (exists){
-                // remove the previous checkpoint
-                List<String> checkpointRemoveCommand = getCheckpointRemoveCommand(appName);
+                // checkpoint exists
+                boolean exists = result.getResult().contains(appName);
+                if (exists) {
+                    // remove the previous checkpoint
+                    List<String> checkpointRemoveCommand = getCheckpointRemoveCommand(appName);
 
-                if (! run(checkpointRemoveCommand) ){
-                    // checkpoint has not been removed successfully
+                    if (!run(checkpointRemoveCommand)) {
+                        // checkpoint has not been removed successfully
+                        return null;
+                    }
+                }
+
+                List<String> checkpointCreateCommand = getCheckpointCreateCommand(appName, true);
+                if (!run(checkpointCreateCommand)) {
+                    // checkpoint container failed
                     return null;
                 }
+                // assert(cp.exists());
+
+                // Note: this only works with root privilege
+                String image = XDNConfig.defaultCheckpointDir + containerizedApps.get(appName).getID() + "/checkpoints/" + appName;
+                List<String> tarCommand = getTarCommand(appName + ".tar.gz", image, XDNConfig.checkpointDir);
+                assert (run(tarCommand));
+                File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
+                String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+                log.fine("Checkpoint: LargeCheckpointer " + chkp);
+
+                return chkp;
             }
-
-            List<String> checkpointCreateCommand = getCheckpointCreateCommand(appName, true);
-            if (!run(checkpointCreateCommand)) {
-                // checkpoint container failed
-                return null;
-            }
-            // assert(cp.exists());
-
-            // Note: this only works with root privilege
-            String image = XDNConfig.defaultCheckpointDir+containerizedApps.get(appName).getID()+"/checkpoints/"+appName;
-            List<String> tarCommand = getTarCommand(appName+".tar.gz", image, XDNConfig.checkpointDir);
-            assert(run(tarCommand));
-            File cp = new File(XDNConfig.checkpointDir+appName+".tar.gz");
-            String chp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
-            log.fine("Checkpoint: LargeCheckpointer "+chp);
-
-            return chp;
 
         } else {
+            // TODO: UNTESTED PATH
             // send checkpoint request to the underlying app
             String containerUrl = null;
             if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name)))
@@ -411,6 +427,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         }
 
         log.fine(">>>>>>>> XDN containerized app to restore:"+name);
+
         // Handle serviceName (name) restore
         if (serviceNames.containsKey(name)){
             // if service name exists, app name must also exist
@@ -455,29 +472,38 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 }
                 return true;
             } else {
-                // restore from a checkpoint
+                // restore from a checkpoint which is either a docker checkpoint or a volume checkpoint
                 if (XDNConfig.largeCheckPointerEnabled) {
-                    /*
-                    Here is the restore complexity:
-                    Current version of docker (19.03) does not support restore from a customized directory.
-                    Therefore, we have to copy it to the corresponding location of the docker image.
-                    */
 
                     // If the instance is running, stop and prepare to restart
                     if (runningApps.contains(appName)) {
                         List<String> stopCommand = getStopCommand(appName);
                         assert (run(stopCommand));
+                        List<String> rmCommand = getRemoveCommand(appName);
+                        assert (run(rmCommand));
                     }
 
-                    String dest = XDNConfig.defaultCheckpointDir+containerizedApps.get(appName).getID()+"/checkpoints/";
-                    String filename = XDNConfig.checkpointDir+appName+".tar.gz";
+                    String dest;
+
+                    if (XDNConfig.volumeCheckpointEnabled){
+                        // checkpoint the external volume
+                        // If the instance is running, stop and prepare to restart
+                        dest = getVolumeDir(appName);
+                    } else {
+                        // checkpoint docker directly
+                        /*
+                        Here is the restore complexity:
+                        Current version of docker (19.03) does not support restore from a customized directory.
+                        Therefore, we have to copy it to the corresponding location of the docker image.
+                        */
+                        dest = XDNConfig.defaultCheckpointDir + containerizedApps.get(appName).getID() + "/checkpoints/";
+                    }
+
+                    String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
                     File cp = new File(filename);
                     LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
                     List<String> unTarCommand = getUntarCommand(filename, dest);
-                    assert(run(unTarCommand));
-
-                    // When largeCheckPointerEnabled is true, each user service is run in different containers
-                    // This implies it won't work for a general scenario with the typical DNS service discovery process
+                    assert (run(unTarCommand));
 
                     List<String> startCommand = getStartCommand(appName);
                     assert (run(startCommand));
@@ -487,6 +513,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                     return true;
                 } else {
+                    // TODO: UNTESTED PATH
                     // send restore request to the underlying app
                     String containerUrl = null;
                     if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name)))
@@ -798,6 +825,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return command;
     }
 
+    private List<String> getRemoveCommand(String name) {
+        List<String> command = new ArrayList<>();
+        command.add("docker");
+        command.add("rm");
+        command.add(name);
+        return command;
+    }
+
     private List<String> getTar() {
         List<String> command = new ArrayList<>();
         command.add("sudo");
@@ -808,10 +843,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     private List<String> getTarCommand(String filename, String path, String dest) {
         List<String> command = getTar();
         command.add("zcf");
-        command.add(filename);
+        command.add(dest+"/"+filename);
         command.add("-C");
         command.add(path);
-        command.add(dest);
+        command.add(".");
         return command;
     }
 
@@ -834,6 +869,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             return false;
         }
         return result.getRetCode() == 0;
+    }
+
+    private String getVolumeDir(String appName) {
+        return XDNConfig.defaultVolumeDir+appName+"/_data/";
     }
 
     @Override

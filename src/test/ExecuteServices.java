@@ -13,6 +13,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+/**
+ * java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/xdn.properties test.ExecuteServices
+ */
 public class ExecuteServices {
     static int received = 0;
 
@@ -31,7 +34,7 @@ public class ExecuteServices {
         int id = 0;
 
         // System.out.println("Start testing... ");
-        for (int i=0; i<1100; i++) {
+        for (int i=0; i<1000; i++) {
             int sent = 1;
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
                     testServiceName,
@@ -41,7 +44,7 @@ public class ExecuteServices {
                     false,
                     0
                     );
-            AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
+            // AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
             // System.out.println("About to send "+i+"th request.");
 
             long start = System.nanoTime();
