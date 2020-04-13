@@ -30,12 +30,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This policy simply move a service between two servers.
- * For example, there are two replicas, AR0 and AR1, the service is first created on both of them with replica_all policy
- * Then the service will move as follows upon every request you send:
- * AR0 -> AR1 -> AR0 -> AR1 -> ...
+ *
  */
-public class DemoDemandProfile extends AbstractDemandProfile {
+public class TestDemandProfile extends AbstractDemandProfile {
 	protected enum Keys {
 		NAME, STATS, RATE, NREQS, NTOTREQS, SRC
 	};
@@ -62,15 +59,15 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 	protected String srcIpAddr = "";
 
 	// Needed only at reconfigurators, so we don't need to serialize this.
-	protected DemoDemandProfile lastReconfiguredProfile = null;
+	protected TestDemandProfile lastReconfiguredProfile = null;
 
 	/**
 	 * The string argument {@code name} is the service name for which this
 	 * demand profile is being maintained.
-	 *
+	 * 
 	 * @param name
 	 */
-	public DemoDemandProfile(String name) {
+	public TestDemandProfile(String name) {
 		super(name);
 	}
 
@@ -78,10 +75,10 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 	 * Deep copy constructor. This constructor should create a copy of the
 	 * supplied DemandProfile argument {@code dp} such that the newly
 	 * constructed DemandProfile instance dpCopy != dp but dpCopy.equals(dp).
-	 *
+	 * 
 	 * @param dp
 	 */
-	public DemoDemandProfile(DemoDemandProfile dp) {
+	public TestDemandProfile(TestDemandProfile dp) {
 		super(dp.name);
 		this.interArrivalTime = dp.interArrivalTime;
 		this.lastRequestTime = dp.lastRequestTime;
@@ -93,11 +90,11 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 	/**
 	 * All {@link AbstractDemandProfile} instances must be constructible from a
 	 * JSONObject.
-	 *
+	 * 
 	 * @param json
 	 * @throws JSONException
 	 */
-	public DemoDemandProfile(JSONObject json) throws JSONException {
+	public TestDemandProfile(JSONObject json) throws JSONException {
 		super(json.getString(Keys.NAME.toString()));
 		this.interArrivalTime = 1.0 / json.getDouble(Keys.RATE.toString());
 		this.numRequests = json.getInt(Keys.NREQS.toString());
@@ -111,8 +108,8 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 	 * @return All {@link AbstractDemandProfile} instances must support a single
 	 *         String argument constructor that is the underlying service name.
 	 */
-	public static DemoDemandProfile createDemandProfile(String name) {
-		return new DemoDemandProfile(name);
+	public static TestDemandProfile createDemandProfile(String name) {
+		return new TestDemandProfile(name);
 	}
 
 	/**
@@ -207,7 +204,7 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 
 	@Override
 	public void combine(AbstractDemandProfile dp) {
-		DemoDemandProfile update = (DemoDemandProfile) dp;
+		TestDemandProfile update = (TestDemandProfile) dp;
 		
 		this.lastRequestTime = Math.max(this.lastRequestTime,
 				update.lastRequestTime);
@@ -235,9 +232,15 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 					- this.lastReconfiguredProfile.numTotalRequests < minRequestsBeforeReconfiguration)
 				return null;
 		}
+		/**
+		 * This example simply returns curActives as this policy trivially
+		 * reconfigures to the same set of locations after every call. In
+		 * general, AbstractDemandProfile implementations should return a new
+		 * list different from curActives.
+		 */
 		
 		/*
-		 *
+		 * Reconfigure
 		 */
 
 		String curNode = curActives.iterator().next();
@@ -254,7 +257,7 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 	@Override
 	public void justReconfigured() {
 		// deep copy
-		this.lastReconfiguredProfile = new DemoDemandProfile(this);
+		this.lastReconfiguredProfile = new TestDemandProfile(this);
 		// this.clone();
 	}
 
@@ -262,6 +265,6 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ReconfigurationPolicyTest.testPolicyImplementation(DemoDemandProfile.class);
+		ReconfigurationPolicyTest.testPolicyImplementation(TestDemandProfile.class);
 	}
 }
