@@ -1,8 +1,11 @@
 package edu.umass.cs.xdn.http;
 
+import edu.umass.cs.reconfiguration.interfaces.ActiveReplicaFunctions;
+
 public class XDNHttpFrontEnd {
 
-    public XDNHttpFrontEnd(){
+    public XDNHttpFrontEnd(ActiveReplicaFunctions arf,
+                           boolean ssl){
         System.out.println("########## Bootup XDN HTTP front end ##########");
     }
 
