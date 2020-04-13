@@ -240,28 +240,17 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 		 * list different from curActives.
 		 */
 		
-		/**
-		 * If srcIpAddr is 10.42.0.1, the demand profile is sent by AR1
-		 * Otherwise the demand profile is sent by AR0
-		 * Only AR0 has the same srcIpAddr as the reconfigurator,
-		 * therefore, 
+		/*
+		 * Reconfigure
 		 */
-		boolean remoteSrc = false;
-		
-		for (String nodeID : nodeConfig.getAllActiveReplicas().keySet()){
-			InetSocketAddress addr = nodeConfig.getAllActiveReplicas().get(nodeID);
-			if (addr.toString().startsWith(srcIpAddr)){
-				remoteSrc = true;
-			}
-		}
-				
+
+		String curNode = curActives.iterator().next();
 		Set<String> retval = new HashSet<String>();
-		if (remoteSrc){
-			retval.add("AR0");			
-		} else {
-			retval.add("AR1");			
+		for (String nodeID : nodeConfig.getAllActiveReplicas().keySet()){
+			if(!nodeID.equals(curNode))
+				retval.add(nodeID);
 		}
-		
+
 		System.out.println(">>>>>>>>>> To configure the service to the set of actives:"+retval+"\n");
 		return retval;
 	}
