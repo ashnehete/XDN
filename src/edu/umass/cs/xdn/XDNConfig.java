@@ -39,7 +39,7 @@ public class XDNConfig {
      * If true, XDN will fetch docker checkpoint directly from a remote node.
      * Otherwise, XDN just uses stringified checkpoint.
      */
-    public static boolean largeCheckPointerEnabled = false;
+    public static boolean largeCheckPointerEnabled = true;
 
     /**
      * If true, all state is kept in a volume on a docker host.
