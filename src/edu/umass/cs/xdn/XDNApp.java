@@ -290,7 +290,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 // checkpoint volume
                 String volume = getVolumeDir(appName);
                 List<String> tarCommand = getTarCommand(appName + ".tar.gz", volume, XDNConfig.checkpointDir);
-                assert (run(tarCommand));
+                // assert (run(tarCommand));
+                run(tarCommand);
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
                 String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 log.fine("Checkpoint: Volume " + chkp);

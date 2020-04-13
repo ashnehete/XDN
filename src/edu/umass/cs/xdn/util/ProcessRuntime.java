@@ -32,7 +32,8 @@ public class ProcessRuntime {
             String line;
 
             while ((line = reader.readLine()) != null) {
-                log.fine(line);
+                // log.fine(line);
+                System.out.println(line);
                 result.append(line);
             }
         } catch (Exception e) {
