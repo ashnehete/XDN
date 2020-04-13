@@ -454,9 +454,11 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     assert (stopped);
 
                     // Remove the container's checkpoint
+                    /*
                     List<String> removeCheckpointCommand = getCheckpointRemoveCommand(container.getName());
                     boolean removed = run(removeCheckpointCommand);
                     assert (removed);
+                    */
 
                     // We do not want to remove the image as in the future, we may still need to use it
                     /**
