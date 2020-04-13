@@ -13,33 +13,25 @@
  * the License.
  * 
  * Initial developer(s): V. Arun */
-package edu.umass.cs.reconfiguration.reconfigurationutils;
-
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+package edu.umass.cs.xdn.policy;
 
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.reconfiguration.ReconfigurationConfig.RC;
 import edu.umass.cs.reconfiguration.interfaces.ReconfigurableAppInfo;
+import edu.umass.cs.reconfiguration.reconfigurationutils.AbstractDemandProfile;
+import edu.umass.cs.reconfiguration.reconfigurationutils.ReconfigurationPolicyTest;
 import edu.umass.cs.utils.Config;
 import edu.umass.cs.utils.Util;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * @author V. Arun
- * 
- *         This sample implementation of {@link AbstractDemandProfile} maintains
- *         the demand profile for a single name and returns it as a JSONObject
- *         via its getStats() method. The specification of its methods is in the
- *         documentation of {@link AbstractDemandProfile}.
+ *
  */
 public class DemoDemandProfile extends AbstractDemandProfile {
 	protected enum Keys {
