@@ -9,5 +9,6 @@ public enum DockerKeys {
     IMAGE_URL,
     PORT,
     ENV,
+    VOL,
 
 }

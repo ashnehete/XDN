@@ -3,7 +3,6 @@ package test;
 import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
-import edu.umass.cs.reconfiguration.reconfigurationpackets.CreateServiceName;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.docker.DockerKeys;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
@@ -43,6 +42,7 @@ public class CreateServices {
         json.put(DockerKeys.IMAGE_URL.toString(), "oversky710/xdn-demo-app");
         // json.put(DockerKeys.ENV.toString(), null);
         json.put(DockerKeys.PORT.toString(), 3000);
+        json.put(DockerKeys.VOL.toString(), "xdn-demo-app");
 
         final int sent = 1;
 

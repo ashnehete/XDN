@@ -42,24 +42,28 @@ public class DockerContainer implements XDNContainer {
     JSONArray env;
 
     /**
-     * FIXME: no name assigned to the volume yet
+     * Indicate whether the docker uses a volume
      * Volume is the docker volume attached to the running instance
      * We let volume name be same as name, which is unique across all apps.
      */
     final private String volume;
 
-    public DockerContainer(String name, String imageUrl, int port, JSONArray env) {
+    public DockerContainer(String name, String imageUrl, int port, JSONArray env, String volume) {
         this.name = name;
-        this.volume = name;
+        this.volume = volume;
         this.imageUrl = imageUrl;
         this.port = port;
         this.env = env;
         this.serviceNames = new ArrayList<>();
     }
 
+    public DockerContainer(String name, String imageUrl, int port, JSONArray env){
+        this(name, imageUrl, port, env, null);
+    }
+
     public DockerContainer(JSONObject json) throws JSONException {
         this.name = json.getString(DockerKeys.NAME.toString());
-        this.volume = this.name;
+        this.volume = json.getString(DockerKeys.VOL.toString());
         this.env = json.getJSONArray(DockerKeys.ENV.toString());
         this.imageUrl = json.getString(DockerKeys.IMAGE_URL.toString());
         this.port = json.getInt(DockerKeys.PORT.toString());

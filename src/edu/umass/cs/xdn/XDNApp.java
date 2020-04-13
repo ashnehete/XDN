@@ -576,6 +576,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     int port = json.has(DockerKeys.PORT.toString()) ? json.getInt(DockerKeys.PORT.toString()) : -1;
                     String url = json.has(DockerKeys.IMAGE_URL.toString()) ? json.getString(DockerKeys.IMAGE_URL.toString()) : null;
                     JSONArray jEnv = json.has(DockerKeys.ENV.toString()) ? json.getJSONArray(DockerKeys.ENV.toString()) : null;
+                    String vol = json.has(DockerKeys.VOL.toString()) ? json.getString(DockerKeys.VOL.toString()) : null;
                     List<String> env = new ArrayList<>();
                     if (jEnv != null) {
                         for (int i = 0; i < jEnv.length(); i++) {
@@ -590,7 +591,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     ProcessRuntime.executeCommand(pullCommand);
 
                     // 3. Boot up the service
-                    List<String> startCommand = getRunCommand(appName, port, env, url);
+                    List<String> startCommand = getRunCommand(appName, port, env, url, vol);
                     ProcessResult result = null;
                     try {
                         result = ProcessRuntime.executeCommand(startCommand);
@@ -611,7 +612,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             // give up and raise an error
                             return false;
                         } else {
-                            DockerContainer container = new DockerContainer(appName, url, port, jEnv);
+                            DockerContainer container = new DockerContainer(appName, url, port, jEnv, vol);
                             updateServiceAndApps(appName, name, container);
                             log.fine(">>>>>>>>> Service name " + name + " has been created successfully after retry.");
                             return true;
@@ -629,7 +630,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 e.printStackTrace();
                             }
                             if (result.getRetCode() == 0 ) {
-                                DockerContainer container = new DockerContainer(appName, url, port, jEnv);
+                                DockerContainer container = new DockerContainer(appName, url, port, jEnv, vol);
                                 updateServiceAndApps(appName, name, container);
                                 log.fine(">>>>>>>>> Service name " + name + " has been created successfully after stop and retry.");
                                 return true;
@@ -637,7 +638,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             return false;
                         } else {
                             // String id = result.getResult().trim();
-                            DockerContainer container = new DockerContainer(appName, url, port, jEnv);
+                            DockerContainer container = new DockerContainer(appName, url, port, jEnv, vol);
                             updateServiceAndApps(appName, name, container);
                             log.fine(">>>>>>>>> Service name " + name + " has been created successfully.");
                             return true;
@@ -718,7 +719,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
      * Run command is the command to run a docker for the first time
      */
     // docker run --name xdn-demo-app -p 8080:3000 -e ADDR=172.17.0.1 -d oversky710/xdn-demo-app --ip 172.17.0.100
-    private List<String> getRunCommand(String name, int port, List<String> env, String url) {
+    private List<String> getRunCommand(String name, int port, List<String> env, String url, String vol) {
         List<String> command = new ArrayList<>();
         command.add("docker");
         command.add("run");
@@ -726,6 +727,11 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         // name is unique globally, otherwise it won't be created successfully
         command.add("--name");
         command.add(name);
+
+        if (vol != null) {
+            command.add("-v");
+            command.add(vol+":/tmp");
+        }
 
         //FIXME: only works on cloud node
         if (port > 0){
