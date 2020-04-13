@@ -127,7 +127,7 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 	@Override
 	public boolean shouldReportDemandStats(Request request, InetAddress sender,
 			ReconfigurableAppInfo nodeConfig) {
-		//System.out.println(">>>> About to send report for request "+request+", sender:"+sender);
+		System.out.println(">>>> About to send report for request "+request+", sender:"+sender);
 		
 		// incorporate request
 		if (!request.getServiceName().equals(this.name))
@@ -148,8 +148,8 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 		if (getNumRequests() >= minRequestsBeforeDemandReport){
 			if (sender.toString() != this.srcIpAddr) {
 				this.srcIpAddr = sender.toString();
-				//System.out.println(">>>>>>>>>>>> Let's report to reconfigurator! Request "
-				//		+request+" FROM a remote sender:"+sender);
+				System.out.println(">>>>>>>>>>>> Let's report to reconfigurator! Request "
+						+request+" FROM a remote sender:"+sender);
 				return true;
 			}			
 		}
@@ -199,7 +199,7 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 		} catch (JSONException je) {
 			je.printStackTrace();
 		}
-		//System.out.println("Prepare a demand profile:"+json.toString());
+		System.out.println("Prepare a demand profile:"+json.toString());
 		return json;
 	}
 
@@ -269,7 +269,8 @@ public class DemoDemandProfile extends AbstractDemandProfile {
 	@Override
 	public void justReconfigured() {
 		// deep copy
-		this.lastReconfiguredProfile = new DemoDemandProfile(this); // this.clone();
+		this.lastReconfiguredProfile = new DemoDemandProfile(this);
+		// this.clone();
 	}
 
 	/**
