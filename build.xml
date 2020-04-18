@@ -10,13 +10,13 @@
 	<!-- Clean up -->
 	    <target name="clean" description="Clean">
 	        <delete dir="bin"/>
-	    	<delete dir="jar"/>
+	    	<delete dir="jars"/>
 	    </target>
 
 	<!-- Initialize build -->
 	    <target name="init">
 	        <mkdir dir="bin"/>
-	    	<mkdir dir="jar"/>
+	    	<mkdir dir="jars"/>
 	    </target>
 
 	<!-- Compile the project -->
@@ -32,8 +32,8 @@
 	<!-- Generate jar -->
 		<target name="jar" depends="compile" >
 			<buildnumber/>
-			<mkdir dir="jar"/>
-			<jar destfile="jar/XDN-${version}.jar" basedir="bin" filesetmanifest="mergewithoutmain">
+			<mkdir dir="jars"/>
+			<jar destfile="jars/XDN-${version}.jar" basedir="bin" filesetmanifest="mergewithoutmain">
 				<manifest>
 					<attribute name="Class-Path" value="."/>
 				</manifest>
