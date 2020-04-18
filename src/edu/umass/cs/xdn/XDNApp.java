@@ -161,15 +161,19 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             HttpActiveReplicaRequest r = (HttpActiveReplicaRequest) request;
             String name = r.getServiceName();
             String containerUrl = null;
-            if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name)))
-                containerUrl = getContainerUrl(containerizedApps.get(serviceNames.get(name)).getAddr());
+            if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name))) {
+                DockerContainer dc = containerizedApps.get(serviceNames.get(name));
+                containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort());
+            }
 
             if (containerUrl == null)
                 return false;
 
-            containerUrl = "http://localhost:3000";
+            // containerUrl = "http://localhost:3000";
+            log.fine("About to execute request "+r+" for service name "+name+" running at address "+containerUrl);
+
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
-                log.fine("About to execute request "+r);
+
 
                 /**
                  // old implementation with okhttp lib

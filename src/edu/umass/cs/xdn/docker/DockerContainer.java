@@ -99,6 +99,10 @@ public class DockerContainer implements XDNContainer {
         return addr;
     }
 
+    public int getPort() {
+        return port;
+    }
+
     public void setID(String id) {
         this.id = id;
     }
