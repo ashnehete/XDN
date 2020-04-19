@@ -1,4 +1,4 @@
-Prerequisites: `Java 1.8+`, `ant`, `bash`, `docker`, `criu`
+Prerequisites: `Linux`, `Java 1.8+`, `ant`, `bash`, `docker`, `criu`
 
 Obtaining XDN
 -------------
@@ -16,9 +16,49 @@ Service dispersibility refers to the ability to programmatically sprinkle replic
 `XDN` is a heterogeneous system that tightly integrates edge and cloud platform to make service dispersibility easier, especially for stateful services.
 
 
-Get Started
--------------
-`XDN` is built on top of [GigaPaxos](<https://github.com/MobilityFirst/gigapaxos>), a group-scalable replicated state machine (RSM) system, which allows applications to easily create and manage a very large number of separate RSMs. Please go through GigaPaxos tutorial first to get familiar with the concepts mentioned in this tutorial.
+Getting Started Quickly
+-----------------------
+`XDN` is built on top of [GigaPaxos](<https://github.com/MobilityFirst/gigapaxos>), a group-scalable replicated state machine (RSM) system, which allows applications to easily create and manage a very large number of separate RSMs. Please go through [GigaPaxos tutorial](<https://github.com/MobilityFirst/gigapaxos/wiki>) first to get familiar with the concepts mentioned in this tutorial.
+
+### Tutorial 1: Standalone Setup
+To start up XDN servers, you need to specify a config file. In this tutorial, we'll use the config file <tt>conf/xdn.local.properties</tt>.
+
+    # XDN config file
+    APPLICATION=edu.umass.cs.xdn.XDNApp
+    
+    DISABLE_RECONFIGURATION=true
+    ENABLE_ACTIVE_REPLICA_HTTP=true
+    GIGAPAXOS_DATA_DIR=/tmp/gigapaxos
+    
+    # format: active.<active_server_name>=host:port
+    active.AR0=127.0.0.1:2000
+    
+    # format: reconfigurator.<active_server_name>=host:port
+    reconfigurator.RC=127.0.0.1:5000
+
+Run the servers as follows from the top-level directory:
+```
+script/gpServer.sh -DgigapaxosConfig=conf/xdn.local.properties start all
+```
+
+Run the client to create an XDN application:
+```
+script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties test.CreateServices
+```
+
+Run the client to send a request:
+```
+script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties test.ExecuteServices
+```
+
+To clear up:
+```
+script/gpServer.sh -DgigapaxosConfig=conf/xdn.local.properties forceclear all
+script/cleanup.sh
+```
+
+
+### Tutorial 2: Distributed Setup
 
 Let's use the config file <tt>conf/exp.properties</tt>
     
