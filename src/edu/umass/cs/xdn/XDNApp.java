@@ -30,6 +30,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -163,13 +164,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             String containerUrl = null;
             if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name))) {
                 DockerContainer dc = containerizedApps.get(serviceNames.get(name));
-                containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort());
+                containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort()+XDNConfig.xdnRoute);
             }
 
             if (containerUrl == null)
                 return false;
 
-            // containerUrl = "http://localhost:3000";
             log.fine("About to execute request "+r+" for service name "+name+" running at address "+containerUrl);
 
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
@@ -223,6 +223,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         ((HttpActiveReplicaRequest) request).setResponse(response != null?
                                 response.toString():
                                 "");
+                        log.log(Level.INFO, "{0} received response from underlying app {1}: {2}", new Object[]{this, name, response});
+
                         return true;
 
                     } else {

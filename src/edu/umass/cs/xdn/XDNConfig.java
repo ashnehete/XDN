@@ -11,7 +11,7 @@ public class XDNConfig {
     /**
      *
      */
-    public static String xdnRoute = "/xdnapp";
+    final public static String xdnRoute = "/xdnapp";
 
     /**
      * Indicate whether this node is edge node, default is false, means it is a cloud node
