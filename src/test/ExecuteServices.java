@@ -24,13 +24,7 @@ public class ExecuteServices {
         XDNAgentClient client = new XDNAgentClient();
         String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
 
-        JSONObject json = new JSONObject();
-        try {
-            json.put("value", "1");
-            json.put("id", 0);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        Integer addValue = 1;
         final int total = 1;
         int id = (new Random()).nextInt();
 
@@ -40,7 +34,7 @@ public class ExecuteServices {
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
                     testServiceName,
                     id++,
-                    json.toString(),
+                    addValue.toString(),
                     true,
                     false,
                     0
