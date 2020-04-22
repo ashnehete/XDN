@@ -31,7 +31,7 @@ To start up XDN servers, you need to specify a config file. In this tutorial, we
     GIGAPAXOS_DATA_DIR=/tmp/gigapaxos
     
     # format: active.<active_server_name>=host:port
-    active.AR0=127.0.0.1:2000
+    active.AR=127.0.0.1:2000
     
     # format: reconfigurator.<active_server_name>=host:port
     reconfigurator.RC=127.0.0.1:5000
