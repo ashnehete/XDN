@@ -667,7 +667,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                 updateServiceAndApps(appName, name, c);
                 return true;
-            } // else { container exists and running, use it as is }
+            } else {
+                // TODO: container is running, add the container info into containerizedApps and runningApps
+            }
 
         }
         long elapsed = System.currentTimeMillis() - start;
