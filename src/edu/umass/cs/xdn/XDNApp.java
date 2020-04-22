@@ -607,7 +607,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         e.printStackTrace();
                     }
 
-                    log.fine("Restore: start app instance command result is "+result);
+                    log.info("Restore: start app instance command result is "+result);
                     if (result == null) {
                         // there may be an interruption, let's retry. No need to stop another instance
                         try {
@@ -618,6 +618,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         assert (result != null);
                         if (result.getRetCode() != 0) {
                             // give up and raise an error
+                            log.log(Level.SEVERE, "unable to restart app for service name {0}: {1}", new Object[]{name, startCommand.toString()});
                             return false;
                         } else {
                             DockerContainer container = new DockerContainer(appName, url, port, jEnv, vol);
