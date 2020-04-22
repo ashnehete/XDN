@@ -172,9 +172,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             log.info("Execute request "+r+" for service name "+name+" running at address "+containerUrl);
 
-            /*
-            if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
 
+            if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
+                /*
                  // old implementation with okhttp lib
                 RequestBody body = RequestBody.create(JSON, r.toString());
                 okhttp3.Request req = new okhttp3.Request.Builder()
