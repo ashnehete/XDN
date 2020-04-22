@@ -175,17 +175,17 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
 
 
-                /**
+
                  // old implementation with okhttp lib
-                RequestBody body = RequestBody.create(JSON, request.toString());
+                RequestBody body = RequestBody.create(JSON, r.toString());
                 okhttp3.Request req = new okhttp3.Request.Builder()
                         .url(containerUrl)
                         .post(body)
                         .build();
                 try (Response response = httpClient.newCall(req).execute()) {
-                    log.fine("Received response from XDN app:"+response);
+                    log.info("Received response from XDN app:"+response);
                     // log.fine("Content:"+response.body().string());
-                    ((HttpActiveReplicaRequest) request).setResponse(response.body() != null?
+                    r.setResponse(response.body() != null?
                             response.body().string():
                             "");
                     return true;
@@ -193,9 +193,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     e.printStackTrace();
                     return false;
                 }
-                */
+
 
                 // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
+                /*
                 URL obj = null;
                 try {
                     obj = new URL(containerUrl);
@@ -204,7 +205,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     con.setRequestProperty("User-Agent", USER_AGENT);
                     con.setDoOutput(true);
                     OutputStream os = con.getOutputStream();
-                    os.write(request.toString().getBytes());
+                    os.write(r.toString().getBytes());
                     os.flush();
                     os.close();
 
@@ -233,7 +234,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
+                */
 
             }
             /*
