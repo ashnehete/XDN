@@ -31,7 +31,7 @@ To start up XDN servers, you need to specify a config file. In this tutorial, we
     GIGAPAXOS_DATA_DIR=/tmp/gigapaxos
     
     # format: active.<active_server_name>=host:port
-    active.AR=127.0.0.1:2000
+    active.AR0=127.0.0.1:2000
     
     # format: reconfigurator.<active_server_name>=host:port
     reconfigurator.RC=127.0.0.1:5000
@@ -46,10 +46,26 @@ Run the client to create an XDN application:
 script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties test.CreateServices
 ```
 
+It creates an stateful counter app wrapped in docker called xdn-demo-app. You can find its docker image on DockerHub: [xdn-demo-app docker image](https://hub.docker.com/repository/docker/oversky710/xdn-demo-app).
+Open your browser to check the counter's current value: [http://127.0.0.1/xdnapp](http://127.0.0.1/xdnapp).
+
 Run the client to send a request:
 ```
 script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties test.ExecuteServices
 ```
+
+The client will send a request with a value "1", the the underlying app [xdn-demo-app](https://github.com/ZhaoyuUmass/xdn-demo-app) add value 1 to its current state.
+Open your browser to check the counter's current value after operation: [http://127.0.0.1/xdnapp](http://127.0.0.1/xdnapp).
+
+You may also issue a request directly to our HTTP API with `curl`:
+
+```
+curl "http://127.0.0.1:2300?name=xdn-demo-app_xdn_Alvin&qval=1"
+```
+
+Or open the following link with your browser to send a request: [http://127.0.0.1:2300?name=xdn-demo-app_xdn_Alvin&qval=1](http://127.0.0.1:2300?name=xdn-demo-app_xdn_Alvin&qval=1).
+
+Find out more usage instructions with our HTTP APIs on [GigaPaxos Wiki](http://github.com/MobilityFirst/gigapaxos/wiki).
 
 To clear up:
 ```
