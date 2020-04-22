@@ -172,9 +172,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             log.info("Execute request "+r+" for service name "+name+" running at address "+containerUrl);
 
+            /*
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
-
-
 
                  // old implementation with okhttp lib
                 RequestBody body = RequestBody.create(JSON, r.toString());
@@ -193,16 +192,18 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     e.printStackTrace();
                     return false;
                 }
-
+                */
 
                 // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
-                /*
+
                 URL obj = null;
                 try {
                     obj = new URL(containerUrl);
                     HttpURLConnection con = (HttpURLConnection) obj.openConnection();
                     con.setRequestMethod("POST");
                     con.setRequestProperty("User-Agent", USER_AGENT);
+                    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    con.setRequestProperty("Accept", "application/json");
                     con.setDoOutput(true);
                     OutputStream os = con.getOutputStream();
                     os.write(r.toString().getBytes());
@@ -234,7 +235,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                */
+
 
             }
             /*
