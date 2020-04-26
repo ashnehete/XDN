@@ -74,30 +74,23 @@ public class ExecuteServices {
                     // request coordination failed
                 }
 
-
+                while (received < sent) {
+                    Thread.sleep(500);
+                }
             } else {
 
                 try {
-                    // coordinate request through GigaPaxos
+                    // send request to a specific node
                     client.sendRequest(ReplicableClientRequest.wrap(req),
                             PaxosConfig.getActives().get(node)
-                            , new RequestCallback() {
-                                @Override
-                                public void handleResponse(Request response) {
-                                    System.out.println((System.currentTimeMillis() - start));
-                                    received++;
-                                }
-                            });
+                            );
 
                 } catch (IOException e) {
                     e.printStackTrace();
-                    // request coordination failed
                 }
 
             }
-            while (received < sent) {
-                Thread.sleep(500);
-            }
+
         }
 
         client.close();
