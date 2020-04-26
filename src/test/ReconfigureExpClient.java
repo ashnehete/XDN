@@ -15,7 +15,7 @@ import java.io.IOException;
 /**
  * java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/xdn.properties test.ReconfigurableServices
  */
-public class ReconfigureServices {
+public class ReconfigureExpClient {
     static int received = 0;
 
     public static void main(String[] args) throws IOException, InterruptedException {
