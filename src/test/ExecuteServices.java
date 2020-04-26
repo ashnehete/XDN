@@ -1,7 +1,9 @@
 package test;
 
+import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
+import edu.umass.cs.reconfiguration.ReconfigurationConfig;
 import edu.umass.cs.reconfiguration.examples.AppRequest;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
@@ -12,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Random;
 
 /**
@@ -25,12 +28,24 @@ public class ExecuteServices {
         String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
 
         Integer addValue = 1;
-        final int total = 1;
-        int id = (new Random()).nextInt();
+        int total = 1;
+        String node = null;
+        if (System.getProperty("node")!=null) {
+            node = System.getProperty("node");
+            // if node does not exist, reset it to null
+            if (!PaxosConfig.getActives().containsKey(node)) {
+                System.out.println("Node ID "+node+" does not exist.");
+                node = null;
+            }
+        }
 
+
+
+        int id = (new Random()).nextInt();
+        int sent = 0;
         // System.out.println("Start testing... ");
         for (int i=0; i<total; i++) {
-            int sent = 1;
+            sent++;
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
                     testServiceName,
                     id++,
@@ -41,28 +56,48 @@ public class ExecuteServices {
                     );
             // AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
             // System.out.println("About to send "+i+"th request.");
+            long start = System.currentTimeMillis();
+            if (node == null) {
+                try {
+                    // coordinate request through GigaPaxos
+                    client.sendRequest(ReplicableClientRequest.wrap(req)
+                            , new RequestCallback() {
+                                @Override
+                                public void handleResponse(Request response) {
+                                    System.out.println((System.currentTimeMillis() - start));
+                                    received++;
+                                }
+                            });
 
-            long start = System.nanoTime();
-            try {
-                // coordinate request through GigaPaxos
-                client.sendRequest(ReplicableClientRequest.wrap(req)
-                        , new RequestCallback() {
-                            @Override
-                            public void handleResponse(Request response) {
-                                System.out.println((System.nanoTime()-start)/1000.0);
-                                received = 1;
-                            }
-                        });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    // request coordination failed
+                }
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                // request coordination failed
+
+            } else {
+
+                try {
+                    // coordinate request through GigaPaxos
+                    client.sendRequest(ReplicableClientRequest.wrap(req),
+                            PaxosConfig.getActives().get(node)
+                            , new RequestCallback() {
+                                @Override
+                                public void handleResponse(Request response) {
+                                    System.out.println((System.currentTimeMillis() - start));
+                                    received++;
+                                }
+                            });
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    // request coordination failed
+                }
 
             }
-            while (received < sent ) {
+            while (received < sent) {
                 Thread.sleep(500);
             }
-            received = 0;
         }
 
         client.close();

@@ -272,7 +272,7 @@ public class TestDemandProfile extends AbstractDemandProfile {
 				retval = curActives;
 			}
 		}
-		
+
 		System.out.println(">>>>>>>>>> To configure the service to the set of actives:"+retval+"\n");
 		return retval;
 	}
