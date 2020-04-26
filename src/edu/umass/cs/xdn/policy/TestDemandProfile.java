@@ -26,22 +26,31 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
  *
  */
 public class TestDemandProfile extends AbstractDemandProfile {
+
 	protected enum Keys {
-		NAME, STATS, RATE, NREQS, NTOTREQS, SRC
+		NAME,
+		STATS,
+		RATE,
+		NREQS, // number of requests
+		NTOTREQS, // number of total requests
+		SRC
 	};
 
 	/**
 	 * The minimum number of requests after which a demand report will be sent
 	 * to reconfigurators.
 	 */
-	protected static int minRequestsBeforeDemandReport = 1;
+	protected static int minRequestsBeforeDemandReport = 5;
 	/**
 	 * The minimum amount of time (ms) that must elapse since the previous
 	 * reconfiguration before the next reconfiguration can happen.
@@ -60,6 +69,9 @@ public class TestDemandProfile extends AbstractDemandProfile {
 
 	// Needed only at reconfigurators, so we don't need to serialize this.
 	protected TestDemandProfile lastReconfiguredProfile = null;
+
+	// private final static String edge_ip = "34.234.16.176";
+	private final static String edge_node = "AR1";
 
 	/**
 	 * The string argument {@code name} is the service name for which this
@@ -223,7 +235,8 @@ public class TestDemandProfile extends AbstractDemandProfile {
 		System.out.println(">>>>>>>>>> Consider to reconfigure the service, current actives:"+curActives);
 		System.out.println(">>>>>>>>>> All actives:"+nodeConfig.getAllActiveReplicas().keySet()
 				+" corresponding to IP addresses "+nodeConfig.getAllActiveReplicas().values());				
-		
+
+		/*
 		if (this.lastReconfiguredProfile != null) {
 			if (System.currentTimeMillis()
 					- this.lastReconfiguredProfile.lastRequestTime < minReconfigurationInterval)
@@ -232,24 +245,34 @@ public class TestDemandProfile extends AbstractDemandProfile {
 					- this.lastReconfiguredProfile.numTotalRequests < minRequestsBeforeReconfiguration)
 				return null;
 		}
-		/**
-		 * This example simply returns curActives as this policy trivially
-		 * reconfigures to the same set of locations after every call. In
-		 * general, AbstractDemandProfile implementations should return a new
-		 * list different from curActives.
-		 */
-		
-		/*
-		 * Reconfigure
-		 */
+		*/
 
-		String curNode = curActives.iterator().next();
-		Set<String> retval = new HashSet<String>();
-		for (String nodeID : nodeConfig.getAllActiveReplicas().keySet()){
-			if(!nodeID.equals(curNode))
-				retval.add(nodeID);
+		Map<String, InetSocketAddress> nodeMap = nodeConfig.getAllActiveReplicas();
+
+		Set<String> retval = new HashSet<>();
+
+		if (curActives.contains(edge_node)){
+
+			if (!nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
+				// AR0, AR1 => AR0
+				for (String nodeID : nodeMap.keySet()){
+					if (!nodeID.equals(edge_node) )
+						retval.add(nodeID);
+				}
+			} else {
+				// no change
+				retval = curActives;
+			}
+		} else {
+			if ( nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
+				// AR0 => AR0, AR1
+				retval.addAll(nodeMap.keySet());
+			} else {
+				// no change
+				retval = curActives;
+			}
 		}
-
+		
 		System.out.println(">>>>>>>>>> To configure the service to the set of actives:"+retval+"\n");
 		return retval;
 	}
