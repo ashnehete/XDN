@@ -139,7 +139,7 @@ public class TestDemandProfile extends AbstractDemandProfile {
 	@Override
 	public boolean shouldReportDemandStats(Request request, InetAddress sender,
 			ReconfigurableAppInfo nodeConfig) {
-		System.out.println(">>>> About to send report for request "+request+", sender:"+sender);
+		// System.out.println(">>>> About to send report for request "+request+", sender:"+sender);
 		
 		// incorporate request
 		if (!request.getServiceName().equals(this.name))
@@ -160,8 +160,8 @@ public class TestDemandProfile extends AbstractDemandProfile {
 		if (getNumRequests() >= minRequestsBeforeDemandReport){
 			if (sender.toString() != this.srcIpAddr) {
 				this.srcIpAddr = sender.toString();
-				System.out.println(">>>>>>>>>>>> Let's report to reconfigurator! Request "
-						+request+" FROM a remote sender:"+sender);
+//				System.out.println(">>>>>>>>>>>> Let's report to reconfigurator! Request "
+//						+request+" FROM a remote sender:"+sender);
 				return true;
 			}			
 		}
