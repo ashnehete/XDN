@@ -15,7 +15,7 @@ import java.util.Random;
  * java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/xdn.properties test.ReconfigurableServices
  */
 public class ReconfigureExpClient {
-    final static long interval = 5000;
+    final static long interval = 1000;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         String ip = args[0];
