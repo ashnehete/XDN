@@ -63,11 +63,11 @@ public class ReconfigureExpClient {
                 long elapsed = System.currentTimeMillis() - start;
                 if (interval > elapsed)
                     Thread.sleep(interval - elapsed);
-                System.out.println(i+","+elapsed);
+                System.out.println(elapsed);
             } else {
 
                 Thread.sleep(interval);
-                System.out.println(i+","+"-1");
+                System.out.println("0");
             }
 
             if (i%30 == 0)
