@@ -15,7 +15,6 @@
  * Initial developer(s): V. Arun */
 package edu.umass.cs.xdn.policy;
 
-import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.reconfiguration.ReconfigurationConfig.RC;
 import edu.umass.cs.reconfiguration.interfaces.ReconfigurableAppInfo;
@@ -265,7 +264,7 @@ public class TestDemandProfile extends AbstractDemandProfile {
 				retval = curActives;
 			}
 		} else {
-			if ( nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
+			if ( nodeMap.containsKey(edge_node) && nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
 				// If srcIPaddr is the same as edge node address, then AR0 => AR0, AR1
 				retval.addAll(nodeMap.keySet());
 			} else {
