@@ -1,8 +1,6 @@
 package test;
 
 import edu.umass.cs.gigapaxos.PaxosConfig;
-import edu.umass.cs.gigapaxos.interfaces.Request;
-import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
@@ -20,7 +18,7 @@ public class ReconfigureExpClient {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         String node = args[0];
-        Boolean ready = Boolean.getBoolean(args[1]);
+        boolean ready = Boolean.getBoolean(args[1]);
 
         XDNAgentClient client = new XDNAgentClient();
 
@@ -67,8 +65,8 @@ public class ReconfigureExpClient {
                 System.out.println(0);
             }
 
-            if ((i+1)%30 == 0)
-                ready = ready? false: true;
+            if (i%30 == 0)
+                ready = !ready;
 
         }
 
