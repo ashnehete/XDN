@@ -18,12 +18,11 @@ import java.util.Random;
  */
 public class ReconfigureExpClient {
     final static long interval = 1000;
-    static int received = 0;
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
         boolean ready = Boolean.parseBoolean(args[0]);
-        
+
         InetSocketAddress addr = null;
         if (args.length > 1) {
             String ip = args[1];
@@ -56,39 +55,22 @@ public class ReconfigureExpClient {
             if (ready) {
                 long start = System.currentTimeMillis();
                 try {
-                    sent++;
                     // coordinate request through GigaPaxos
                     if (addr != null)
                         client.sendRequest(ReplicableClientRequest.wrap(req),
                                 // PaxosConfig.getActives().get(node),
                                 addr,
-                                new RequestCallback() {
-                                    @Override
-                                    public void handleResponse(Request response) {
-                                        System.out.println((System.currentTimeMillis() - start));
-                                        received++;
-                                    }
-                                }
+                                1000
                         );
                     else
                         client.sendRequest(ReplicableClientRequest.wrap(req),
                                 // PaxosConfig.getActives().get(node),
-                                new RequestCallback() {
-                                    @Override
-                                    public void handleResponse(Request response) {
-                                        System.out.println((System.currentTimeMillis() - start));
-                                        received++;
-                                    }
-                                }
+                                1000
                         );
 
                 } catch (IOException e) {
                     e.printStackTrace();
                     // request coordination failed
-                }
-
-                while (received < sent) {
-                    Thread.sleep(10);
                 }
 
                 long elapsed = System.currentTimeMillis() - start;
