@@ -20,7 +20,7 @@ public class ReconfigureExpClient {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         String node = args[0];
-        Boolean notEdge = Boolean.getBoolean(args[1]);
+        Boolean ready = Boolean.getBoolean(args[1]);
 
         XDNAgentClient client = new XDNAgentClient();
 
@@ -44,7 +44,7 @@ public class ReconfigureExpClient {
 
             long start = System.currentTimeMillis();
 
-            if (notEdge) {
+            if (ready) {
                 try {
                     // coordinate request through GigaPaxos
                     client.sendRequest(ReplicableClientRequest.wrap(req),
@@ -68,7 +68,7 @@ public class ReconfigureExpClient {
             }
 
             if ((i+1)%30 == 0)
-                notEdge = notEdge? false: true;
+                ready = ready? false: true;
 
         }
 
