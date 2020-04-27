@@ -21,9 +21,14 @@ public class ReconfigureExpClient {
     static int received = 0;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        String ip = args[0];
-        InetSocketAddress addr = new InetSocketAddress(ip, 2100);
-        boolean ready = Boolean.parseBoolean(args[1]);
+
+        boolean ready = Boolean.parseBoolean(args[0]);
+        
+        InetSocketAddress addr = null;
+        if (args.length > 1) {
+            String ip = args[1];
+            addr = new InetSocketAddress(ip, 2100);
+        }
 
         XDNAgentClient client = new XDNAgentClient();
 
@@ -53,17 +58,29 @@ public class ReconfigureExpClient {
                 try {
                     sent++;
                     // coordinate request through GigaPaxos
-                    client.sendRequest(ReplicableClientRequest.wrap(req),
-                            // PaxosConfig.getActives().get(node),
-                            addr,
-                            new RequestCallback() {
-                                @Override
-                                public void handleResponse(Request response) {
-                                    System.out.println((System.currentTimeMillis() - start));
-                                    received++;
+                    if (addr != null)
+                        client.sendRequest(ReplicableClientRequest.wrap(req),
+                                // PaxosConfig.getActives().get(node),
+                                addr,
+                                new RequestCallback() {
+                                    @Override
+                                    public void handleResponse(Request response) {
+                                        System.out.println((System.currentTimeMillis() - start));
+                                        received++;
+                                    }
                                 }
-                            }
-                    );
+                        );
+                    else
+                        client.sendRequest(ReplicableClientRequest.wrap(req),
+                                // PaxosConfig.getActives().get(node),
+                                new RequestCallback() {
+                                    @Override
+                                    public void handleResponse(Request response) {
+                                        System.out.println((System.currentTimeMillis() - start));
+                                        received++;
+                                    }
+                                }
+                        );
 
                 } catch (IOException e) {
                     e.printStackTrace();
