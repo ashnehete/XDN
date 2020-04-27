@@ -16,18 +16,18 @@ import java.util.Random;
  * java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/xdn.properties test.ReconfigurableServices
  */
 public class ReconfigureExpClient {
-    static int received = 0;
     final static long interval = 1000;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         String node = args[0];
+        Boolean isEdge = Boolean.getBoolean(args[1]);
 
         XDNAgentClient client = new XDNAgentClient();
 
         String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
 
 
-        int total = 30;
+        int total = 100;
 
         int id = (new Random()).nextInt();
 
@@ -41,26 +41,34 @@ public class ReconfigureExpClient {
                     false,
                     0
             );
-            // AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
-            // System.out.println("About to send "+i+"th request.");
+
             long start = System.currentTimeMillis();
 
-            try {
-                // coordinate request through GigaPaxos
-                client.sendRequest(ReplicableClientRequest.wrap(req),
-                        PaxosConfig.getActives().get(node)
-                );
+            if (isEdge) {
+                try {
+                    // coordinate request through GigaPaxos
+                    client.sendRequest(ReplicableClientRequest.wrap(req),
+                            PaxosConfig.getActives().get(node)
+                    );
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                // request coordination failed
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    // request coordination failed
+                }
+
+
+                long elapsed = System.currentTimeMillis() - start;
+                if (interval > elapsed)
+                    Thread.sleep(interval - elapsed);
+                System.out.println(elapsed);
+            } else {
+
+                Thread.sleep(interval);
+                System.out.println(0);
             }
 
-
-            long elapsed = System.currentTimeMillis() - start;
-            if(interval > elapsed )
-                Thread.sleep(interval - elapsed);
-            System.out.println(elapsed);
+            if ((i+1)%30 == 0)
+                isEdge = isEdge? false: true;
 
         }
 
