@@ -1,5 +1,6 @@
 package test;
 
+import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
@@ -22,15 +23,14 @@ public class ReconfigureExpClient {
         XDNAgentClient client = new XDNAgentClient();
 
         String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
+        String node = args[0];
 
         int total = 30;
 
         int id = (new Random()).nextInt();
-        int sent = 0;
 
         // System.out.println("Start testing... ");
         for (int i=0; i<total; i++) {
-            sent++;
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
                     testServiceName,
                     id++,
@@ -45,23 +45,16 @@ public class ReconfigureExpClient {
 
             try {
                 // coordinate request through GigaPaxos
-                client.sendRequest(ReplicableClientRequest.wrap(req)
-                        , new RequestCallback() {
-                            @Override
-                            public void handleResponse(Request response) {
-                                System.out.println((System.currentTimeMillis() - start));
-                                received++;
-                            }
-                        });
+                client.sendRequest(ReplicableClientRequest.wrap(req),
+                        PaxosConfig.getActives().get(node)
+                );
 
             } catch (IOException e) {
                 e.printStackTrace();
                 // request coordination failed
             }
 
-            while (received < sent) {
-                Thread.sleep(500);
-            }
+
             long elapsed = System.currentTimeMillis() - start;
             if(interval > elapsed )
                 Thread.sleep(interval - elapsed);
