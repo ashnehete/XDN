@@ -73,7 +73,7 @@ public class TestDemandProfile extends AbstractDemandProfile {
 
 	// There are 2 actives in this experiment setup: AR0 and AR1. Edge node is assumed to be the second node AR1
 	private final static String edge_node = "AR1";
-	private final static String edge_ip = PaxosConfig.getActives().get(edge_node).getAddress().toString();
+	// private final static String edge_ip = PaxosConfig.getActives().get(edge_node).getAddress().toString();
 
 	/**
 	 * The string argument {@code name} is the service name for which this
