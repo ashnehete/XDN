@@ -1,6 +1,8 @@
 package test;
 
 import edu.umass.cs.gigapaxos.PaxosConfig;
+import edu.umass.cs.gigapaxos.interfaces.Request;
+import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
@@ -16,6 +18,7 @@ import java.util.Random;
  */
 public class ReconfigureExpClient {
     final static long interval = 1000;
+    static int received = 0;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         String ip = args[0];
@@ -30,6 +33,8 @@ public class ReconfigureExpClient {
         int total = 100;
 
         int id = (new Random()).nextInt();
+
+        int sent = 0;
 
         // System.out.println("Start testing... ");
         for (int i=0; i<total; i++) {
@@ -46,12 +51,18 @@ public class ReconfigureExpClient {
             if (ready) {
                 long start = System.currentTimeMillis();
                 try {
-
+                    sent++;
                     // coordinate request through GigaPaxos
                     client.sendRequest(ReplicableClientRequest.wrap(req),
                             // PaxosConfig.getActives().get(node),
                             addr,
-                            1000
+                            new RequestCallback() {
+                                @Override
+                                public void handleResponse(Request response) {
+                                    System.out.println((System.currentTimeMillis() - start));
+                                    received++;
+                                }
+                            }
                     );
 
                 } catch (IOException e) {
@@ -59,6 +70,9 @@ public class ReconfigureExpClient {
                     // request coordination failed
                 }
 
+                while (received < sent) {
+                    Thread.sleep(10);
+                }
 
                 long elapsed = System.currentTimeMillis() - start;
                 if (interval > elapsed)
