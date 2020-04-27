@@ -8,6 +8,7 @@ import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Random;
 
 /**
@@ -17,7 +18,8 @@ public class ReconfigureExpClient {
     final static long interval = 5000;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        String node = args[0];
+        String ip = args[0];
+        InetSocketAddress addr = new InetSocketAddress(ip, 2000);
         boolean ready = Boolean.parseBoolean(args[1]);
 
         XDNAgentClient client = new XDNAgentClient();
@@ -47,7 +49,8 @@ public class ReconfigureExpClient {
 
                     // coordinate request through GigaPaxos
                     client.sendRequest(ReplicableClientRequest.wrap(req),
-                            PaxosConfig.getActives().get(node),
+                            // PaxosConfig.getActives().get(node),
+                            addr,
                             1000
                     );
 
