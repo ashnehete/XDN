@@ -22,7 +22,7 @@ public class ReconfigureExpClient {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         String ip = args[0];
-        InetSocketAddress addr = new InetSocketAddress(ip, 2000);
+        InetSocketAddress addr = new InetSocketAddress(ip, 2100);
         boolean ready = Boolean.parseBoolean(args[1]);
 
         XDNAgentClient client = new XDNAgentClient();
