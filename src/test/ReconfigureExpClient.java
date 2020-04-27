@@ -18,8 +18,8 @@ public class ReconfigureExpClient {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         String node = args[0];
-        boolean ready = Boolean.getBoolean(args[1]);
-
+        boolean ready = Boolean.parseBoolean(args[1]);
+        
         XDNAgentClient client = new XDNAgentClient();
 
         String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
@@ -40,9 +40,9 @@ public class ReconfigureExpClient {
                     0
             );
 
-            long start = System.currentTimeMillis();
 
             if (ready) {
+                long start = System.currentTimeMillis();
                 try {
 
                     // coordinate request through GigaPaxos
@@ -64,7 +64,7 @@ public class ReconfigureExpClient {
             } else {
 
                 Thread.sleep(interval);
-                System.out.println(0);
+                System.out.println(-1);
             }
 
             if (i%30 == 0)
