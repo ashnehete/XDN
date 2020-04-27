@@ -44,9 +44,11 @@ public class ReconfigureExpClient {
 
             if (ready) {
                 try {
+
                     // coordinate request through GigaPaxos
                     client.sendRequest(ReplicableClientRequest.wrap(req),
-                            PaxosConfig.getActives().get(node)
+                            PaxosConfig.getActives().get(node),
+                            1000
                     );
 
                 } catch (IOException e) {
