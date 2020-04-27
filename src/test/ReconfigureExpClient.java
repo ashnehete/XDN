@@ -19,7 +19,7 @@ public class ReconfigureExpClient {
     public static void main(String[] args) throws IOException, InterruptedException {
         String node = args[0];
         boolean ready = Boolean.parseBoolean(args[1]);
-        
+
         XDNAgentClient client = new XDNAgentClient();
 
         String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
@@ -60,11 +60,11 @@ public class ReconfigureExpClient {
                 long elapsed = System.currentTimeMillis() - start;
                 if (interval > elapsed)
                     Thread.sleep(interval - elapsed);
-                System.out.println(elapsed);
+                System.out.println(i+","+elapsed);
             } else {
 
                 Thread.sleep(interval);
-                System.out.println(-1);
+                System.out.println(i+","+"-1");
             }
 
             if (i%30 == 0)
