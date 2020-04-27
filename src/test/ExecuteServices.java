@@ -39,8 +39,6 @@ public class ExecuteServices {
             }
         }
 
-
-
         int id = (new Random()).nextInt();
         int sent = 0;
         // System.out.println("Start testing... ");
