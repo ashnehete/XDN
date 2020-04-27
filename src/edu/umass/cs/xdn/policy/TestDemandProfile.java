@@ -15,6 +15,7 @@
  * Initial developer(s): V. Arun */
 package edu.umass.cs.xdn.policy;
 
+import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.reconfiguration.ReconfigurationConfig.RC;
 import edu.umass.cs.reconfiguration.interfaces.ReconfigurableAppInfo;
@@ -50,7 +51,7 @@ public class TestDemandProfile extends AbstractDemandProfile {
 	 * The minimum number of requests after which a demand report will be sent
 	 * to reconfigurators.
 	 */
-	protected static int minRequestsBeforeDemandReport = 5;
+	protected static int minRequestsBeforeDemandReport = 1;
 	/**
 	 * The minimum amount of time (ms) that must elapse since the previous
 	 * reconfiguration before the next reconfiguration can happen.
@@ -70,8 +71,9 @@ public class TestDemandProfile extends AbstractDemandProfile {
 	// Needed only at reconfigurators, so we don't need to serialize this.
 	protected TestDemandProfile lastReconfiguredProfile = null;
 
-	// private final static String edge_ip = "34.234.16.176";
+	// There are 2 actives in this experiment setup: AR0 and AR1. Edge node is assumed to be the second node AR1
 	private final static String edge_node = "AR1";
+	private final static String edge_ip = PaxosConfig.getActives().get(edge_node).getAddress().toString();
 
 	/**
 	 * The string argument {@code name} is the service name for which this
@@ -252,9 +254,8 @@ public class TestDemandProfile extends AbstractDemandProfile {
 		Set<String> retval = new HashSet<>();
 
 		if (curActives.contains(edge_node)){
-
 			if (!nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
-				// AR0, AR1 => AR0
+				// If srcIpAddr is not the same as edge node address, then AR0, AR1 => AR0
 				for (String nodeID : nodeMap.keySet()){
 					if (!nodeID.equals(edge_node) )
 						retval.add(nodeID);
@@ -265,7 +266,7 @@ public class TestDemandProfile extends AbstractDemandProfile {
 			}
 		} else {
 			if ( nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
-				// AR0 => AR0, AR1
+				// If srcIPaddr is the same as edge node address, then AR0 => AR0, AR1
 				retval.addAll(nodeMap.keySet());
 			} else {
 				// no change
