@@ -109,30 +109,6 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
             initGroup.add(servers.get(name));
         }
 
-        final int sent = 1;
-
-        /*
-        client.sendRequest(new CreateServiceName(testServiceName,
-                        "0", initGroup),
-                new RequestCallback() {
-                    final long createTime = System.currentTimeMillis();
-                    @Override
-                    public void handleResponse(Request response) {
-                        System.out.println("Response to create service name ="
-                        + (response)
-                        + " received in "
-                        + (System.currentTimeMillis() - createTime)
-                        + "ms");
-                        received += 1;
-                    }
-                }
-        );
-
-        while (sent < received) {
-            Thread.sleep(500);
-        }
-         */
-
         JSONObject json = new JSONObject();
         try {
             json.put("value", "1");

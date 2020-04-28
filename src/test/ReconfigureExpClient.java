@@ -22,6 +22,10 @@ public class ReconfigureExpClient {
     // final static long timeout = 1000;
 
     static int received = 0;
+    static synchronized void incr(){
+        received++;
+    }
+
     static Map<Integer, Long> result = new HashMap<>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -72,7 +76,7 @@ public class ReconfigureExpClient {
                                     public void handleResponse(Request response) {
                                         result.put(index, (System.currentTimeMillis() - start));
                                         System.out.println((System.currentTimeMillis() - start));
-                                        received++;
+                                        incr();
                                     }
                                 }
                         );
@@ -84,7 +88,7 @@ public class ReconfigureExpClient {
                                     public void handleResponse(Request response) {
                                         result.put(index, (System.currentTimeMillis() - start));
                                         System.out.println((System.currentTimeMillis() - start));
-                                        received++;
+                                        incr();
                                     }
                                 }
                         );
@@ -110,7 +114,7 @@ public class ReconfigureExpClient {
         }
 
         while(received < sent){
-            System.out.println("Received:"+received);
+            System.out.println("Received:"+ received);
             Thread.sleep(500);
         }
         client.close();
