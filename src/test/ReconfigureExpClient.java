@@ -1,8 +1,5 @@
 package test;
 
-import edu.umass.cs.gigapaxos.PaxosConfig;
-import edu.umass.cs.gigapaxos.interfaces.Request;
-import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
@@ -18,6 +15,7 @@ import java.util.Random;
  */
 public class ReconfigureExpClient {
     final static long interval = 1000;
+    final static long timeout = 5000;
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -46,7 +44,7 @@ public class ReconfigureExpClient {
                     testServiceName,
                     id++,
                     "1",
-                    true,
+                    false,
                     false,
                     0
             );
@@ -60,12 +58,12 @@ public class ReconfigureExpClient {
                         client.sendRequest(ReplicableClientRequest.wrap(req),
                                 // PaxosConfig.getActives().get(node),
                                 addr,
-                                1000
+                                timeout
                         );
                     else
                         client.sendRequest(ReplicableClientRequest.wrap(req),
                                 // PaxosConfig.getActives().get(node),
-                                1000
+                                timeout
                         );
 
                 } catch (IOException e) {
