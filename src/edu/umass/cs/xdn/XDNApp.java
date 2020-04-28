@@ -53,7 +53,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     /**
      * A map of app name to containerizedApps
-     * TODO: use Service interface rather than DockerService if we decide to switch to another container
      */
     private Map<String, DockerContainer> containerizedApps;
 
@@ -448,8 +447,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             assert (container != null);
 
             if ( state == null ){
-                // If we need to remove name
-                serviceNames.remove(name);
+                // FIXME: do we need to remove name ?
+                // serviceNames.remove(name);
                 // remove pointer from service name list in containerizedApps, must succeed
                 boolean cleared = container.removeServiceName(name);
                 // serviceName must be successfully removed from service list in container class
