@@ -283,8 +283,7 @@ public class TestDemandProfile extends AbstractDemandProfile {
 						retval.add(nodeID);
 				}
 			} else {
-				// no change
-				retval = null;
+				retval.add(edge_node);
 			}
 		} else {
 			if ( nodeMap.containsKey(edge_node) && nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
@@ -292,7 +291,10 @@ public class TestDemandProfile extends AbstractDemandProfile {
 				retval.add(edge_node);
 			} else {
 				// no change
-				retval = null;
+				for (String nodeID : nodeMap.keySet()){
+					if (!nodeID.equals(edge_node) )
+						retval.add(nodeID);
+				}
 			}
 		}
 
