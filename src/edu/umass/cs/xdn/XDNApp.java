@@ -848,6 +848,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         List<String> command = new ArrayList<>();
         command.add("docker");
         command.add("stop");
+        command.add("-t");
+        command.add("0"); // time to kill docker immediately
         command.add(name);
         return command;
     }
