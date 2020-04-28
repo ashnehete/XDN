@@ -40,8 +40,7 @@ public class ReconfigureExpClient {
 
         XDNAgentClient client = new XDNAgentClient();
 
-        String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
-
+        String testServiceName = CreateServices.imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
 
         int total = 100;
 
@@ -93,9 +92,8 @@ public class ReconfigureExpClient {
                                 }
                         );
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                    // request coordination failed
                 }
 
                 long elapsed = System.currentTimeMillis() - start;

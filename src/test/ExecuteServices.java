@@ -3,18 +3,14 @@ package test;
 import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
-import edu.umass.cs.reconfiguration.ReconfigurationConfig;
-import edu.umass.cs.reconfiguration.examples.AppRequest;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
-import org.json.JSONException;
-import org.json.JSONObject;
+
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.Random;
 
 /**
@@ -25,7 +21,7 @@ public class ExecuteServices {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         XDNAgentClient client = new XDNAgentClient();
-        String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
+        String testServiceName = CreateServices.imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
 
         Integer addValue = 1;
         int total = 1;

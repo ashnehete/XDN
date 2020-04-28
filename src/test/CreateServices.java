@@ -19,6 +19,7 @@ import java.util.Set;
 public class CreateServices {
 
     static int received = 0;
+    final static String imageName = "xdn-test-demo"; //"xdn-demo-app";
 
     public static void main(String[] args) throws IOException, InterruptedException, JSONException {
 
@@ -38,15 +39,15 @@ public class CreateServices {
         arr.put("");
 
         JSONObject json = new JSONObject();
-        json.put(DockerKeys.NAME.toString(), "xdn-demo-app");
-        json.put(DockerKeys.IMAGE_URL.toString(), "oversky710/xdn-demo-app");
+        json.put(DockerKeys.NAME.toString(), imageName);
+        json.put(DockerKeys.IMAGE_URL.toString(), "oversky710/"+imageName);
         // json.put(DockerKeys.ENV.toString(), null);
         json.put(DockerKeys.PORT.toString(), 3000);
-        json.put(DockerKeys.VOL.toString(), "xdn-demo-app");
+        json.put(DockerKeys.VOL.toString(), imageName);
 
         final int sent = 1;
 
-        testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
+        testServiceName = imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
 
         //client.sendRequest(new CreateServiceName(testServiceName,
         //                json.toString(), initGroup),
