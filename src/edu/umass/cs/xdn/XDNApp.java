@@ -394,7 +394,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
      */
     @Override
     public boolean restore(String name, String state) {
-        long start = System.currentTimeMillis();
+
         // app name is the name before xdnServiceDecimal "_xdn_"
         String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
         log.info(">>>>>> Restore request: { Name: "+name+"\nAppName: "+appName+"\nState: "+state+"}");
@@ -436,6 +436,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         }
 
         log.info(">>>>>>>> XDN containerized app to restore:"+name);
+        log.info(">>>>>>>> serviceNames:"+serviceNames);
+        log.info(">>>>>>>> runningApps:"+runningApps);
 
         // Handle serviceName (name) restore
         if (serviceNames.containsKey(name)){
@@ -484,6 +486,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 }
                 return true;
             } else {
+                System.out.println(">>>>>>>>>>>>>>>>>>> Restore from a non-empty state: "+state);
                 // restore from a checkpoint which is either a docker checkpoint or a volume checkpoint
                 if (XDNConfig.largeCheckPointerEnabled) {
 
@@ -679,8 +682,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
 
         }
-        long elapsed = System.currentTimeMillis() - start;
-        System.out.println(">>>>>>> It takes "+elapsed+"ms to restore.");
+
+        // FIXME:
         return true;
     }
 
