@@ -454,12 +454,13 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 assert (cleared);
                 if (container.isEmpty()) {
                     // If service list is empty, we need to clean up the container state on this node
-
+                    long stopTime = System.currentTimeMillis();
                     // Stop the container
                     List<String> stopCommand = getStopCommand(container.getName());
                     boolean stopped = run(stopCommand);
                     // container must be stopped successfully
                     assert (stopped);
+                    System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis() - stopTime)+"ms to stop app "+container.getName());
 
                     // Remove the container's checkpoint
                     /*
@@ -495,6 +496,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     }
 
                     String dest;
+                    long checkpointTime = System.currentTimeMillis();
 
                     if (XDNConfig.volumeCheckpointEnabled){
                         // checkpoint the external volume
@@ -515,10 +517,13 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
                     List<String> unTarCommand = getUntarCommand(filename, dest);
                     assert (run(unTarCommand));
+                    System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-checkpointTime)+"ms to get checkpoint for app "+container.getName());
 
+                    long startTime = System.currentTimeMillis();
                     List<String> startCommand = getStartCommand(appName);
                     assert (run(startCommand));
                     DockerContainer c = containerizedApps.get(appName);
+                    System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-startTime)+"ms to start app "+container.getName());
 
                     updateServiceAndApps(appName, name, c);
 

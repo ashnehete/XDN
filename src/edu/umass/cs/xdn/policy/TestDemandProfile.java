@@ -211,7 +211,7 @@ public class TestDemandProfile extends AbstractDemandProfile {
 		} catch (JSONException je) {
 			je.printStackTrace();
 		}
-		System.out.println("Prepare a demand profile:"+json.toString());
+		// System.out.println(">>>>> Prepare a demand profile:"+json.toString());
 		return json;
 	}
 
