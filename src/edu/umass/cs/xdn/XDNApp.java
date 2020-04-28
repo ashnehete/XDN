@@ -397,7 +397,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         long start = System.currentTimeMillis();
         // app name is the name before xdnServiceDecimal "_xdn_"
         String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
-        log.fine("Name: "+name+"\nAppName: "+appName+"\nState: "+state);
+        log.info(">>>>>> Restore request: { Name: "+name+"\nAppName: "+appName+"\nState: "+state+"}");
 
         // handle XDN service restore
         if (name.equals(PaxosConfig.getDefaultServiceName())){
@@ -435,7 +435,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
         }
 
-        log.fine(">>>>>>>> XDN containerized app to restore:"+name);
+        log.info(">>>>>>>> XDN containerized app to restore:"+name);
 
         // Handle serviceName (name) restore
         if (serviceNames.containsKey(name)){
