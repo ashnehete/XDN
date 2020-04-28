@@ -7,7 +7,6 @@ import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
 import edu.umass.cs.reconfiguration.ReconfigurableAppClientAsync;
 import edu.umass.cs.reconfiguration.examples.AppRequest;
-import edu.umass.cs.reconfiguration.examples.noopsimple.NoopApp;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.reconfigurationutils.RequestParseException;
@@ -25,7 +24,6 @@ import java.util.Set;
  * This class a temporary class used by XDNHttpServer to interact with
  * XDNAgentApp (a GigaPaxos App).
  */
-@Deprecated
 public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implements AppRequestParserBytes {
 
     static int received = 0;

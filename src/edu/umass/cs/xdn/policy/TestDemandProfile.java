@@ -252,6 +252,7 @@ public class TestDemandProfile extends AbstractDemandProfile {
 
 		Set<String> retval = new HashSet<>();
 
+		/*
 		if (curActives.contains(edge_node)){
 			if (!nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
 				// If srcIpAddr is not the same as edge node address, then AR0, AR1 => AR0
@@ -272,6 +273,29 @@ public class TestDemandProfile extends AbstractDemandProfile {
 				retval = curActives;
 			}
 		}
+		*/
+
+		if (curActives.contains(edge_node)){
+			if (!nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
+				// If srcIpAddr is not the same as edge node address, then AR0, AR1 => AR0, or AR1 => AR0
+				for (String nodeID : nodeMap.keySet()){
+					if (!nodeID.equals(edge_node) )
+						retval.add(nodeID);
+				}
+			} else {
+				// no change
+				retval = null;
+			}
+		} else {
+			if ( nodeMap.containsKey(edge_node) && nodeMap.get(edge_node).getAddress().toString().contains(srcIpAddr)){
+				// If srcIPaddr is the same as edge node address, then AR0 => AR1
+				retval.add(edge_node);
+			} else {
+				// no change
+				retval = null;
+			}
+		}
+
 
 		System.out.println(">>>>>>>>>> To configure the service to the set of actives:"+retval+"\n");
 		return retval;
