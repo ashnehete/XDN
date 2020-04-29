@@ -93,9 +93,8 @@ public class ReconfigureExpClient {
                     Thread.sleep(interval - elapsed);
                 // System.out.println(elapsed);
             } else {
-
+                System.out.println(i+",0");
                 Thread.sleep(interval);
-                // System.out.println("0");
             }
 
             if (i%30 == 0)

@@ -448,7 +448,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             if ( state == null ){
                 // FIXME: do we need to remove name ?
-                // serviceNames.remove(name);
+                serviceNames.remove(name);
                 // remove pointer from service name list in containerizedApps, must succeed
                 boolean cleared = container.removeServiceName(name);
                 // serviceName must be successfully removed from service list in container class
