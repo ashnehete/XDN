@@ -300,7 +300,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 // assert (run(tarCommand));
                 run(tarCommand);
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
-                String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+                // FIXME: hack for reconfiguration experiment
+                String chkp = cp.getAbsolutePath(); // LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 log.fine("Checkpoint: Volume " + chkp);
                 return chkp;
             } else {
@@ -514,14 +515,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         dest = XDNConfig.defaultCheckpointDir + containerizedApps.get(appName).getID() + "/checkpoints/";
                     }
 
-
+                    // FIXME: hack for reconfiguration experiment
+                    /*
                     String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
                     File cp = new File(filename);
                     LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
                     List<String> unTarCommand = getUntarCommand(filename, dest);
                     assert (run(unTarCommand));
                     System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-checkpointTime)+"ms to get checkpoint for app "+container.getName());
-                    
+                    */
 
                     long startTime = System.currentTimeMillis();
                     List<String> startCommand = getStartCommand(appName);
@@ -684,7 +686,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         }
 
-        // FIXME:
+        // FIXME: return true here?
         return true;
     }
 
