@@ -1,5 +1,6 @@
 package test;
 
+import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
@@ -59,7 +60,7 @@ public class ReconfigureExpClient {
 
             if (ready) {
                 final long start = System.currentTimeMillis();
-                final int index = i;
+
                 sent++;
                 try {
                     // coordinate request through GigaPaxos
@@ -67,20 +68,21 @@ public class ReconfigureExpClient {
                         client.sendRequest(ReplicableClientRequest.wrap(req),
                                 // PaxosConfig.getActives().get(node),
                                 addr,
-                                (RequestCallback) response -> {
-                                    // result.put(index, (System.currentTimeMillis() - start));
-                                    System.out.println(index+","+(System.currentTimeMillis() - start));
-                                    incr();
-                                }
+                                timeout
+//                                (RequestCallback) response -> {
+//                                    // result.put(index, (System.currentTimeMillis() - start));
+//                                    System.out.println(index+","+(System.currentTimeMillis() - start));
+//                                    incr();
+//                                }
                         );
                     else
                         client.sendRequest(ReplicableClientRequest.wrap(req),
-                                // PaxosConfig.getActives().get(node),
-                                (RequestCallback) response -> {
-                                    // result.put(index, (System.currentTimeMillis() - start));
-                                    System.out.println(index+","+(System.currentTimeMillis() - start));
-                                    incr();
-                                }
+                                timeout
+//                                (RequestCallback) response -> {
+//                                    // result.put(index, (System.currentTimeMillis() - start));
+//                                    System.out.println(index+","+(System.currentTimeMillis() - start));
+//                                    incr();
+//                                }
 
                         );
 
@@ -89,23 +91,18 @@ public class ReconfigureExpClient {
                 }
 
                 long elapsed = System.currentTimeMillis() - start;
+                /*
                 if (interval > elapsed)
                     Thread.sleep(interval - elapsed);
-                // System.out.println(elapsed);
-            } else {
-                System.out.println(i+",0");
-                Thread.sleep(interval);
-            }
+                    */
+                System.out.println(elapsed);
+            } 
 
-            if (i%30 == 0)
-                ready = !ready;
+//            if (i%30 == 0)
+//                ready = !ready;
 
         }
 
-        while(received < sent){
-            System.out.println("Received:"+ received);
-            Thread.sleep(500);
-        }
         client.close();
 
     }

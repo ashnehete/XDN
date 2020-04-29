@@ -522,7 +522,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     assert (run(unTarCommand));
                     System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-checkpointTime)+"ms to get checkpoint for app "+container.getName());
                      */
-                    
+
                     long startTime = System.currentTimeMillis();
                     List<String> startCommand = getStartCommand(appName);
                     assert (run(startCommand));
