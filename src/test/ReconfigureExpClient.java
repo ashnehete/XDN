@@ -1,6 +1,5 @@
 package test;
 
-import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
@@ -10,8 +9,6 @@ import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -19,14 +16,14 @@ import java.util.Random;
  */
 public class ReconfigureExpClient {
     final static long interval = 1000;
-    // final static long timeout = 1000;
+    final static long timeout = 1000;
 
     static int received = 0;
     static synchronized void incr(){
         received++;
     }
 
-    static Map<Integer, Long> result = new HashMap<>();
+    // static Map<Integer, Long> result = new HashMap<>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -70,26 +67,21 @@ public class ReconfigureExpClient {
                         client.sendRequest(ReplicableClientRequest.wrap(req),
                                 // PaxosConfig.getActives().get(node),
                                 addr,
-                                new RequestCallback() {
-                                    @Override
-                                    public void handleResponse(Request response) {
-                                        result.put(index, (System.currentTimeMillis() - start));
-                                        System.out.println((System.currentTimeMillis() - start));
-                                        incr();
-                                    }
+                                (RequestCallback) response -> {
+                                    // result.put(index, (System.currentTimeMillis() - start));
+                                    System.out.println(index+","+(System.currentTimeMillis() - start));
+                                    incr();
                                 }
                         );
                     else
                         client.sendRequest(ReplicableClientRequest.wrap(req),
                                 // PaxosConfig.getActives().get(node),
-                                new RequestCallback() {
-                                    @Override
-                                    public void handleResponse(Request response) {
-                                        result.put(index, (System.currentTimeMillis() - start));
-                                        System.out.println((System.currentTimeMillis() - start));
-                                        incr();
-                                    }
+                                (RequestCallback) response -> {
+                                    // result.put(index, (System.currentTimeMillis() - start));
+                                    System.out.println(index+","+(System.currentTimeMillis() - start));
+                                    incr();
                                 }
+
                         );
 
                 } catch (Exception e) {
@@ -106,8 +98,8 @@ public class ReconfigureExpClient {
                 // System.out.println("0");
             }
 
-//            if (i%30 == 0)
-//                ready = !ready;
+            if (i%30 == 0)
+                ready = !ready;
 
         }
 
