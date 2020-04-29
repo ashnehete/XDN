@@ -448,7 +448,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             if ( state == null ){
                 // FIXME: do we need to remove name ?
-                serviceNames.remove(name);
+                // serviceNames.remove(name);
                 // remove pointer from service name list in containerizedApps, must succeed
                 boolean cleared = container.removeServiceName(name);
                 // serviceName must be successfully removed from service list in container class
@@ -514,13 +514,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         dest = XDNConfig.defaultCheckpointDir + containerizedApps.get(appName).getID() + "/checkpoints/";
                     }
 
+                    /*
                     String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
                     File cp = new File(filename);
                     LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
                     List<String> unTarCommand = getUntarCommand(filename, dest);
                     assert (run(unTarCommand));
                     System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-checkpointTime)+"ms to get checkpoint for app "+container.getName());
-
+                     */
+                    
                     long startTime = System.currentTimeMillis();
                     List<String> startCommand = getStartCommand(appName);
                     assert (run(startCommand));
