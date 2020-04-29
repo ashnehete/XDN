@@ -67,8 +67,8 @@ public class ReconfigureExpClient {
                     if (addr != null)
                         client.sendRequest(ReplicableClientRequest.wrap(req),
                                 // PaxosConfig.getActives().get(node),
-                                addr,
-                                timeout
+                                addr
+                                //, timeout
 //                                (RequestCallback) response -> {
 //                                    // result.put(index, (System.currentTimeMillis() - start));
 //                                    System.out.println(index+","+(System.currentTimeMillis() - start));
@@ -76,8 +76,8 @@ public class ReconfigureExpClient {
 //                                }
                         );
                     else
-                        client.sendRequest(ReplicableClientRequest.wrap(req),
-                                timeout
+                        client.sendRequest(ReplicableClientRequest.wrap(req)
+                                //,timeout
 //                                (RequestCallback) response -> {
 //                                    // result.put(index, (System.currentTimeMillis() - start));
 //                                    System.out.println(index+","+(System.currentTimeMillis() - start));
@@ -96,7 +96,7 @@ public class ReconfigureExpClient {
                     Thread.sleep(interval - elapsed);
                     */
                 System.out.println(elapsed);
-            } 
+            }
 
 //            if (i%30 == 0)
 //                ready = !ready;
