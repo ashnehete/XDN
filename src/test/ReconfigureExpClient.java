@@ -3,10 +3,13 @@ package test;
 import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
+import edu.umass.cs.gigapaxos.interfaces.RequestFuture;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
+import edu.umass.cs.reconfiguration.ReconfigurableAppClientAsync;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.interfaces.ReconfigurableRequest;
+import edu.umass.cs.reconfiguration.reconfigurationpackets.ClientReconfigurationPacket;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.RequestActiveReplicas;
 import edu.umass.cs.xdn.XDNConfig;
@@ -15,6 +18,9 @@ import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * java -ea -cp jar/XDN-1.0.jar -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/xdn.properties test.ReconfigurableServices
@@ -30,16 +36,16 @@ public class ReconfigureExpClient {
 
     static XDNAgentClient client;
 
-    private void requestActiveReplicas(String serviceName) throws IOException {
+    private String requestActiveReplicas(String serviceName) throws IOException, ReconfigurableAppClientAsync.ReconfigurationException, InterruptedException, ExecutionException, TimeoutException {
         RequestActiveReplicas r = new RequestActiveReplicas(serviceName);
-        client.sendRequest(r, request -> {
-        });
+        RequestFuture<ClientReconfigurationPacket> future = client.sendRequest(r);
+        ClientReconfigurationPacket result = (ClientReconfigurationPacket) future.get(1000, TimeUnit.MILLISECONDS);
+        return result.getResponseMessage();
     }
 
     protected static class RequestRunnable implements Runnable {
 
         RequestRunnable(){
-
         }
 
         @Override
@@ -62,7 +68,7 @@ public class ReconfigureExpClient {
 
         String testServiceName = CreateServices.imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
 
-        int total = 100;
+        int total = 10;
 
         int id = (new Random()).nextInt();
 
@@ -84,39 +90,39 @@ public class ReconfigureExpClient {
                 final long start = System.currentTimeMillis();
 
                 sent++;
-                try {
-                    // coordinate request through GigaPaxos
-                    if (addr != null)
-                        client.sendRequest(ReplicableClientRequest.wrap(req),
-                                // PaxosConfig.getActives().get(node),
-                                addr
-                                //, timeout
+
+                Request result = null;
+
+                // coordinate request through GigaPaxos
+                if (addr != null)
+                    result = client.sendRequest(ReplicableClientRequest.wrap(req),
+                            addr
+                            , timeout
 //                                (RequestCallback) response -> {
 //                                    // result.put(index, (System.currentTimeMillis() - start));
 //                                    System.out.println(index+","+(System.currentTimeMillis() - start));
 //                                    incr();
 //                                }
-                        );
-                    else
-                        client.sendRequest(ReplicableClientRequest.wrap(req)
-                                //,timeout
+                    );
+                else
+                    result = client.sendRequest(ReplicableClientRequest.wrap(req)
+                            ,timeout
 //                                (RequestCallback) response -> {
 //                                    // result.put(index, (System.currentTimeMillis() - start));
 //                                    System.out.println(index+","+(System.currentTimeMillis() - start));
 //                                    incr();
 //                                }
 
-                        );
+                    );
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
+                System.out.println(result);
 
                 long elapsed = System.currentTimeMillis() - start;
-                /*
+
                 if (interval > elapsed)
                     Thread.sleep(interval - elapsed);
-                    */
+
                 System.out.println(elapsed);
             }
 
