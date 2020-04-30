@@ -35,8 +35,8 @@ public class CreateServices {
         System.out.println("InitGroup:"+initGroup);
         XDNAgentClient client = new XDNAgentClient();
 
-        JSONArray arr = new JSONArray();
-        arr.put("");
+//        JSONArray arr = new JSONArray();
+//        arr.put("");
 
         JSONObject json = new JSONObject();
         json.put(DockerKeys.NAME.toString(), imageName);

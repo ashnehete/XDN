@@ -1,10 +1,14 @@
 package test;
 
 import edu.umass.cs.gigapaxos.PaxosConfig;
+import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
+import edu.umass.cs.nio.interfaces.IntegerPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
+import edu.umass.cs.reconfiguration.interfaces.ReconfigurableRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
+import edu.umass.cs.reconfiguration.reconfigurationpackets.RequestActiveReplicas;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 
@@ -24,7 +28,25 @@ public class ReconfigureExpClient {
         received++;
     }
 
-    // static Map<Integer, Long> result = new HashMap<>();
+    static XDNAgentClient client;
+
+    private void requestActiveReplicas(String serviceName) throws IOException {
+        RequestActiveReplicas r = new RequestActiveReplicas(serviceName);
+        client.sendRequest(r, request -> {
+        });
+    }
+
+    protected static class RequestRunnable implements Runnable {
+
+        RequestRunnable(){
+
+        }
+
+        @Override
+        public void run() {
+
+        }
+    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -36,7 +58,7 @@ public class ReconfigureExpClient {
             addr = new InetSocketAddress(ip, 2100);
         }
 
-        XDNAgentClient client = new XDNAgentClient();
+        client = new XDNAgentClient();
 
         String testServiceName = CreateServices.imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
 
@@ -45,7 +67,7 @@ public class ReconfigureExpClient {
         int id = (new Random()).nextInt();
 
         int sent = 0;
-
+        
         // System.out.println("Start testing... ");
         for (int i=0; i<total; i++) {
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
