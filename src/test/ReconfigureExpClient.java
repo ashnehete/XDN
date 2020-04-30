@@ -68,13 +68,12 @@ public class ReconfigureExpClient {
 
         String testServiceName = CreateServices.imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
 
-        int total = 10;
+        int total = 120;
 
         int id = (new Random()).nextInt();
 
         int sent = 0;
-        
-        // System.out.println("Start testing... ");
+
         for (int i=0; i<total; i++) {
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
                     testServiceName,
@@ -115,14 +114,14 @@ public class ReconfigureExpClient {
 
                     );
 
+                // System.out.println(result);
 
-                System.out.println(result);
                 if (result == null)
                 {
                     // update service list
                     try {
                         ClientReconfigurationPacket packet = requestActiveReplicas(testServiceName);
-                        System.out.println(">>>>>>>>>>"+packet);
+                        // System.out.println(">>>>>>>>>>"+packet);
                     } catch (ReconfigurableAppClientAsync.ReconfigurationException | ExecutionException | TimeoutException e) {
                         e.printStackTrace();
                     }
@@ -136,8 +135,8 @@ public class ReconfigureExpClient {
                 System.out.println(elapsed);
             }
 
-//            if (i%30 == 0)
-//                ready = !ready;
+            if (i%30 == 0)
+                ready = !ready;
 
         }
 
