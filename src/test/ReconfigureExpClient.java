@@ -36,11 +36,11 @@ public class ReconfigureExpClient {
 
     static XDNAgentClient client;
 
-    private String requestActiveReplicas(String serviceName) throws IOException, ReconfigurableAppClientAsync.ReconfigurationException, InterruptedException, ExecutionException, TimeoutException {
+    private static ClientReconfigurationPacket requestActiveReplicas(String serviceName) throws IOException, ReconfigurableAppClientAsync.ReconfigurationException, InterruptedException, ExecutionException, TimeoutException {
         RequestActiveReplicas r = new RequestActiveReplicas(serviceName);
         RequestFuture<ClientReconfigurationPacket> future = client.sendRequest(r);
         ClientReconfigurationPacket result = (ClientReconfigurationPacket) future.get(1000, TimeUnit.MILLISECONDS);
-        return result.getResponseMessage();
+        return result;
     }
 
     protected static class RequestRunnable implements Runnable {
@@ -117,6 +117,16 @@ public class ReconfigureExpClient {
 
 
                 System.out.println(result);
+                if (result == null)
+                {
+                    // update service list
+                    try {
+                        ClientReconfigurationPacket packet = requestActiveReplicas(testServiceName);
+                        System.out.println(">>>>>>>>>>"+packet);
+                    } catch (ReconfigurableAppClientAsync.ReconfigurationException | ExecutionException | TimeoutException e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 long elapsed = System.currentTimeMillis() - start;
 
