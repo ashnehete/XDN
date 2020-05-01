@@ -1,13 +1,79 @@
 package edu.umass.cs.xdn;
 
-import edu.umass.cs.gigapaxos.PaxosConfig;
-
+import java.io.*;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 public class XDNConfig {
 
-    public static Logger log = Logger.getLogger(XDNConfig.class.getName());
+    public static void load() {
+        String filename = defaultConfigFileName;
+        if (System.getProperty(appConfigName)!=null) {
+            filename = System.getProperty(appConfigName);
+        }
 
+        File f = new File(filename);
+        if (!f.exists()) {
+            System.out.println("Config file "+filename+" does not exist");
+            System.exit(0);
+        }
+
+        try {
+            InputStream input = new FileInputStream(filename);
+            prop.load(input);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Properties prop = new Properties();
+
+    static{
+        load();
+    }
+
+    public enum XC {
+        /**
+         * a name that is unique for an app, i.e., IMAGE_NAME
+         */
+        NAME("Umass"),
+        /**
+         *
+         */
+        IMAGE_NAME("xdn-demo-app"),
+
+        /**
+         * URL to fetch docker image from DockerHub
+         */
+        IMAGE_URL("oversky710/xdn-demo-app"),
+        /**
+         * Docker port number
+         */
+        DOCKER_PORT(3000),
+        /**
+         * Value of a request to send to XDN
+         */
+        VALUE("1"),
+        /**
+         *
+         */
+        COORD(true),
+        /**
+         *
+         */
+        NUM_REQ(1),
+        ;
+
+        final Object defaultValue;
+
+        XC(Object defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+    }
+
+
+    public static Logger log = Logger.getLogger(XDNConfig.class.getName());
     /**
      *
      */
@@ -21,7 +87,7 @@ public class XDNConfig {
     /**
      *
      */
-    public static String checkpointDir =  "checkpoints/"; // customized location does not work: "/users/oversky/checkpoint/";
+    public static String checkpointDir =  "checkpoints/";
 
     /**
      * Docker's default checkpoint location
@@ -52,4 +118,31 @@ public class XDNConfig {
      * Used to test overhead with noop for XDNApp
      */
     public static boolean noopEnabled = false;
+
+    final public static String appConfigName = "appConfig";
+
+    final public static String defaultConfigFileName = "conf/app/service.properties";
+
+    public static String generateServiceName(String imageName, String name){
+        return imageName+xdnServiceDecimal+name;
+    }
+
+    public static void main(String[] args) throws IOException {
+        String filename = defaultConfigFileName;
+        if (System.getProperty(appConfigName)!=null) {
+            filename = System.getProperty(appConfigName);
+        }
+
+        File f = new File(filename);
+        if (!f.exists()) {
+            System.out.println("Config file "+filename+" does not exist");
+            System.exit(0);
+        }
+
+        InputStream input = new FileInputStream(filename);
+
+        Properties prop = new Properties();
+        prop.load(input);
+        System.out.println(prop);
+    }
 }
