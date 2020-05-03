@@ -19,7 +19,7 @@ import java.util.Set;
 public class CreateServices {
 
     static int received = 0;
-    final static String imageName = "xdn-test-app"; //"xdn-demo-app";
+    final static String imageName = "xdn-demo-app"; //"xdn-demo-app";
 
     public static void main(String[] args) throws IOException, InterruptedException, JSONException {
 
@@ -47,7 +47,7 @@ public class CreateServices {
 
         final int sent = 1;
 
-        testServiceName = imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
+        testServiceName = XDNConfig.generateServiceName(imageName, "Alvin"); // imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
 
         //client.sendRequest(new CreateServiceName(testServiceName,
         //                json.toString(), initGroup),
