@@ -769,6 +769,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 command.add(e);
             }
         }
+        command.add("-e");
+        // FIXME: the gateway may differ across various hosts
+        command.add("HOST=172.17.0.1");
 
         command.add("-d");
         command.add(url);
