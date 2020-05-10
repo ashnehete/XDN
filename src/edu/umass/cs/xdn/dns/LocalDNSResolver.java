@@ -13,7 +13,6 @@ import io.netty.handler.codec.dns.*;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 /**
  * This is  a local DNS (LDNS) resolver running on the edge server as a part of XDN agent.
@@ -28,12 +27,10 @@ import java.util.ArrayList;
  */
 public class LocalDNSResolver {
 
-    static private XDNApp app;
     // set default TTL to 10s
     final static int TTL = 10;
 
     public LocalDNSResolver(XDNApp app) {
-        this.app = app;
 
         final NioEventLoopGroup group = new NioEventLoopGroup();
         try {
@@ -43,8 +40,8 @@ public class LocalDNSResolver {
                         @Override
                         protected void initChannel(NioDatagramChannel nioDatagramChannel) throws Exception {
                             nioDatagramChannel.pipeline().addLast(new DatagramDnsQueryDecoder());
+                            nioDatagramChannel.pipeline().addLast(new DnsHandler(app));
                             nioDatagramChannel.pipeline().addLast(new DatagramDnsResponseEncoder());
-                            nioDatagramChannel.pipeline().addLast(new DnsHandler());
                         }
                     }).option(ChannelOption.SO_BROADCAST, true);
 
@@ -59,6 +56,11 @@ public class LocalDNSResolver {
 
     @ChannelHandler.Sharable
     static class DnsHandler extends SimpleChannelInboundHandler<DatagramDnsQuery> {
+
+        private XDNApp app;
+        DnsHandler(XDNApp app){
+            this.app = app;
+        }
 
         private byte[] convertIpStringToByteArray(String ip) throws UnknownHostException {
             return InetAddress.getByName(ip).getAddress();
@@ -111,7 +113,7 @@ public class LocalDNSResolver {
         }
 
         @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             cause.printStackTrace();
         }
     }

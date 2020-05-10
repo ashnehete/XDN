@@ -6,7 +6,6 @@ import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.docker.DockerKeys;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 

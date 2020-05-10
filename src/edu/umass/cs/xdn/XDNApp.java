@@ -88,17 +88,31 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     public XDNApp() {
         httpClient = new OkHttpClient();
 
-        gatewayIPAddress = "localhost";
+        gatewayIPAddress = "172.17.0.1";
         if (System.getProperty("gateway") != null)
-            // TODO: we can also get this from docker command directly
             gatewayIPAddress = System.getProperty("gateway");
+
+        try {
+            ProcessResult r= ProcessRuntime.executeCommand(getBridgeInspectCommand());
+            // a valid result is returned
+            if(r.getRetCode() == 0) {
+                JSONArray arr = new JSONArray(r.getResult());
+                // get IP address management info from the result
+                JSONObject json = arr.getJSONObject(0).getJSONObject("IPAM");
+                String ipAddr = json.getJSONArray("Config").getJSONObject(0).getString("Gateway");
+                if (ipAddr != null)
+                    gatewayIPAddress = ipAddr;
+            }
+        } catch (IOException | InterruptedException | JSONException e) {
+            e.printStackTrace();
+        }
 
         containerizedApps = new ConcurrentHashMap<>();
         // avoid throwing an exception when bootup
         containerizedApps.put(PaxosConfig.getDefaultServiceName(),
                 new DockerContainer(PaxosConfig.getDefaultServiceName(),
                         null, -1, null));
-        // FIXME change HashSet to a sorted list to track resource usage
+        // FIXME: change HashSet to a sorted list to track resource usage
         runningApps = new HashSet<>();
 
         serviceNames = new ConcurrentHashMap<>();
@@ -448,7 +462,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             assert (container != null);
 
             if ( state == null ){
-                // FIXME: do we need to remove name ?
+                // we do not need to remove name from serviceNames table
                 // serviceNames.remove(name);
                 // remove pointer from service name list in containerizedApps, must succeed
                 boolean cleared = container.removeServiceName(name);
@@ -719,7 +733,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     private boolean selectAndStopContainer() {
         // select a container to stop
         Iterator<String> iter = runningApps.iterator();
-        // TODO: select a proper running container (rather than the first one) and stop it
+        // TODO: select a running container based on the scheduling policy (rather than the first one) and stop it
         if (iter.hasNext()){
             DockerContainer container = containerizedApps.get(iter.next());
             List<String> stopCommand = getStopCommand(container.getName());
@@ -728,6 +742,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return false;
     }
 
+    /* ========================= docker command ============================ */
     /**
      * Inspect a docker to get the information such as ip address
      */
@@ -736,6 +751,18 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         command.add("docker");
         command.add("inspect");
         command.add(name);
+        return command;
+    }
+
+    private List<String> getBridgeInspectCommand() {
+        List<String> command = new ArrayList<>();
+
+        command.add("docker");
+        command.add("network");
+        command.add("inspect");
+        // inspect the virtual bridge
+        command.add("bridge");
+
         return command;
     }
 
@@ -770,8 +797,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
         }
         command.add("-e");
-        // FIXME: the gateway may differ across various hosts
-        command.add("HOST=172.17.0.1");
+        command.add("HOST="+gatewayIPAddress);
 
         command.add("-d");
         command.add(url);
@@ -868,6 +894,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         command.add(name);
         return command;
     }
+
+    /* ================== End of docker command ==================== */
 
     private List<String> getTar() {
         List<String> command = new ArrayList<>();

@@ -62,6 +62,10 @@ public class XDNConfig {
          *
          */
         NUM_REQ(1),
+        /**
+         *
+         */
+        EDGE_ADDR("127.0.0.1"),
         ;
 
         final Object defaultValue;
