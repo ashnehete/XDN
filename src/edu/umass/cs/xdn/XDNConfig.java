@@ -146,8 +146,8 @@ public class XDNConfig {
      */
     public static String[] extractNamesFromServiceName(String serviceName){
         String[] result = new String[]{null, null};
-        serviceName.replace(xdnServiceDecimal+xdnDomainName, "");
-        String[] subs = serviceName.split(xdnServiceDecimal);
+        serviceName = serviceName.replace(xdnServiceDecimal+xdnDomainName, "");
+        String[] subs = serviceName.split(getEscapeDecimal(xdnServiceDecimal));
         // FIXME: imageName or name could be null
         // name
         result[0] = subs[0];
@@ -155,6 +155,10 @@ public class XDNConfig {
         result[1] = subs[1];
 
         return result;
+    }
+
+    private static String getEscapeDecimal(String decimal){
+        return "\\"+decimal;
     }
 
     public static void main(String[] args) throws IOException {

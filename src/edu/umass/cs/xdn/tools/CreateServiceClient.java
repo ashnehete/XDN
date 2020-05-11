@@ -19,7 +19,7 @@ public class CreateServiceClient {
     String imageUrl;
     int port;
 
-    final private static long timeout = 1000;
+    final private static long timeout = 10000;
 
     XDNAgentClient client;
 
