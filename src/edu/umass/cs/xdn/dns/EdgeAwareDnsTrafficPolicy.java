@@ -12,11 +12,11 @@ import java.util.Set;
 /**
  * This policy is used for a blind test demo only
  */
-public class BlindTestDnsTrafficPolicy implements DnsTrafficPolicy {
+public class EdgeAwareDnsTrafficPolicy implements DnsTrafficPolicy {
 
     private static String sourceIP;
 
-    public BlindTestDnsTrafficPolicy(){
+    public EdgeAwareDnsTrafficPolicy(){
         sourceIP = XDNConfig.prop.getProperty(XDNConfig.XC.EDGE_ADDR.toString());
     }
 
