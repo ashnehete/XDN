@@ -23,7 +23,7 @@ public class ExecuteServices {
         XDNAgentClient client = new XDNAgentClient();
         String testServiceName = XDNConfig.generateServiceName(CreateServices.imageName, "Alvin");
 
-        Integer addValue = 1;
+        int addValue = 1;
         int total = 1;
         String node = null;
         if (System.getProperty("node")!=null) {
@@ -43,7 +43,7 @@ public class ExecuteServices {
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
                     testServiceName,
                     id++,
-                    addValue.toString(),
+                    Integer.toString(addValue),
                     true,
                     false,
                     0

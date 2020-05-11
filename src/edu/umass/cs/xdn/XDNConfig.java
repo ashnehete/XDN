@@ -103,7 +103,12 @@ public class XDNConfig {
     /**
      *
      */
-    public static String xdnServiceDecimal = "_xdn_";
+    private static String xdnServiceDecimal = ".";
+
+    /**
+     * form service in a DNS domain name style to be compatible with DNS query
+     */
+    public static String xdnDomainName = "xdnbest.xyz";
 
     /**
      * If true, XDN will fetch docker checkpoint directly from a remote node.
@@ -127,8 +132,29 @@ public class XDNConfig {
 
     final public static String defaultConfigFileName = "conf/app/service.properties";
 
+
     public static String generateServiceName(String imageName, String name){
-        return imageName+xdnServiceDecimal+name;
+        // FIXME: imageName or name could be null
+        return name+xdnServiceDecimal+imageName+xdnServiceDecimal+xdnDomainName;
+        // return imageName+xdnServiceDecimal+name;
+    }
+
+    /**
+     *
+     * @param serviceName
+     * @return a String array:
+     */
+    public static String[] extractNamesFromServiceName(String serviceName){
+        String[] result = new String[]{null, null};
+        serviceName.replace(xdnServiceDecimal+xdnDomainName, "");
+        String[] subs = serviceName.split(xdnServiceDecimal);
+        // FIXME: imageName or name could be null
+        // name
+        result[0] = subs[0];
+        // imageName
+        result[1] = subs[1];
+
+        return result;
     }
 
     public static void main(String[] args) throws IOException {

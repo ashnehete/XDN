@@ -5,7 +5,6 @@ import edu.umass.cs.gigapaxos.interfaces.RequestFuture;
 import edu.umass.cs.reconfiguration.ReconfigurableAppClientAsync;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
-import edu.umass.cs.reconfiguration.interfaces.ReconfigurableRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ClientReconfigurationPacket;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.RequestActiveReplicas;
@@ -63,7 +62,7 @@ public class ReconfigureExpClient {
 
         client = new XDNAgentClient();
 
-        String testServiceName = CreateServices.imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
+        String testServiceName = XDNConfig.generateServiceName( CreateServices.imageName, "Alvin" );
 
         int total = 120;
 

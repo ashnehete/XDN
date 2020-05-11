@@ -126,12 +126,13 @@ public class DockerCommandUnitTest {
 
     public static void main(String[] args) throws JSONException, IOException, InterruptedException {
 
+        String appName = "xdn-demo-app";
         JSONObject json = new JSONObject();
-        json.put(DockerKeys.NAME.toString(), "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin");
+        json.put(DockerKeys.NAME.toString(), appName);
         json.put(DockerKeys.IMAGE_URL.toString(), "oversky710/xdn-demo-app");
         json.put(DockerKeys.PORT.toString(), 3000);
 
-        restore(json.toString(), "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin", "xdn-demo-app");
+        restore(json.toString(), XDNConfig.generateServiceName(appName,"Alvin"), appName);
 
     }
 }

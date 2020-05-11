@@ -13,7 +13,7 @@ public class DeleteServices {
     public static void main(String[] args) throws IOException, InterruptedException {
 
         XDNAgentClient client = new XDNAgentClient();
-        String testServiceName = "xdn-demo-app"+ XDNConfig.xdnServiceDecimal+"Alvin";
+        String testServiceName = XDNConfig.generateServiceName("xdn-demo-app", "Alvin");
 
         final int sent = 1;
 
