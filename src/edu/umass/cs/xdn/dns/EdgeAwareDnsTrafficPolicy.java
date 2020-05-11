@@ -14,15 +14,11 @@ import java.util.Set;
  */
 public class EdgeAwareDnsTrafficPolicy implements DnsTrafficPolicy {
 
-    private static String sourceIP;
-
-    public EdgeAwareDnsTrafficPolicy(){
-        sourceIP = XDNConfig.prop.getProperty(XDNConfig.XC.EDGE_ADDR.toString());
-    }
+    private static String sourceIP = XDNConfig.prop.getProperty(XDNConfig.XC.EDGE_ADDR.toString());
 
     @Override
     public Set<InetAddress> getAddresses(Set<InetAddress> addresses, InetAddress source) {
-        Set<InetAddress> result = new HashSet<InetAddress>();
+        Set<InetAddress> result = new HashSet<>();
         // convert the set to a list
         List<InetAddress> targetList = new ArrayList<>(addresses);
 
