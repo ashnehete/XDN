@@ -301,11 +301,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             return xdnState.toString();
         }
 
-
         // Now let's handle app state and user state event
         if (XDNConfig.largeCheckPointerEnabled) {
             String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
-            String userName = nameResult[0];
+            // String userName = nameResult[0];
             String appName = nameResult[1];
 
             if (XDNConfig.volumeCheckpointEnabled) {
@@ -411,10 +410,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     public boolean restore(String name, String state) {
 
         // String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
-
-        String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
-        String userName = nameResult[0];
-        String appName = nameResult[1];
+        String appName = name;
+        if (name.contains(XDNConfig.xdnDomainName)){
+            String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
+            // String userName = nameResult[0];
+            appName = nameResult[1];
+        }
         log.info(">>>>>> Restore request: { Name: "+name+"\nAppName: "+appName+"\nState: "+state+"}");
 
         // handle XDN service restore
