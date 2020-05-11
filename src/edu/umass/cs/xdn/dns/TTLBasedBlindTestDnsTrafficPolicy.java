@@ -8,7 +8,7 @@ import java.util.*;
 /**
  *
  */
-public class BlindTestAwareDnsTrafficPolicy implements DnsTrafficPolicy {
+public class TTLBasedBlindTestDnsTrafficPolicy implements DnsTrafficPolicy {
 
     private static long lastQueriedTime = System.currentTimeMillis();
     private static InetAddress lastReturnValue = null;
