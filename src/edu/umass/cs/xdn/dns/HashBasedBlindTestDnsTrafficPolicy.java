@@ -16,8 +16,8 @@ import java.util.Set;
  */
 public class HashBasedBlindTestDnsTrafficPolicy implements DnsTrafficPolicy {
 
-    final private static long defaultIntervalForReturnValue = 10*60*1000;
-    private static long lastQueriedTime = System.currentTimeMillis()/defaultIntervalForReturnValue-1;
+    final private static long DEFAULT_INTERVAL_FOR_RETURN_VALUE = 10*60*1000;
+    private static long lastQueriedTime = System.currentTimeMillis()/ DEFAULT_INTERVAL_FOR_RETURN_VALUE -1;
     private static InetAddress lastReturnValue = null;
 
     static MessageDigest md;
@@ -33,7 +33,7 @@ public class HashBasedBlindTestDnsTrafficPolicy implements DnsTrafficPolicy {
     @Override
     public Set<InetAddress> getAddresses(Set<InetAddress> addresses, InetAddress source) {
         Set<InetAddress> result = new HashSet<>();
-        long now = System.currentTimeMillis()/defaultIntervalForReturnValue; // current time divided by interval
+        long now = System.currentTimeMillis()/ DEFAULT_INTERVAL_FOR_RETURN_VALUE; // current time divided by interval
 
         if (now != lastQueriedTime || lastReturnValue == null) {
             List<InetAddress> targetList = new ArrayList<>(addresses);
