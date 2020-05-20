@@ -1,7 +1,8 @@
 package edu.umass.cs.xdn.tools;
 
+import edu.umass.cs.gigapaxos.interfaces.Request;
+import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.ReconfigurableAppClientAsync;
-import edu.umass.cs.reconfiguration.reconfigurationpackets.ClientReconfigurationPacket;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.CreateServiceName;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
@@ -18,8 +19,9 @@ public class CreateServiceClient {
     String imageName;
     String imageUrl;
     int port;
+    static int received = 0;
 
-    final private static long timeout = 10000;
+    // final private static long timeout = 30000;
 
     XDNAgentClient client;
 
@@ -50,17 +52,28 @@ public class CreateServiceClient {
         client.close();
     }
 
-    private void sendCreateServiceName() throws JSONException, IOException, ReconfigurableAppClientAsync.ReconfigurationException {
+    private void sendCreateServiceName() throws JSONException, IOException, ReconfigurableAppClientAsync.ReconfigurationException, InterruptedException {
+        final int sent = 1;
+
         long createTime = System.currentTimeMillis();
-        ClientReconfigurationPacket packet = client.sendRequest(generateCreateServiceNamePacket(), timeout);
-        System.out.println("Response to create service name ="
-                + (packet.getResponseMessage())
-                + " received in "
-                + (System.currentTimeMillis() - createTime)
-                + "ms");
+        client.sendRequest(generateCreateServiceNamePacket(), new RequestCallback() {
+            final long createTime = System.currentTimeMillis();
+            @Override
+            public void handleResponse(Request response) {
+                System.out.println("Response to create service name ="
+                        + (response)
+                        + " received in "
+                        + (System.currentTimeMillis() - createTime)
+                        + "ms");
+                received += 1;
+            }
+        });
+        while (sent > received) {
+            Thread.sleep(500);
+        }
     }
 
-    public static void main(String[] args) throws IOException, JSONException, ReconfigurableAppClientAsync.ReconfigurationException {
+    public static void main(String[] args) throws IOException, JSONException, ReconfigurableAppClientAsync.ReconfigurationException, InterruptedException {
         CreateServiceClient c = new CreateServiceClient();
         c.sendCreateServiceName();
         c.close();
