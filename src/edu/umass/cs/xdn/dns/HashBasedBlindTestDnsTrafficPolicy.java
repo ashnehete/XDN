@@ -6,17 +6,14 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This policy uses a MD5 deterministic hash to return a random IP address based on the current timestamp
  */
 public class HashBasedBlindTestDnsTrafficPolicy implements DnsTrafficPolicy {
 
-    final private static long DEFAULT_INTERVAL_FOR_RETURN_VALUE = 1*60*1000;
+    final private static long DEFAULT_INTERVAL_FOR_RETURN_VALUE = 60*1000;
     private static long lastQueriedTime = System.currentTimeMillis()/ DEFAULT_INTERVAL_FOR_RETURN_VALUE -1;
     private static InetAddress lastReturnValue = null;
 
@@ -42,13 +39,17 @@ public class HashBasedBlindTestDnsTrafficPolicy implements DnsTrafficPolicy {
             byte[] r = md.digest(b);
             int num = ByteUtils.bytesToLong(r).intValue();
 
-            lastReturnValue = targetList.get(num % targetList.size());
+            lastReturnValue = targetList.get(getIndex(num, targetList.size()));
 
             lastQueriedTime = now;
         }
         result.add(lastReturnValue);
 
         return result;
+    }
+
+    private int getIndex(int num, int mod){
+        return ((num%mod)+mod)%mod;
     }
 
     public static class ByteUtils {
@@ -71,17 +72,21 @@ public class HashBasedBlindTestDnsTrafficPolicy implements DnsTrafficPolicy {
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
         int total = 10;
-        Long now = System.currentTimeMillis()/1000;
-        System.out.println(now);
+        // Long now = System.currentTimeMillis()/1000;
+        Random rand = new Random();
+        int mod = 3;
+
         MessageDigest md = MessageDigest.getInstance("MD5");
 
         for (int i=0; i<total; i++){
+            long now = rand.nextLong();
+            System.out.println(now);
             byte[] b = ByteUtils.longToBytes(now);
             byte[] r = md.digest(b);
             // System.out.println(new String(r));
             long num = ByteUtils.bytesToLong(r);
 
-            System.out.println(num+","+num%2);
+            System.out.println(num+","+((num%mod)+mod)%mod);
         }
 
     }
