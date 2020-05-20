@@ -24,7 +24,8 @@ public class RequestActiveReplicaClient {
 
     public static void main(String[] args) throws IOException, InterruptedException, ExecutionException, TimeoutException, ReconfigurableAppClientAsync.ReconfigurationException {
         client = new XDNAgentClient();
-        ClientReconfigurationPacket result = requestActiveReplicas(XDNConfig.generateServiceName("xdn-demo-app","Alvin"));
+        ClientReconfigurationPacket result = requestActiveReplicas("NoopPaxosApp0");
+                //XDNConfig.generateServiceName("xdn-demo-app","Alvin"));
         System.out.println(result);
         client.close();
     }

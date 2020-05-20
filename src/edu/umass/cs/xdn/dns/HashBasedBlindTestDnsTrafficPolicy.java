@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class HashBasedBlindTestDnsTrafficPolicy implements DnsTrafficPolicy {
 
-    final private static long DEFAULT_INTERVAL_FOR_RETURN_VALUE = 10*60*1000;
+    final private static long DEFAULT_INTERVAL_FOR_RETURN_VALUE = 1*60*1000;
     private static long lastQueriedTime = System.currentTimeMillis()/ DEFAULT_INTERVAL_FOR_RETURN_VALUE -1;
     private static InetAddress lastReturnValue = null;
 
