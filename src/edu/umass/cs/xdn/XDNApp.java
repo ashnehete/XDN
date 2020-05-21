@@ -2,11 +2,13 @@ package edu.umass.cs.xdn;
 
 import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;
+import edu.umass.cs.gigapaxos.interfaces.ClientMessenger;
 import edu.umass.cs.gigapaxos.interfaces.Replicable;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.paxosutil.LargeCheckpointer;
 import edu.umass.cs.nio.JSONPacket;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
+import edu.umass.cs.nio.interfaces.SSLMessenger;
 import edu.umass.cs.reconfiguration.examples.AbstractReconfigurablePaxosApp;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
@@ -38,11 +40,11 @@ import java.util.logging.Logger;
  *
  */
 public class XDNApp extends AbstractReconfigurablePaxosApp<String>
-        implements Replicable, Reconfigurable, AppRequestParserBytes {
+        implements Replicable, Reconfigurable, AppRequestParserBytes, ClientMessenger {
 
     private static final String USER_AGENT = "Mozilla/5.0";
 
-    // private String myID;
+    private String myID;
     private static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 
@@ -801,8 +803,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 command.add(e);
             }
         }
+
         command.add("-e");
         command.add("HOST="+gatewayIPAddress);
+
+        command.add("-e");
+        command.add("HOSTNAME="+myID);
 
         command.add("-d");
         command.add(url);
@@ -966,9 +972,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return new HashSet<>(Arrays.asList(types));
     }
 
+    // only need to set id
+    @Override
+    public void setClientMessenger(SSLMessenger<?, JSONObject> msgr) {
+        this.myID = msgr.getMyID().toString();
+    }
+
     @Override
     public String toString() {
-        return this.getClass().getSimpleName(); //+"("+myID+")";
+        return this.getClass().getSimpleName()+"("+myID+")";
     }
 
     public static void main(String[] args) {
