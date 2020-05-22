@@ -13,7 +13,7 @@ public class RandomDnsTrafficPolicy implements DnsTrafficPolicy {
         Set<InetAddress> result = new HashSet<>();
         List<InetAddress> targetList = new ArrayList<>(addresses);
         result.add(targetList.get(rand.nextInt(targetList.size())));
-        
+
         return result;
     }
 }
