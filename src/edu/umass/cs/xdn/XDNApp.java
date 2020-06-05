@@ -113,7 +113,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         // avoid throwing an exception when bootup
         containerizedApps.put(PaxosConfig.getDefaultServiceName(),
                 new DockerContainer(PaxosConfig.getDefaultServiceName(),
-                        null, -1, null));
+                        null, -1, -1, null, ""));
         // FIXME: change HashSet to a sorted list to track resource usage
         runningApps = new HashSet<>();
 
@@ -619,6 +619,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     String url = json.has(DockerKeys.IMAGE_URL.toString()) ? json.getString(DockerKeys.IMAGE_URL.toString()) : null;
                     JSONArray jEnv = json.has(DockerKeys.ENV.toString()) ? json.getJSONArray(DockerKeys.ENV.toString()) : null;
                     String vol = json.has(DockerKeys.VOL.toString()) ? json.getString(DockerKeys.VOL.toString()) : null;
+                    int exposePort = json.has(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) ? json.getInt(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) : 80;
                     List<String> env = new ArrayList<>();
                     if (jEnv != null) {
                         for (int i = 0; i < jEnv.length(); i++) {
@@ -633,7 +634,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     ProcessRuntime.executeCommand(pullCommand);
 
                     // 3. Boot up the service
-                    List<String> startCommand = getRunCommand(appName, port, env, url, vol);
+                    List<String> startCommand = getRunCommand(appName, port, exposePort, env, url, vol);
                     ProcessResult result = null;
                     try {
                         result = ProcessRuntime.executeCommand(startCommand);
@@ -655,7 +656,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             log.log(Level.SEVERE, "unable to restart app for service name {0}: {1}", new Object[]{name, startCommand.toString()});
                             return false;
                         } else {
-                            DockerContainer container = new DockerContainer(appName, url, port, jEnv, vol);
+                            DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
                             updateServiceAndApps(appName, name, container);
                             log.fine(">>>>>>>>> Service name " + name + " has been created successfully after retry.");
                             return true;
@@ -673,7 +674,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 e.printStackTrace();
                             }
                             if (result.getRetCode() == 0 ) {
-                                DockerContainer container = new DockerContainer(appName, url, port, jEnv, vol);
+                                DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
                                 updateServiceAndApps(appName, name, container);
                                 log.fine(">>>>>>>>> Service name " + name + " has been created successfully after stop and retry.");
                                 return true;
@@ -681,7 +682,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             return false;
                         } else {
                             // String id = result.getResult().trim();
-                            DockerContainer container = new DockerContainer(appName, url, port, jEnv, vol);
+                            DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
                             updateServiceAndApps(appName, name, container);
                             log.fine(">>>>>>>>> Service name " + name + " has been created successfully.");
                             return true;
@@ -777,7 +778,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
      * Run command is the command to run a docker for the first time
      */
     // docker run --name xdn-demo-app -p 8080:3000 -e ADDR=172.17.0.1 -d oversky710/xdn-demo-app --ip 172.17.0.100
-    private List<String> getRunCommand(String name, int port, List<String> env, String url, String vol) {
+    private List<String> getRunCommand(String name, int port, int exportPort, List<String> env, String url, String vol) {
         List<String> command = new ArrayList<>();
         command.add("docker");
         command.add("run");
@@ -794,7 +795,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         //FIXME: only works on cloud node
         if (port > 0){
             command.add("-p");
-            command.add("80:"+port);
+            command.add(exportPort+":"+port);
         }
 
         if (env != null ){

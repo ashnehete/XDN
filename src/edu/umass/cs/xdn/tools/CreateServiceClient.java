@@ -19,6 +19,7 @@ public class CreateServiceClient {
     String imageName;
     String imageUrl;
     int port;
+    int exposePort;
     static int received = 0;
 
     // final private static long timeout = 30000;
@@ -32,7 +33,7 @@ public class CreateServiceClient {
         imageName = XDNConfig.prop.getProperty(XDNConfig.XC.IMAGE_NAME.toString());
         imageUrl = XDNConfig.prop.getProperty(XDNConfig.XC.IMAGE_URL.toString());
         port = Integer.parseInt(XDNConfig.prop.getProperty(XDNConfig.XC.DOCKER_PORT.toString()));
-
+        exposePort = Integer.parseInt(XDNConfig.prop.getProperty(XDNConfig.XC.PUBLIC_EXPOSE_PORT.toString()));
         serviceName = XDNConfig.generateServiceName(imageName, name);
 
         client = new XDNAgentClient();
@@ -45,6 +46,7 @@ public class CreateServiceClient {
         // json.put(DockerKeys.ENV.toString(), null);
         state.put(DockerKeys.PORT.toString(), this.port);
         state.put(DockerKeys.VOL.toString(), this.imageName);
+        state.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), this.exposePort);
         return new CreateServiceName(serviceName, state.toString());
     }
 

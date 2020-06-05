@@ -51,6 +51,10 @@ public class XDNConfig {
          */
         DOCKER_PORT(3000),
         /**
+         * public exposed port number
+         */
+        PUBLIC_EXPOSE_PORT(8080),
+        /**
          * Value of a request to send to XDN
          */
         VALUE("1"),
