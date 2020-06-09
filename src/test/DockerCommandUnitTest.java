@@ -62,6 +62,9 @@ public class DockerCommandUnitTest {
         int port = json.has(DockerKeys.PORT.toString()) ? json.getInt(DockerKeys.PORT.toString()) : -1;
         String url = json.has(DockerKeys.IMAGE_URL.toString()) ? json.getString(DockerKeys.IMAGE_URL.toString()) : null;
         JSONArray jEnv = json.has(DockerKeys.ENV.toString()) ? json.getJSONArray(DockerKeys.ENV.toString()) : null;
+        int exportPort = json.has(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) ?
+                json.getInt(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) : 80;
+
         List<String> env = new ArrayList<>();
         if (jEnv != null) {
             for (int i = 0; i < jEnv.length(); i++) {
@@ -95,7 +98,7 @@ public class DockerCommandUnitTest {
                 // give up and raise an error
                 return false;
             } else {
-                DockerContainer container = new DockerContainer(appName, url, port, jEnv);
+                DockerContainer container = new DockerContainer(appName, url, port, exportPort, jEnv, appName);
                 // updateServiceAndApps(appName, name, container);
                 log.fine(">>>>>>>>> Service name " + name + " has been created successfully after retry.");
                 return true;
@@ -108,7 +111,7 @@ public class DockerCommandUnitTest {
                     e.printStackTrace();
                 }
                 if (result.getRetCode() == 0) {
-                    DockerContainer container = new DockerContainer(appName, url, port, jEnv);
+                    DockerContainer container = new DockerContainer(appName, url, port,exportPort, jEnv, appName);
                     // updateServiceAndApps(appName, name, container);
                     log.fine(">>>>>>>>> Service name " + name + " has been created successfully after stop and retry.");
                     return true;
@@ -116,7 +119,7 @@ public class DockerCommandUnitTest {
                 return false;
             } else {
                 // String id = result.getResult().trim();
-                DockerContainer container = new DockerContainer(appName, url, port, jEnv);
+                DockerContainer container = new DockerContainer(appName, url, port, exportPort, jEnv, appName);
                 // updateServiceAndApps(appName, name, container);
                 log.fine(">>>>>>>>> Service name " + name + " has been created successfully.");
                 return true;
@@ -131,6 +134,7 @@ public class DockerCommandUnitTest {
         json.put(DockerKeys.NAME.toString(), appName);
         json.put(DockerKeys.IMAGE_URL.toString(), "oversky710/xdn-demo-app");
         json.put(DockerKeys.PORT.toString(), 3000);
+        json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), 80);
 
         restore(json.toString(), XDNConfig.generateServiceName(appName,"Alvin"), appName);
 
