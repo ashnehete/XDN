@@ -13,6 +13,7 @@
 
 script/gpClient.sh -DgigapaxosConfig=conf/examples/ec2.properties -DappConfig=conf/app/wiggle.properties edu.umass.cs.xdn.tools.CreateServiceClient
 
+script/gpClient.sh -DgigapaxosConfig=conf/examples/ec2.properties -DappConfig=conf/app/agarbot.properties edu.umass.cs.xdn.tools.CreateServiceClient
 
 sudo java -ea -cp jars/XDN-1.0.jar -Djavax.net.ssl.keyStorePassword=qwerty -Djavax.net.ssl.trustStorePassword=qwerty -Djavax.net.ssl.keyStore=conf/keyStore.jks -Djavax.net.ssl.trustStore=conf/trustStore.jks -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/examples/ec2.properties edu.umass.cs.reconfiguration.ReconfigurableNode AR0
 

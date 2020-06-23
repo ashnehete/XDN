@@ -1,23 +1,31 @@
-#!/bin/bash
+#!/bin/sh
 
-sudo apt update
-# sudo apt install criu
+# 0. pre-requisites
+sudo swapoff -a
 
-# sudo cp daemon.json /etc/docker/
-sudo dockerd --config-file /etc/docker/daemon.json
+# 1. Install docker
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common -y
 
-# setup Java
-cp /proj/lsn-PG0/groups/jdk-8u181-linux-x64.tar.gz .
-tar zxf jdk-8u181-linux-x64.tar.gz
-cp /proj/lsn-PG0/groups/.profile .
-source .profile
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
-# get XDN code
-cp -r /proj/lsn-PG0/groups/XDN .
+sudo apt-get update -y
 
-# compile code
-cd XDN
-git pull
-ant jar
-cd ~
+sudo apt-get install docker-ce -y
+
+sudo systemctl enable docker && sudo systemctl start docker
+
+sudo usermod -a -G docker $USER
+
+# 2. Install Kubernetes
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt-get update -y
+ 
+sudo apt-get install kubelet kubeadm kubectl -y
+ 
+sudo systemctl enable kubelet && sudo systemctl start kubelet
+
