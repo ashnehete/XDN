@@ -28,7 +28,7 @@ public class CreateServices {
 
     private static final String xdnServiceNameDecimal = "_xdn_";
 
-    private static final String name = "Alice";
+    private static final String name = "Alvin";
 
     protected static String generateServiceName() {
         return imageName+xdnServiceNameDecimal+name;
