@@ -19,9 +19,12 @@ public class CreateServices {
 
     static int received = 0;
 
+    // docker related info
     private static final String dockerHubAccount = "oversky710";
 
     private static final String imageName = "xdn-demo-app";
+    private static final int port = 3000;
+    private static final int public_expose_port = 80;
 
     private static final String xdnServiceNameDecimal = "_xdn_";
 
@@ -48,10 +51,10 @@ public class CreateServices {
 
         JSONObject json = new JSONObject();
         json.put(DockerKeys.NAME.toString(), imageName);
-        json.put(DockerKeys.IMAGE_URL.toString(), dockerHubAccount+imageName);
-        // json.put(DockerKeys.ENV.toString(), null);
-        json.put(DockerKeys.PORT.toString(), 3000);
+        json.put(DockerKeys.IMAGE_URL.toString(), dockerHubAccount+"/"+imageName);
+        json.put(DockerKeys.PORT.toString(), port);
         json.put(DockerKeys.VOL.toString(), imageName);
+        json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), public_expose_port);
 
         final int sent = 1;
 
