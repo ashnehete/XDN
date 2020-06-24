@@ -44,7 +44,7 @@ public class TutorialDemandProfile extends AbstractDemandProfile {
 	 * The minimum number of requests after which a demand report will be sent
 	 * to reconfigurators.
 	 */
-	protected static int minRequestsBeforeDemandReport = 1;
+	protected static int minRequestsBeforeDemandReport = 30;
 	/**
 	 * The minimum amount of time (ms) that must elapse since the previous
 	 * reconfiguration before the next reconfiguration can happen.
@@ -243,8 +243,8 @@ public class TutorialDemandProfile extends AbstractDemandProfile {
 		String curNode = curActives.iterator().next();
 		Set<String> retval = new HashSet<String>();
 		for (String nodeID : nodeConfig.getAllActiveReplicas().keySet()){
-			if(!nodeID.equals(curNode))
-				retval.add(nodeID);
+			// if(!nodeID.equals(curNode))
+			retval.add(nodeID);
 		}
 
 		System.out.println(">>>>>>>>>> To configure the service to the set of actives:"+retval+"\n");
