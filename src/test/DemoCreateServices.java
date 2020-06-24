@@ -57,10 +57,11 @@ public class DemoCreateServices {
         Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
 
         Set<InetSocketAddress> initGroup = new HashSet<>();
+        initGroup.add(servers.get("AR0"));
+        /*
         for(String name: servers.keySet()){
             initGroup.add(servers.get(name));
-            break; // only need one replica
-        }
+        }*/
 
         System.out.println("InitGroup:"+initGroup);
         XDNAgentClient client = new XDNAgentClient();
