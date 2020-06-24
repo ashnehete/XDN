@@ -126,7 +126,7 @@ public class XDNConfig {
      * checkpoint needs to copy the volume,
      * while restore needs to transfer the volume.
      */
-    public static boolean volumeCheckpointEnabled = true;
+    public static boolean volumeCheckpointEnabled = false;
 
     /**
      * Used to test overhead with noop for XDNApp

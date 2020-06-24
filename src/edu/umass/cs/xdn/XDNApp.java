@@ -322,7 +322,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                 log.fine("Checkpoint: Volume " + chkp);
                 return chkp;
-                // return null;
+
             } else {
                 // use {@link LargeCheckpointer} to checkpoint
                 List<String> checkpointListCommand = getCheckpointListCommand(appName);
@@ -365,7 +365,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 log.fine("Checkpoint: LargeCheckpointer " + chkp);
 
                 return chkp;
-                // return null;
+
             }
 
         } else {
