@@ -5,7 +5,7 @@ import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;
 import edu.umass.cs.gigapaxos.interfaces.ClientMessenger;
 import edu.umass.cs.gigapaxos.interfaces.Replicable;
 import edu.umass.cs.gigapaxos.interfaces.Request;
-import edu.umass.cs.gigapaxos.paxosutil.LargeCheckpointer;
+// import edu.umass.cs.gigapaxos.paxosutil.LargeCheckpointer;
 import edu.umass.cs.nio.JSONPacket;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
 import edu.umass.cs.nio.interfaces.SSLMessenger;
@@ -321,7 +321,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 String chkp = cp.getAbsolutePath(); // LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
 
                 log.fine("Checkpoint: Volume " + chkp);
-                return chkp;
+                // return chkp;
+                return null;
             } else {
                 // use {@link LargeCheckpointer} to checkpoint
                 List<String> checkpointListCommand = getCheckpointListCommand(appName);
@@ -363,7 +364,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 String chkp = cp.getAbsolutePath(); // LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 log.fine("Checkpoint: LargeCheckpointer " + chkp);
 
-                return chkp;
+                // return chkp;
+                return null;
             }
 
         } else {
