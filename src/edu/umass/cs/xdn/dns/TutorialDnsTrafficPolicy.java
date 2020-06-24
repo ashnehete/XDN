@@ -14,7 +14,7 @@ import java.util.Set;
  */
 public class TutorialDnsTrafficPolicy implements DnsTrafficPolicy {
 
-    private static String sourceIP = "/128.105.145.106";
+    private static String sourceIP = "128.105.145.106";
 
     @Override
     public Set<InetAddress> getAddresses(Set<InetAddress> addresses, InetAddress source) {
@@ -22,16 +22,20 @@ public class TutorialDnsTrafficPolicy implements DnsTrafficPolicy {
         // convert the set to a list
         List<InetAddress> targetList = new ArrayList<>(addresses);
 
-        boolean found = false;
+        System.out.println(">>>>>>>>>>> "+targetList);
 
         for (int i=1; i<targetList.size(); i++) {
+            System.out.println(">>>>>>>>>>> "+ targetList.get(i)+","+sourceIP);
             if (targetList.get(i).toString().contains(sourceIP)){
+                System.out.println(targetList.get(i)+","+sourceIP);
                 Set<InetAddress> r = new HashSet<>();
                 r.add(targetList.get(i));
                 return r;
             }
             result.add(targetList.get(i));
         }
+
+        System.out.println(">>>>>>>>>>> "+result);
 
         return result;
     }
