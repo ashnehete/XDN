@@ -21,8 +21,7 @@ public class ExecuteServices {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         XDNAgentClient client = new XDNAgentClient();
-        // FIXME:
-        String testServiceName = ""; // XDNConfig.generateServiceName(CreateServices.imageName, "Alvin");
+        String testServiceName = XDNConfig.generateServiceName(CreateServices.imageName, "Alvin");
 
         int addValue = 1;
         int total = 1;

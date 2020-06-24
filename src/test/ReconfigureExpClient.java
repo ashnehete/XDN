@@ -62,8 +62,7 @@ public class ReconfigureExpClient {
 
         client = new XDNAgentClient();
 
-        // FIXME:
-        String testServiceName =  ""; // XDNConfig.generateServiceName( CreateServices.imageName, "Alvin" );
+        String testServiceName = XDNConfig.generateServiceName( CreateServices.imageName, "Alvin" );
 
         int total = 120;
 

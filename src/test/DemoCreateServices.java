@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class CreateServices {
+public class DemoCreateServices {
 
     String serviceName;
     String name;
@@ -28,7 +28,7 @@ public class CreateServices {
 
     public static final String xdnDomainName = "xdnedge.xyz";
 
-    public CreateServices() throws IOException {
+    public DemoCreateServices() throws IOException {
         XDNConfig.load();
         name = XDNConfig.prop.getProperty(XDNConfig.XC.NAME.toString());
 
@@ -52,7 +52,7 @@ public class CreateServices {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, JSONException {
-        CreateServices services = new CreateServices();
+        DemoCreateServices services = new DemoCreateServices();
 
         Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
 
