@@ -321,8 +321,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 String chkp = cp.getAbsolutePath(); // LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
 
                 log.fine("Checkpoint: Volume " + chkp);
-                // return chkp;
-                return null;
+                return chkp;
+                // return null;
             } else {
                 // use {@link LargeCheckpointer} to checkpoint
                 List<String> checkpointListCommand = getCheckpointListCommand(appName);
@@ -364,8 +364,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 String chkp = cp.getAbsolutePath(); // LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 log.fine("Checkpoint: LargeCheckpointer " + chkp);
 
-                // return chkp;
-                return null;
+                return chkp;
+                // return null;
             }
 
         } else {
