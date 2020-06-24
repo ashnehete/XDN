@@ -24,7 +24,7 @@ public class TutorialDnsTrafficPolicy implements DnsTrafficPolicy {
 
         System.out.println(">>>>>>>>>>> "+targetList);
 
-        for (int i=1; i<targetList.size(); i++) {
+        for (int i=0; i<targetList.size(); i++) {
             System.out.println(">>>>>>>>>>> "+ targetList.get(i)+","+sourceIP);
             if (targetList.get(i).toString().contains(sourceIP)){
                 System.out.println(targetList.get(i)+","+sourceIP);
