@@ -358,7 +358,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 List<String> tarCommand = getTarCommand(appName + ".tar.gz", image, XDNConfig.checkpointDir);
                 assert (run(tarCommand));
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
-                String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+
+                // FIXME:
+                String chkp = cp.getAbsolutePath(); // LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 log.fine("Checkpoint: LargeCheckpointer " + chkp);
 
                 return chkp;
