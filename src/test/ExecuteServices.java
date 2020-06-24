@@ -6,7 +6,6 @@ import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
-import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 
 
@@ -21,7 +20,7 @@ public class ExecuteServices {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         XDNAgentClient client = new XDNAgentClient();
-        String testServiceName = XDNConfig.generateServiceName(CreateServices.imageName, "Alvin");
+        String testServiceName = CreateServices.generateServiceName();
 
         int addValue = 1;
         int total = 1;
@@ -37,7 +36,6 @@ public class ExecuteServices {
 
         int id = (new Random()).nextInt();
         int sent = 0;
-        // System.out.println("Start testing... ");
         for (int i=0; i<total; i++) {
             sent++;
             HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
@@ -48,8 +46,7 @@ public class ExecuteServices {
                     false,
                     0
                     );
-            // AppRequest request = new AppRequest(testServiceName, json.toString(), AppRequest.PacketType.DEFAULT_APP_REQUEST, false);
-            // System.out.println("About to send "+i+"th request.");
+
             long start = System.currentTimeMillis();
             if (node == null) {
                 try {

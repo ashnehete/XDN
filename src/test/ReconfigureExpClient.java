@@ -8,7 +8,6 @@ import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ClientReconfigurationPacket;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.ReplicableClientRequest;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.RequestActiveReplicas;
-import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 
 import java.io.IOException;
@@ -62,7 +61,7 @@ public class ReconfigureExpClient {
 
         client = new XDNAgentClient();
 
-        String testServiceName = XDNConfig.generateServiceName( CreateServices.imageName, "Alvin" );
+        String testServiceName = CreateServices.generateServiceName();
 
         int total = 120;
 
@@ -117,7 +116,6 @@ public class ReconfigureExpClient {
                     // update service list
                     try {
                         ClientReconfigurationPacket packet = requestActiveReplicas(testServiceName);
-                        // System.out.println(">>>>>>>>>>"+packet);
                     } catch (ReconfigurableAppClientAsync.ReconfigurationException | ExecutionException | TimeoutException e) {
                         e.printStackTrace();
                     }

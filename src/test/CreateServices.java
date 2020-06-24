@@ -18,7 +18,18 @@ import java.util.Set;
 public class CreateServices {
 
     static int received = 0;
-    final static String imageName = "pong"; //"xdn-demo-app";
+
+    private static final String dockerHubAccount = "oversky710";
+
+    private static final String imageName = "xdn-demo-app";
+
+    private static final String xdnServiceNameDecimal = "_xdn_";
+
+    private static final String name = "Alice";
+
+    protected static String generateServiceName() {
+        return imageName+xdnServiceNameDecimal+name;
+    }
 
     public static void main(String[] args) throws IOException, InterruptedException, JSONException {
 
@@ -34,19 +45,17 @@ public class CreateServices {
         System.out.println("InitGroup:"+initGroup);
         XDNAgentClient client = new XDNAgentClient();
 
-//        JSONArray arr = new JSONArray();
-//        arr.put("");
 
         JSONObject json = new JSONObject();
         json.put(DockerKeys.NAME.toString(), imageName);
-        json.put(DockerKeys.IMAGE_URL.toString(), "oversky710/"+imageName);
+        json.put(DockerKeys.IMAGE_URL.toString(), dockerHubAccount+imageName);
         // json.put(DockerKeys.ENV.toString(), null);
         json.put(DockerKeys.PORT.toString(), 3000);
         json.put(DockerKeys.VOL.toString(), imageName);
 
         final int sent = 1;
 
-        testServiceName = XDNConfig.generateServiceName(imageName, "Alvin"); // imageName+ XDNConfig.xdnServiceDecimal+"Alvin";
+        testServiceName = generateServiceName();
 
         //client.sendRequest(new CreateServiceName(testServiceName,
         //                json.toString(), initGroup),
