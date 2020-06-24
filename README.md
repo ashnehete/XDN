@@ -16,7 +16,7 @@ Service dispersibility refers to the ability to programmatically sprinkle replic
 `XDN` is a heterogeneous system that tightly integrates edge and cloud platform to make service dispersibility easier, especially for stateful services.
 
 
-Getting Started Quickly
+Getting-Started
 -----------------------
 `XDN` is built on top of [GigaPaxos](<https://github.com/MobilityFirst/gigapaxos>), a group-scalable replicated state machine (RSM) system, which allows applications to easily create and manage a very large number of separate RSMs. Please go through [GigaPaxos tutorial](<https://github.com/MobilityFirst/gigapaxos/wiki>) first to get familiar with the concepts mentioned in this tutorial.
 
