@@ -189,14 +189,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 if(isLinux)
                     containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort());
                 else
-                    containerUrl = "http://localhost:"+dc.getExposePort();
+                    containerUrl = getContainerUrl("localhost:"+dc.getExposePort());
             }
 
             if (containerUrl == null)
                 return false;
 
             log.info("Execute request "+r+" for service name "+name+" running at address "+containerUrl);
-            
+
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
                 /*
                  // old implementation with okhttp lib
