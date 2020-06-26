@@ -114,6 +114,10 @@ public class DockerContainer implements XDNContainer {
         return port;
     }
 
+    public int getExposePort(){
+        return exposePort;
+    }
+
     public void setID(String id) {
         this.id = id;
     }

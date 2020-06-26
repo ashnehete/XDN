@@ -5,7 +5,7 @@ import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;
 import edu.umass.cs.gigapaxos.interfaces.ClientMessenger;
 import edu.umass.cs.gigapaxos.interfaces.Replicable;
 import edu.umass.cs.gigapaxos.interfaces.Request;
-// import edu.umass.cs.gigapaxos.paxosutil.LargeCheckpointer;
+import edu.umass.cs.gigapaxos.paxosutil.LargeCheckpointer;
 import edu.umass.cs.nio.JSONPacket;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
 import edu.umass.cs.nio.interfaces.SSLMessenger;
@@ -36,12 +36,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *  XDNApp is a GigaPaxos application
+ *  XDNApp is a GigaPaxos application used for
  *
  */
 public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         implements Replicable, Reconfigurable, AppRequestParserBytes, ClientMessenger {
 
+    // used by execute method to post coordinated requests to underlying app
     private static final String USER_AGENT = "Mozilla/5.0";
 
     private String myID;
@@ -52,6 +53,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     // used to propagate coordinated result to applications
     private static OkHttpClient httpClient;
+
+    private final boolean isLinux;
 
     /**
      * A map of app name to containerizedApps
@@ -108,6 +111,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         } catch (IOException | InterruptedException | JSONException e) {
             e.printStackTrace();
         }
+
+        isLinux = System.getProperty("os.name").equals("Linux");
 
         containerizedApps = new ConcurrentHashMap<>();
         // avoid throwing an exception when bootup
@@ -179,15 +184,19 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             String containerUrl = null;
             if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name))) {
                 DockerContainer dc = containerizedApps.get(serviceNames.get(name));
-                containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort());
+                // TODO: this url only works on Linux. Since MacOS does not have docker0 bridge running on the host machine, therefore, the following implementation won't work for MacOS
+                // {@url https://docs.docker.com/docker-for-mac/networking/#:~:text=There%20is%20no%20docker0%20bridge,docker0%20interface%20on%20the%20host}
+                if(isLinux)
+                    containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort());
+                else
+                    containerUrl = "http://localhost:"+dc.getExposePort();
             }
 
             if (containerUrl == null)
                 return false;
 
             log.info("Execute request "+r+" for service name "+name+" running at address "+containerUrl);
-
-
+            
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
                 /*
                  // old implementation with okhttp lib
@@ -419,6 +428,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         // String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
         String appName = name;
+        // FIXME: derive appName based name (serviceName)
         if (name.contains(XDNConfig.xdnDomainName)){
             String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
             // String userName = nameResult[0];
