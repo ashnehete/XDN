@@ -114,7 +114,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         containerizedApps.put(PaxosConfig.getDefaultServiceName(),
                 new DockerContainer(PaxosConfig.getDefaultServiceName(),
                         null, -1, -1, null, ""));
-        // FIXME: change HashSet to a sorted list to track resource usage
+        // TODO: change HashSet to a sorted list to track resource usage
         runningApps = new HashSet<>();
 
         serviceNames = new ConcurrentHashMap<>();
@@ -211,10 +211,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                 // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
 
-                URL obj = null;
+                URL url = null;
                 try {
-                    obj = new URL(containerUrl);
-                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                    url = new URL(containerUrl);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("POST");
                     con.setRequestProperty("User-Agent", USER_AGENT);
                     con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
