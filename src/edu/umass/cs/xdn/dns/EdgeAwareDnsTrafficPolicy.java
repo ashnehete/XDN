@@ -14,7 +14,8 @@ import java.util.Set;
  */
 public class EdgeAwareDnsTrafficPolicy implements DnsTrafficPolicy {
 
-    private static String sourceIP = XDNConfig.prop.getProperty(XDNConfig.XC.EDGE_ADDR.toString());
+    // TODO: change the edge address for experiment
+    private static String sourceIP = "";
 
     @Override
     public Set<InetAddress> getAddresses(Set<InetAddress> addresses, InetAddress source) {

@@ -1,5 +1,6 @@
 package edu.umass.cs.xdn.tools;
 
+import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.ReconfigurableAppClientAsync;
@@ -11,15 +12,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.*;
 
 public class CreateServiceClient {
 
-    String serviceName;
-    String name;
-    String imageName;
-    String imageUrl;
-    int port;
-    int exposePort;
+    final String serviceName;
+    final String name;
+    final String imageName;
+    final String imageUrl;
+    final int port;
+    final int exposePort;
+
+    Set<InetSocketAddress> initGroup;
     static int received = 0;
 
     // final private static long timeout = 30000;
@@ -36,6 +41,30 @@ public class CreateServiceClient {
         exposePort = Integer.parseInt(XDNConfig.prop.getProperty(XDNConfig.XC.PUBLIC_EXPOSE_PORT.toString()));
         serviceName = XDNConfig.generateServiceName(imageName, name);
 
+        String initGroupString = XDNConfig.prop.getProperty(XDNConfig.XC.INIT_GROUP.toString()) == null?
+                "ALL" :
+                XDNConfig.prop.getProperty(XDNConfig.XC.INIT_GROUP.toString());
+
+        Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
+
+        initGroup = new HashSet<>();
+        if (initGroupString.equals("ALL")) {
+            for(String name: servers.keySet()){
+                initGroup.add(servers.get(name));
+            }
+        } else {
+            String[] srvs = initGroupString.split(",");
+            for (String name: srvs) {
+                if (servers.containsKey(name))
+                    initGroup.add(servers.get(name));
+                else
+                    System.err.println("The key "+name+" in INIT_GROUP does not exist.");
+            }
+        }
+
+        System.out.println("initGroupString:"+initGroupString);
+        System.out.println("initGroup:"+initGroup);
+
         client = new XDNAgentClient();
     }
 
@@ -47,7 +76,8 @@ public class CreateServiceClient {
         state.put(DockerKeys.PORT.toString(), this.port);
         state.put(DockerKeys.VOL.toString(), this.imageName);
         state.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), this.exposePort);
-        return new CreateServiceName(serviceName, state.toString());
+
+        return new CreateServiceName(serviceName, state.toString(), this.initGroup);
     }
 
     private void close(){
@@ -57,8 +87,11 @@ public class CreateServiceClient {
     private void sendCreateServiceName() throws JSONException, IOException, ReconfigurableAppClientAsync.ReconfigurationException, InterruptedException {
         final int sent = 1;
 
-        long createTime = System.currentTimeMillis();
-        client.sendRequest(generateCreateServiceNamePacket(), new RequestCallback() {
+        CreateServiceName packet = generateCreateServiceNamePacket();
+
+        System.out.println("About to send create service name request packet:"+packet);
+
+        client.sendRequest(packet, new RequestCallback() {
             final long createTime = System.currentTimeMillis();
             @Override
             public void handleResponse(Request response) {

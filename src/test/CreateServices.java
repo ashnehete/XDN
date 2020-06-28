@@ -36,7 +36,7 @@ public class CreateServices {
 
     public static void main(String[] args) throws IOException, InterruptedException, JSONException {
 
-        String testServiceName = PaxosConfig.getDefaultServiceName()+0; // PaxosConfig.getDefaultServiceName();
+
 
         Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
 
@@ -48,7 +48,6 @@ public class CreateServices {
         System.out.println("InitGroup:"+initGroup);
         XDNAgentClient client = new XDNAgentClient();
 
-
         JSONObject json = new JSONObject();
         json.put(DockerKeys.NAME.toString(), imageName);
         json.put(DockerKeys.IMAGE_URL.toString(), dockerHubAccount+"/"+imageName);
@@ -58,7 +57,7 @@ public class CreateServices {
 
         final int sent = 1;
 
-        testServiceName = generateServiceName();
+        String testServiceName = generateServiceName();
 
         //client.sendRequest(new CreateServiceName(testServiceName,
         //                json.toString(), initGroup),

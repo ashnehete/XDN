@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 
 /**
  *  XDNApp is a GigaPaxos application used for
- *
  */
 public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         implements Replicable, Reconfigurable, AppRequestParserBytes, ClientMessenger {
@@ -239,7 +238,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         BufferedReader in = new BufferedReader(new InputStreamReader(
                                 con.getInputStream()));
                         String inputLine;
-                        StringBuffer response = new StringBuffer();
+                        StringBuilder response = new StringBuilder();
 
                         while ((inputLine = in.readLine()) != null) {
                             response.append(inputLine);
@@ -271,8 +270,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 String name = r.getServiceName();
                 List<String> command = getRestoreCommand(name);
                 return run(command);
-            }*/
-
+            }
+            */
         }
         return false;
     }
@@ -284,7 +283,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         log.fine("Checkpoint ServiceName="+name);
 
         if (name.equals(PaxosConfig.getDefaultServiceName())){
-            // do nothing for the default app
+            // return empty string for the default app
             return "";
         }
         // handle checkpoint for XDNApp's default user name, which represents a unique device, e.g., XDNApp0_AlvinRouter
@@ -326,10 +325,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 run(tarCommand);
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
                 // FIXME: hack for reconfiguration experiment
-                // String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
-                String chkp = cp.getAbsolutePath(); // LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+                String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+                // String chkp = cp.getAbsolutePath();
 
-                log.fine("Checkpoint: Volume " + chkp);
+                log.fine("Checkpoint volume: " + chkp);
                 return chkp;
 
             } else {

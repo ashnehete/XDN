@@ -24,6 +24,8 @@ public class XDNConfig {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.out.println(prop);
     }
 
     public static Properties prop = new Properties();
@@ -54,6 +56,12 @@ public class XDNConfig {
          * public exposed port number
          */
         PUBLIC_EXPOSE_PORT(8080),
+
+        /**
+         * Initial group
+         */
+        INIT_GROUP("ALL"),
+
         /**
          * Value of a request to send to XDN
          */
@@ -65,11 +73,7 @@ public class XDNConfig {
         /**
          *
          */
-        NUM_REQ(1),
-        /**
-         *
-         */
-        EDGE_ADDR("127.0.0.1"),
+        NUM_REQ(1)
         ;
 
         final Object defaultValue;
@@ -146,7 +150,7 @@ public class XDNConfig {
 
     /**
      *
-     * @param serviceName
+     * @param serviceName Service Name
      * @return a String array:
      */
     public static String[] extractNamesFromServiceName(String serviceName){
