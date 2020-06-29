@@ -328,7 +328,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 // String chkp = cp.getAbsolutePath();
 
-                log.fine("Checkpoint volume: " + chkp);
+                log.info("Checkpoint volume: " + chkp);
                 return chkp;
 
             } else {
@@ -368,12 +368,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 assert (run(tarCommand));
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
 
-                // FIXME:
-                String chkp = cp.getAbsolutePath(); // LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
-                log.fine("Checkpoint: LargeCheckpointer " + chkp);
+                String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+                log.info("Checkpoint: LargeCheckpointer " + chkp);
 
                 return chkp;
-
             }
 
         } else {
@@ -569,7 +567,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                     updateServiceAndApps(appName, name, c);
 
-                    return true;
                 } else {
                     // TODO: UNTESTED PATH
                     // send restore request to the underlying app
@@ -605,8 +602,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     }
 
                     // underlying app may not implement checkpoint, return an empty string as a checkpoint
-                    return true;
                 }
+                return true;
             }
 
         } else {

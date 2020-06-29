@@ -25,7 +25,9 @@ public class XDNConfig {
             e.printStackTrace();
         }
 
-        System.out.println(prop);
+        for (XC xc : XC.values()){
+            System.out.println(xc+":"+xc.defaultValue);
+        }
     }
 
     public static Properties prop = new Properties();
@@ -35,6 +37,8 @@ public class XDNConfig {
     }
 
     public enum XC {
+        XDN_DOMAIN_NAME("xdnedge.xyz"),
+
         /**
          * a name that is unique for an app, i.e., IMAGE_NAME
          */
@@ -92,6 +96,22 @@ public class XDNConfig {
     final public static String xdnRoute = "/xdnapp";
 
     /**
+     * Docker's default checkpoint location
+     */
+    public final static String defaultCheckpointDir =  "/var/lib/docker/containers/";
+
+    public final static String defaultVolumeDir = "/var/lib/docker/volumes/";
+
+    /**
+     *
+     */
+    final private static String xdnServiceDecimal = ".";
+
+    final public static String appConfigName = "appConfig";
+
+    final public static String defaultConfigFileName = "conf/app/service.properties";
+
+    /**
      * Indicate whether this node is edge node, default is false, means it is a cloud node
      */
     public static boolean isEdgeNode = false;
@@ -102,22 +122,10 @@ public class XDNConfig {
     public static String checkpointDir =  "checkpoints/";
 
     /**
-     * Docker's default checkpoint location
-     */
-    public final static String defaultCheckpointDir =  "/var/lib/docker/containers/";
-
-    public final static String defaultVolumeDir = "/var/lib/docker/volumes/";
-
-    /**
-     *
-     */
-    private static String xdnServiceDecimal = ".";
-
-    /**
      * form service in a DNS domain name style to be compatible with DNS query
      */
-    // public static String xdnDomainName = "xdnbest.xyz";
-    public static String xdnDomainName = "xdnedge.xyz";
+    public static String xdnDomainName = "xdnbest.xyz";
+    // public static String xdnDomainName = "xdnedge.xyz";
 
     /**
      * If true, XDN will fetch docker checkpoint directly from a remote node.
@@ -130,22 +138,17 @@ public class XDNConfig {
      * checkpoint needs to copy the volume,
      * while restore needs to transfer the volume.
      */
-    public static boolean volumeCheckpointEnabled = false;
+    public static boolean volumeCheckpointEnabled = true;
 
     /**
      * Used to test overhead with noop for XDNApp
      */
     public static boolean noopEnabled = false;
 
-    final public static String appConfigName = "appConfig";
-
-    final public static String defaultConfigFileName = "conf/app/service.properties";
-
 
     public static String generateServiceName(String imageName, String name){
         // FIXME: imageName or name could be null
         return name+xdnServiceDecimal+imageName+xdnServiceDecimal+xdnDomainName;
-        // return imageName+xdnServiceDecimal+name;
     }
 
     /**

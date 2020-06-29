@@ -3,7 +3,6 @@ package edu.umass.cs.xdn.tools;
 import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
-import edu.umass.cs.reconfiguration.ReconfigurableAppClientAsync;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.CreateServiceName;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
@@ -33,6 +32,12 @@ public class CreateServiceClient {
 
     public CreateServiceClient() throws IOException {
         XDNConfig.load();
+
+        // FIXME: get these values from XDNConfig directly
+        XDNConfig.xdnDomainName = XDNConfig.prop.getProperty(XDNConfig.XC.XDN_DOMAIN_NAME.toString()) == null?
+                XDNConfig.xdnDomainName :
+                XDNConfig.prop.getProperty(XDNConfig.XC.XDN_DOMAIN_NAME.toString());
+
         name = XDNConfig.prop.getProperty(XDNConfig.XC.NAME.toString());
 
         imageName = XDNConfig.prop.getProperty(XDNConfig.XC.IMAGE_NAME.toString());
@@ -84,7 +89,7 @@ public class CreateServiceClient {
         client.close();
     }
 
-    private void sendCreateServiceName() throws JSONException, IOException, ReconfigurableAppClientAsync.ReconfigurationException, InterruptedException {
+    private void sendCreateServiceName() throws JSONException, IOException, InterruptedException {
         final int sent = 1;
 
         CreateServiceName packet = generateCreateServiceNamePacket();
@@ -108,7 +113,7 @@ public class CreateServiceClient {
         }
     }
 
-    public static void main(String[] args) throws IOException, JSONException, ReconfigurableAppClientAsync.ReconfigurationException, InterruptedException {
+    public static void main(String[] args) throws IOException, JSONException, InterruptedException {
         CreateServiceClient c = new CreateServiceClient();
         c.sendCreateServiceName();
         c.close();
