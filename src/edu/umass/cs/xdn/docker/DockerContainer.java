@@ -171,6 +171,38 @@ public class DockerContainer implements XDNContainer {
         return imageUrl;
     }
 
+    public String getVolume() {
+        return volume;
+    }
+
+    public JSONArray getEnv() {
+        return env;
+    }
+
+    public static JSONObject dockerToJsonState(DockerContainer container) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put(DockerKeys.NAME.toString(), container.name);
+        json.put(DockerKeys.IMAGE_URL.toString(), container.imageUrl);
+        // json.put(DockerKeys.SERVICE_NAMES.toString(), container.serviceNames);
+        json.put(DockerKeys.VOL.toString(), container.volume);
+        json.put(DockerKeys.PORT.toString(), container.port);
+        json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), container.exposePort);
+        json.put(DockerKeys.ENV.toString(), container.env);
+
+        return json;
+    }
+
+    public static DockerContainer stateToDockerContainer(JSONObject json) throws JSONException {
+        String appName = json.getString(DockerKeys.NAME.toString());
+        int port = json.has(DockerKeys.PORT.toString()) ? json.getInt(DockerKeys.PORT.toString()) : -1;
+        String url = json.has(DockerKeys.IMAGE_URL.toString()) ? json.getString(DockerKeys.IMAGE_URL.toString()) : null;
+        JSONArray jEnv = json.has(DockerKeys.ENV.toString()) ? json.getJSONArray(DockerKeys.ENV.toString()) : null;
+        String vol = json.has(DockerKeys.VOL.toString()) ? json.getString(DockerKeys.VOL.toString()) : null;
+        int exposePort = json.has(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) ? json.getInt(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) : 80;
+
+        return new DockerContainer(appName, url, port, exposePort, jEnv, vol);
+    }
+
     public static void main(String[] args) {
 
     }

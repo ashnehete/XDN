@@ -368,10 +368,24 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 assert (run(tarCommand));
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
 
+                // TODO: implement a new large checkpoint
                 String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
-                log.info("Checkpoint: LargeCheckpointer " + chkp);
+                JSONObject json = null;
+                try {
+                    json = DockerContainer.dockerToJsonState(containerizedApps.get(appName));
+                    JSONObject checkpointJson = new JSONObject(chkp);
+                    Iterator key = checkpointJson.keys();
+                    while(key.hasNext()){
+                        String k = (String) key.next();
+                        json.put(k, checkpointJson.get(k));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
-                return chkp;
+                log.info("Checkpoint: LargeCheckpointer " + chkp+"\n");
+
+                return json.toString();
             }
 
         } else {
@@ -627,11 +641,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     // 1. Extract the initial service information
                     assert(state != null);
                     JSONObject json = new JSONObject(state);
-                    int port = json.has(DockerKeys.PORT.toString()) ? json.getInt(DockerKeys.PORT.toString()) : -1;
-                    String url = json.has(DockerKeys.IMAGE_URL.toString()) ? json.getString(DockerKeys.IMAGE_URL.toString()) : null;
-                    JSONArray jEnv = json.has(DockerKeys.ENV.toString()) ? json.getJSONArray(DockerKeys.ENV.toString()) : null;
-                    String vol = json.has(DockerKeys.VOL.toString()) ? json.getString(DockerKeys.VOL.toString()) : null;
-                    int exposePort = json.has(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) ? json.getInt(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) : 80;
+                    json.put(DockerKeys.NAME.toString(), appName);
+                    DockerContainer dockerContainer = DockerContainer.stateToDockerContainer(json);
+
+                    int port = dockerContainer.getPort();
+                    String url = dockerContainer.getUrl();
+                    String vol = dockerContainer.getVolume();
+                    int exposePort = dockerContainer.getExposePort();
+                    JSONArray jEnv = dockerContainer.getEnv();
+
                     List<String> env = new ArrayList<>();
                     if (jEnv != null) {
                         for (int i = 0; i < jEnv.length(); i++) {
@@ -640,6 +658,17 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     }
 
                     log.fine(">>>>>>>> container info: name="+name+",state="+state+",json="+json);
+
+                    if (XDNConfig.volumeCheckpointEnabled){
+                        // Check whether it's a large checkpoint
+                        if(LargeCheckpointer.isCheckpointHandle(json.toString())){
+                            // TODO
+                        } // else: new state
+                    } else {
+                        if(LargeCheckpointer.isCheckpointHandle(json.toString())){
+                            // TODO
+                        }
+                    }
 
                     // 2. Pull service and boot-up
                     List<String> pullCommand = getPullCommand(url);
@@ -656,7 +685,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                     log.info("Restore: start app instance command result is "+result);
                     if (result == null) {
-                        // there may be an interruption, let's retry. No need to stop another instance
+                        // there may be an interruption, let's retry.
                         try {
                             result = ProcessRuntime.executeCommand(startCommand);
                         } catch (IOException | InterruptedException e) {
@@ -675,7 +704,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         }
                     } else {
                         if (result.getRetCode() != 0) {
-                            // no enough resource, stop an unused container and retry
+                            // error or no enough resource, stop an unused container and retry
                             if (!selectAndStopContainer()){
                                 // if no container is stopped , then give up and return an error
                                 return false;
@@ -720,7 +749,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         }
 
-        // FIXME: return true here?
         return true;
     }
 
