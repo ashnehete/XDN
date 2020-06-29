@@ -621,7 +621,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
 
         } else {
-            log.fine("Restore: service name "+name+" does not exist.");
+            log.info("Restore: service name "+name+" does not exist.");
 
             /*
              * This is not a registered service name, follow the steps to set up the service if the app does not exist yet
@@ -657,7 +657,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         }
                     }
 
-                    log.fine(">>>>>>>> container info: name="+name+",state="+state+",json="+json);
+                    log.info(">>>>>>>> container info: name="+name+",state="+state+",json="+json);
 
                     if (XDNConfig.volumeCheckpointEnabled){
                         // Check whether it's a large checkpoint
