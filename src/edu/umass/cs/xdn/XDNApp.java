@@ -324,10 +324,22 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 // assert (run(tarCommand));
                 run(tarCommand);
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
-                // FIXME: hack for reconfiguration experiment
+
                 String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 // String chkp = cp.getAbsolutePath();
-
+                JSONObject json = null;
+                try {
+                    json = DockerContainer.dockerToJsonState(containerizedApps.get(appName));
+                    JSONObject checkpointJson = new JSONObject(chkp);
+                    Iterator key = checkpointJson.keys();
+                    while(key.hasNext()){
+                        String k = (String) key.next();
+                        json.put(k, checkpointJson.get(k));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                
                 log.info("Checkpoint volume: " + chkp);
                 return chkp;
 
@@ -368,7 +380,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 assert (run(tarCommand));
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
 
-                // TODO: implement a new large checkpoint
                 String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 JSONObject json = null;
                 try {
