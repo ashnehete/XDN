@@ -347,8 +347,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     e.printStackTrace();
                 }
 
-                log.info(">>>>>>>>> Checkpoint volume: " + chkp);
-                return chkp;
+                log.info(">>>>>>>>> Checkpoint volume: " + json);
+                return json.toString();
 
             } else {
                 // use {@link LargeCheckpointer} to checkpoint
