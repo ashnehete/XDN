@@ -243,8 +243,8 @@ public class TutorialDemandProfile extends AbstractDemandProfile {
 		String curNode = curActives.iterator().next();
 		Set<String> retval = new HashSet<String>();
 		for (String nodeID : nodeConfig.getAllActiveReplicas().keySet()){
-			// if(!nodeID.equals(curNode))
-			retval.add(nodeID);
+			if(!nodeID.equals(curNode))
+				retval.add(nodeID);
 		}
 
 		System.out.println(">>>>>>>>>> To configure the service to the set of actives:"+retval+"\n");
