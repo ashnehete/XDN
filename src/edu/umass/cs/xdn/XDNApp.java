@@ -322,7 +322,24 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             log.info(">>>>>>>> About to checkpoint for appName:"+appName);
 
             if (DEBUG_ENABLED) {
-                String state = DockerContainer.dockerToJsonState(containerizedApps.get(appName)).toString();
+                System.out.println(">>>>>>>>>> DEBUG <<<<<<<<<<<<");
+                // String state = DockerContainer.dockerToJsonState(containerizedApps.get(appName)).toString();
+                DockerContainer container = containerizedApps.get(appName);
+                JSONObject json = new JSONObject();
+
+                try {
+                    json.put(DockerKeys.NAME.toString(), container.getName());
+                    json.put(DockerKeys.IMAGE_URL.toString(), container.getUrl());
+                    // json.put(DockerKeys.SERVICE_NAMES.toString(), container.serviceNames);
+                    json.put(DockerKeys.VOL.toString(), container.getVolume());
+                    json.put(DockerKeys.PORT.toString(), container.getPort());
+                    json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), container.getExposePort());
+                    json.put(DockerKeys.ENV.toString(), container.getEnv());
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                String state = json.toString();
                 log.info(">>>>>>>> Checkpoint state:" + state);
                 return state;
             }
