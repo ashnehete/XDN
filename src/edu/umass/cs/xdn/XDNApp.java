@@ -663,7 +663,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     assert(state != null);
                     JSONObject json = new JSONObject(state);
                     json.put(DockerKeys.NAME.toString(), appName);
+                    log.info("########## JSON from state:"+state);
+
                     DockerContainer dockerContainer = DockerContainer.stateToDockerContainer(json);
+                    log.info("########## Docker from JSON"+ dockerContainer);
 
                     int port = dockerContainer.getPort();
                     String url = dockerContainer.getUrl();

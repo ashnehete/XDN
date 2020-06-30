@@ -199,7 +199,8 @@ public class DockerContainer implements XDNContainer {
         return json;
     }
 
-    public static DockerContainer stateToDockerContainer(JSONObject json) throws JSONException {
+    public static DockerContainer stateToDockerContainer(JSONObject json) throws Exception {
+
         String appName = json.getString(DockerKeys.NAME.toString());
         int port = json.has(DockerKeys.PORT.toString()) ? json.getInt(DockerKeys.PORT.toString()) : -1;
         String url = json.has(DockerKeys.IMAGE_URL.toString()) ? json.getString(DockerKeys.IMAGE_URL.toString()) : null;
