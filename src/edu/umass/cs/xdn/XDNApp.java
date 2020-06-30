@@ -403,8 +403,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                
-                log.info("Checkpoint: LargeCheckpointer " + chkp+"\n");
+
+                log.info("Checkpoint: LargeCheckpointer " + json+"\n");
 
                 return json.toString();
             }
