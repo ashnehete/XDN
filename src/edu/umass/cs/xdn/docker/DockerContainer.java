@@ -191,7 +191,7 @@ public class DockerContainer implements XDNContainer {
             json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), container.exposePort);
             json.put(DockerKeys.ENV.toString(), container.env);
 
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

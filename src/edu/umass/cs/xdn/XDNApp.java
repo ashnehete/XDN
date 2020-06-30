@@ -321,35 +321,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             log.info(">>>>>>>> About to checkpoint for appName:"+appName);
 
-            if (DEBUG_ENABLED) {
-                System.out.println(">>>>>>>>>> DEBUG <<<<<<<<<<<<");
-                // String state = DockerContainer.dockerToJsonState(containerizedApps.get(appName)).toString();
-                System.out.println("serviceNames:"+serviceNames);
-                System.out.println("containerizedApps:"+containerizedApps);
-
-                DockerContainer container = containerizedApps.get(serviceNames.get(name));
-                System.out.println(">>>>>> Container:"+ container);
-                JSONObject json = new JSONObject();
-
-                try {
-                    json.put(DockerKeys.NAME.toString(), container.getName());
-                    json.put(DockerKeys.IMAGE_URL.toString(), container.getUrl());
-                    // json.put(DockerKeys.SERVICE_NAMES.toString(), container.serviceNames);
-                    json.put(DockerKeys.VOL.toString(), container.getVolume());
-                    json.put(DockerKeys.PORT.toString(), container.getPort());
-                    json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), container.getExposePort());
-                    json.put(DockerKeys.ENV.toString(), container.getEnv());
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                String state = json.toString();
-                log.info(">>>>>>>> Checkpoint state:" + state);
-                return state;
-            }
-
-
-
             if (XDNConfig.volumeCheckpointEnabled) {
                 // checkpoint volume
                 String volume = getVolumeDir(appName);
@@ -358,21 +329,23 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 run(tarCommand);
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
 
-                String chkp = "";//LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+                String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 // String chkp = cp.getAbsolutePath();
                 JSONObject json = null;
 
-                    json = DockerContainer.dockerToJsonState(containerizedApps.get(appName));
-                    /*
-                    JSONObject checkpointJson = new JSONObject(chkp);
+                json = DockerContainer.dockerToJsonState(containerizedApps.get(serviceNames.get(name)));
+
+                JSONObject checkpointJson = null;
+                try {
+                    checkpointJson = new JSONObject(chkp);
                     Iterator key = checkpointJson.keys();
                     while(key.hasNext()){
                         String k = (String) key.next();
                         json.put(k, checkpointJson.get(k));
                     }
-                    */
-
-
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
                 log.info(">>>>>>>>> Checkpoint volume: " + chkp);
                 return chkp;
@@ -417,16 +390,20 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 JSONObject json = null;
 
-                json = DockerContainer.dockerToJsonState(containerizedApps.get(appName));
-                /*
-                JSONObject checkpointJson = new JSONObject(chkp);
-                Iterator key = checkpointJson.keys();
-                while(key.hasNext()){
-                    String k = (String) key.next();
-                    json.put(k, checkpointJson.get(k));
-                }
-                */
+                json = DockerContainer.dockerToJsonState(containerizedApps.get(serviceNames.get(name)));
 
+                JSONObject checkpointJson = null;
+                try {
+                    checkpointJson = new JSONObject(chkp);
+                    Iterator key = checkpointJson.keys();
+                    while(key.hasNext()){
+                        String k = (String) key.next();
+                        json.put(k, checkpointJson.get(k));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                
                 log.info("Checkpoint: LargeCheckpointer " + chkp+"\n");
 
                 return json.toString();
