@@ -317,7 +317,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             // String userName = nameResult[0];
             String appName = nameResult[1];
 
-            log.info("About to checkpoint for appName:"+appName);
+            log.info(">>>>>>>> About to checkpoint for appName:"+appName);
 
             if (XDNConfig.volumeCheckpointEnabled) {
                 // checkpoint volume
@@ -327,7 +327,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 run(tarCommand);
                 File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
 
-                String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
+                String chkp = "";//LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 // String chkp = cp.getAbsolutePath();
                 JSONObject json = null;
                 try {
@@ -340,11 +340,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         json.put(k, checkpointJson.get(k));
                     }
                     */
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                log.info("Checkpoint volume: " + chkp);
+                log.info(">>>>>>>>> Checkpoint volume: " + chkp);
                 return chkp;
 
             } else {
