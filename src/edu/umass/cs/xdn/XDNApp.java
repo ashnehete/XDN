@@ -325,6 +325,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 System.out.println(">>>>>>>>>> DEBUG <<<<<<<<<<<<");
                 // String state = DockerContainer.dockerToJsonState(containerizedApps.get(appName)).toString();
                 DockerContainer container = containerizedApps.get(appName);
+                System.out.println(">>>>>> Container:"+ container);
                 JSONObject json = new JSONObject();
 
                 try {
@@ -336,7 +337,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), container.getExposePort());
                     json.put(DockerKeys.ENV.toString(), container.getEnv());
 
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 String state = json.toString();
