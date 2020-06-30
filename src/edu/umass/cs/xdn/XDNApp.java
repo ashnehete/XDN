@@ -280,7 +280,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     public String checkpoint(String name) {
         long start = System.currentTimeMillis();
 
-        log.fine("Checkpoint ServiceName="+name);
+        log.info(">>>>>>> Checkpoint ServiceName="+name);
 
         if (name.equals(PaxosConfig.getDefaultServiceName())){
             // return empty string for the default app
@@ -316,6 +316,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
             // String userName = nameResult[0];
             String appName = nameResult[1];
+
+            log.info("About to checkpoint for appName:"+appName);
 
             if (XDNConfig.volumeCheckpointEnabled) {
                 // checkpoint volume
