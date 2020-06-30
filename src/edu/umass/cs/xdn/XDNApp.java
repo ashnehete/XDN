@@ -319,6 +319,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             log.info(">>>>>>>> About to checkpoint for appName:"+appName);
 
+            try {
+                return DockerContainer.dockerToJsonState(containerizedApps.get(appName)).toString();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            log.info(">>>>>>>>Something wrong with checkpoint state:"+appName);
+
             if (XDNConfig.volumeCheckpointEnabled) {
                 // checkpoint volume
                 String volume = getVolumeDir(appName);
