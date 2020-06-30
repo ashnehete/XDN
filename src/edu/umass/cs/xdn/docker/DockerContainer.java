@@ -179,16 +179,23 @@ public class DockerContainer implements XDNContainer {
         return env;
     }
 
-    public static JSONObject dockerToJsonState(DockerContainer container) throws JSONException {
+    public static JSONObject dockerToJsonState(DockerContainer container) {
         JSONObject json = new JSONObject();
-        json.put(DockerKeys.NAME.toString(), container.name);
-        json.put(DockerKeys.IMAGE_URL.toString(), container.imageUrl);
-        // json.put(DockerKeys.SERVICE_NAMES.toString(), container.serviceNames);
-        json.put(DockerKeys.VOL.toString(), container.volume);
-        json.put(DockerKeys.PORT.toString(), container.port);
-        json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), container.exposePort);
-        json.put(DockerKeys.ENV.toString(), container.env);
 
+        try {
+            json.put(DockerKeys.NAME.toString(), container.name);
+            json.put(DockerKeys.IMAGE_URL.toString(), container.imageUrl);
+            // json.put(DockerKeys.SERVICE_NAMES.toString(), container.serviceNames);
+            json.put(DockerKeys.VOL.toString(), container.volume);
+            json.put(DockerKeys.PORT.toString(), container.port);
+            json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), container.exposePort);
+            json.put(DockerKeys.ENV.toString(), container.env);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("############ JSON State:" + json);
         return json;
     }
 
