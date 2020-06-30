@@ -86,6 +86,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         SERVICE_NAME
     }
 
+    boolean DEBUG_ENABLED = true;
+
     /**
      * 
      */
@@ -319,12 +321,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             log.info(">>>>>>>> About to checkpoint for appName:"+appName);
 
-            try {
+            if (DEBUG_ENABLED) {
                 String state = DockerContainer.dockerToJsonState(containerizedApps.get(appName)).toString();
-                log.info(">>>>>>>> Checkpoint state:"+state);
+                log.info(">>>>>>>> Checkpoint state:" + state);
                 return state;
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
 
 
@@ -340,7 +340,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 String chkp = "";//LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 // String chkp = cp.getAbsolutePath();
                 JSONObject json = null;
-                try {
+
                     json = DockerContainer.dockerToJsonState(containerizedApps.get(appName));
                     /*
                     JSONObject checkpointJson = new JSONObject(chkp);
@@ -351,9 +351,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     }
                     */
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+
 
                 log.info(">>>>>>>>> Checkpoint volume: " + chkp);
                 return chkp;
@@ -397,19 +395,16 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                 String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 JSONObject json = null;
-                try {
-                    json = DockerContainer.dockerToJsonState(containerizedApps.get(appName));
-                    /*
-                    JSONObject checkpointJson = new JSONObject(chkp);
-                    Iterator key = checkpointJson.keys();
-                    while(key.hasNext()){
-                        String k = (String) key.next();
-                        json.put(k, checkpointJson.get(k));
-                    }
-                    */
-                } catch (JSONException e) {
-                    e.printStackTrace();
+
+                json = DockerContainer.dockerToJsonState(containerizedApps.get(appName));
+                /*
+                JSONObject checkpointJson = new JSONObject(chkp);
+                Iterator key = checkpointJson.keys();
+                while(key.hasNext()){
+                    String k = (String) key.next();
+                    json.put(k, checkpointJson.get(k));
                 }
+                */
 
                 log.info("Checkpoint: LargeCheckpointer " + chkp+"\n");
 
