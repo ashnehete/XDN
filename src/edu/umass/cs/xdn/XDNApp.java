@@ -324,7 +324,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (DEBUG_ENABLED) {
                 System.out.println(">>>>>>>>>> DEBUG <<<<<<<<<<<<");
                 // String state = DockerContainer.dockerToJsonState(containerizedApps.get(appName)).toString();
-                DockerContainer container = containerizedApps.get(appName);
+                System.out.println("serviceNames:"+serviceNames);
+                System.out.println("containerizedApps:"+containerizedApps);
+
+                DockerContainer container = containerizedApps.get(serviceNames.get(name));
                 System.out.println(">>>>>> Container:"+ container);
                 JSONObject json = new JSONObject();
 
@@ -740,7 +743,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         } else {
                             DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
                             updateServiceAndApps(appName, name, container);
-                            log.fine(">>>>>>>>> Service name " + name + " has been created successfully after retry.");
+                            log.fine(">>>>>>>>> Service name " + name + " has been created successfully after retry.\n appName:"+appName);
                             return true;
                         }
                     } else {
@@ -758,7 +761,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             if (result.getRetCode() == 0 ) {
                                 DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
                                 updateServiceAndApps(appName, name, container);
-                                log.fine(">>>>>>>>> Service name " + name + " has been created successfully after stop and retry.");
+                                log.fine(">>>>>>>>> Service name " + name + " has been created successfully after stop and retry.\n appName:"+appName);
                                 return true;
                             }
                             return false;
@@ -766,7 +769,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             // String id = result.getResult().trim();
                             DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
                             updateServiceAndApps(appName, name, container);
-                            log.fine(">>>>>>>>> Service name " + name + " has been created successfully.");
+                            log.info(">>>>>>>>> Service name " + name + " has been created successfully.\n appName:"+appName);
                             return true;
                         }
 
