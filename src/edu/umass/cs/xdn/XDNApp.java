@@ -86,7 +86,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         SERVICE_NAME
     }
 
-    boolean DEBUG_ENABLED = true;
+    Level DEBUG_LEVEL = Level.INFO;
 
     /**
      * 
@@ -584,15 +584,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         dest = XDNConfig.defaultCheckpointDir + containerizedApps.get(appName).getID() + "/checkpoints/";
                     }
 
-                    // FIXME: hack for reconfiguration experiment
-                    /*
+
                     String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
                     File cp = new File(filename);
                     LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
                     List<String> unTarCommand = getUntarCommand(filename, dest);
                     assert (run(unTarCommand));
                     System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-checkpointTime)+"ms to get checkpoint for app "+container.getName());
-                     */
+
 
                     long startTime = System.currentTimeMillis();
                     List<String> startCommand = getStartCommand(appName);
@@ -656,7 +655,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
              * 5. restore user state
              */
             if ( !containerizedApps.containsKey(appName) ) {
-                log.fine("Restore: app "+appName+" does not exist, restore from a new image.");
+                log.log(DEBUG_LEVEL,"Restore: app "+appName+" does not exist, restore from a new image.");
                 try {
 
                     // 1. Extract the initial service information
@@ -686,17 +685,37 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         }
                     }
 
-                    log.info(">>>>>>>> container info: name="+name+",state="+state+",json="+json);
+                    log.log(DEBUG_LEVEL, ">>>>>>>> container info: name={0},state={1},json={2}",
+                            new String[]{name, state, json.toString()});
 
-                    if (XDNConfig.volumeCheckpointEnabled){
-                        // Check whether it's a large checkpoint
-                        if(LargeCheckpointer.isCheckpointHandle(json.toString())){
-                            // TODO
-                        } // else: new state
-                    } else {
-                        if(LargeCheckpointer.isCheckpointHandle(json.toString())){
-                            // TODO
+
+                    if (XDNConfig.largeCheckPointerEnabled) {
+
+                        if (XDNConfig.volumeCheckpointEnabled){
+                            // Check whether it's a large checkpoint
+                            if(LargeCheckpointer.isCheckpointHandle(json.toString())){
+                                String dest = getVolumeDir(appName);
+                                String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
+                                log.log(DEBUG_LEVEL, "Extract state from volume "+ filename + " to "+dest);
+
+                                File cp = new File(filename);
+                                LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
+                                List<String> unTarCommand = getUntarCommand(filename, dest);
+                                assert (run(unTarCommand));
+                            } // else: new state
+                        } else {
+                            if(LargeCheckpointer.isCheckpointHandle(json.toString())){
+                                String dest = XDNConfig.defaultCheckpointDir + containerizedApps.get(appName).getID() + "/checkpoints/";
+                                String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
+                                log.log(DEBUG_LEVEL, "Extract state from checkpoint "+ filename + " to "+dest);
+                                File cp = new File(filename);
+                                LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
+                                List<String> unTarCommand = getUntarCommand(filename, dest);
+                                assert (run(unTarCommand));
+                            }
                         }
+
+
                     }
 
                     // 2. Pull service and boot-up
@@ -760,7 +779,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                     }
 
-                } catch (JSONException | InterruptedException | IOException e) {
+                } catch (Exception e) {
+                    // catch all exceptions
                     e.printStackTrace();
                 }
                 return false;

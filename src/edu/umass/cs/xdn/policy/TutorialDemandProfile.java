@@ -235,10 +235,6 @@ public class TutorialDemandProfile extends AbstractDemandProfile {
 					- this.lastReconfiguredProfile.numTotalRequests < minRequestsBeforeReconfiguration)
 				return null;
 		}
-		
-		/*
-		 *
-		 */
 
 		String curNode = curActives.iterator().next();
 		Set<String> retval = new HashSet<String>();
