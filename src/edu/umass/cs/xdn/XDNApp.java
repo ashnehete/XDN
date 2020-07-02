@@ -1036,6 +1036,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             e.printStackTrace();
             return false;
         }
+        log.info("Command return value:"+result);
         return result.getRetCode() == 0;
     }
 
