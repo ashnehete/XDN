@@ -688,7 +688,20 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     log.log(DEBUG_LEVEL, "\n >>>>>>>>>> container info: name={0},state={1},json={2}\n",
                             new String[]{name, state, json.toString()});
 
+                    // 2. Pull service and boot-up
+                    List<String> pullCommand = getPullCommand(url);
+                    ProcessRuntime.executeCommand(pullCommand);
 
+                    // 3. Boot up the service
+                    List<String> startCommand = getRunCommand(appName, port, exposePort, env, url, vol);
+                    ProcessResult result = null;
+                    try {
+                        result = ProcessRuntime.executeCommand(startCommand);
+                    } catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    // need to start the docker first, then download the checkpoint
                     if (XDNConfig.largeCheckPointerEnabled) {
 
                         if (XDNConfig.volumeCheckpointEnabled){
@@ -719,19 +732,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         }
 
 
-                    }
-
-                    // 2. Pull service and boot-up
-                    List<String> pullCommand = getPullCommand(url);
-                    ProcessRuntime.executeCommand(pullCommand);
-
-                    // 3. Boot up the service
-                    List<String> startCommand = getRunCommand(appName, port, exposePort, env, url, vol);
-                    ProcessResult result = null;
-                    try {
-                        result = ProcessRuntime.executeCommand(startCommand);
-                    } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
                     }
 
                     log.info("Restore: start app instance command result is "+result);
