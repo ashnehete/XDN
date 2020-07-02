@@ -124,8 +124,8 @@ public class XDNConfig {
     /**
      * form service in a DNS domain name style to be compatible with DNS query
      */
-    public static String xdnDomainName = "xdnbest.xyz";
-    // public static String xdnDomainName = "xdnedge.xyz";
+    // public static String xdnDomainName = "xdnbest.xyz";
+    public static String xdnDomainName = "xdnedge.xyz";
 
     /**
      * If true, XDN will fetch docker checkpoint directly from a remote node.

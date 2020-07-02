@@ -460,7 +460,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         // String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
         String appName = name;
-        // FIXME: derive appName based name (serviceName)
+        // FIXME: derive appName based on name (serviceName)
         if (name.contains(XDNConfig.xdnDomainName)){
             String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
             // String userName = nameResult[0];
