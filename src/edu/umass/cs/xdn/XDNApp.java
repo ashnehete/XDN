@@ -685,7 +685,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         }
                     }
 
-                    log.log(DEBUG_LEVEL, ">>>>>>>> container info: name={0},state={1},json={2}",
+                    log.log(DEBUG_LEVEL, "\n >>>>>>>>>> container info: name={0},state={1},json={2}\n",
                             new String[]{name, state, json.toString()});
 
 
