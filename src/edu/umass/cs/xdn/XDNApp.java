@@ -703,6 +703,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 List<String> unTarCommand = getUntarCommand(filename, dest);
                                 assert (run(unTarCommand));
                             } // else: new state
+                            else {
+                                log.log(DEBUG_LEVEL, "Not a valid checkpoint {0}", new Object[]{json});
+                            }
                         } else {
                             if(LargeCheckpointer.isCheckpointHandle(json.toString())){
                                 String dest = XDNConfig.defaultCheckpointDir + containerizedApps.get(appName).getID() + "/checkpoints/";
