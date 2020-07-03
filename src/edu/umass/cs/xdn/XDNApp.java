@@ -715,6 +715,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
                                 List<String> unTarCommand = getUntarCommand(filename, dest);
                                 assert (run(unTarCommand));
+
+                                // state is restored successfully, we need to restart the docker
+                                List<String> restartCommand = getRestartCommand(appName);
+                                run(restartCommand);
                             } // else: new state
                             else {
                                 log.log(DEBUG_LEVEL, "Not a valid checkpoint {0}", new Object[]{json});
@@ -728,6 +732,13 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
                                 List<String> unTarCommand = getUntarCommand(filename, dest);
                                 assert (run(unTarCommand));
+
+                                // state is restored successfully, we need to restart the docker
+                                List<String> restartCommand = getRestartCommand(appName);
+                                run(restartCommand);
+                            }
+                            else {
+                                log.log(DEBUG_LEVEL, "Not a valid checkpoint {0}", new Object[]{json});
                             }
                         }
 
@@ -960,7 +971,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     /**
-     * Start command is the command to restart a docker
+     * Start command is the command to start a docker when the previous docker has not been removed
      */
     // docker start --checkpoint=xdn-demo-app xdn-demo-app
     private List<String> getStartCommand(String name) {
@@ -968,6 +979,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         command.add("docker");
         command.add("start");
         // command.add("--checkpoint-dir="+XDNConfig.checkpointDir+name);
+        command.add(name);
+        return command;
+    }
+
+    // docker restart xdn-demo-app
+    private List<String> getRestartCommand(String name) {
+        List<String> command = new ArrayList<>();
+        command.add("docker");
+        command.add("restart");
         command.add(name);
         return command;
     }
