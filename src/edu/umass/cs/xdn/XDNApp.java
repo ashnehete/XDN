@@ -988,6 +988,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         List<String> command = new ArrayList<>();
         command.add("docker");
         command.add("restart");
+        // restart the docker immediately
+        command.add("-t");
+        command.add("0");
         command.add(name);
         return command;
     }
