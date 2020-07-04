@@ -628,7 +628,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             .build();
 
                     try (Response response = httpClient.newCall(req).execute()) {
-                        log.fine("Restore1: received response from app:"+response);
+                        log.fine("Restore: received response from app:"+response);
 
                         return response.code()==200;
                     } catch (IOException e) {
@@ -832,6 +832,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 String ipAddr = json.getJSONObject("NetworkSettings").getString("IPAddress");
                 container.setAddr(ipAddr);
             } catch (IOException | InterruptedException | JSONException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             container.addServiceName(name);
