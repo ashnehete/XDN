@@ -19,3 +19,5 @@ sudo java -ea -cp jars/XDN-1.0.jar -Djavax.net.ssl.keyStorePassword=qwerty -Djav
 
 
 sudo java -ea -cp jars/XDN-1.0.jar -Djavax.net.ssl.keyStorePassword=qwerty -Djavax.net.ssl.trustStorePassword=qwerty -Djavax.net.ssl.keyStore=conf/keyStore.jks -Djavax.net.ssl.trustStore=conf/trustStore.jks -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/examples/ec2.properties edu.umass.cs.reconfiguration.ReconfigurableNode RC0
+
+sudo java -ea -cp jars/XDN-1.0.jar -Djavax.net.ssl.keyStorePassword=qwerty -Djavax.net.ssl.trustStorePassword=qwerty -Djavax.net.ssl.keyStore=conf/keyStore.j -Djavax.net.ssl.trustStore=conf/trustStore.jks -Djava.util.logging.config.file=conf/logging.properties -Dlog4j.configuration=conf/log4j.properties -DgigapaxosConfig=conf/demo/reconf.properties edu.umass.cs.reconfiguration.ReconfigurableNode RC0/AR0
