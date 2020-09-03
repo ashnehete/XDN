@@ -722,6 +722,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 run(restartCommand);
                             } // else: new state
                             else {
+                                // This is OK as it only happens when the service name is first time created
                                 log.log(DEBUG_LEVEL, "Not a valid checkpoint {0}", new Object[]{json});
                             }
                         } else {
@@ -739,6 +740,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 run(restartCommand);
                             }
                             else {
+                                // This is OK as it only happens when the service name is first time created
                                 log.log(DEBUG_LEVEL, "Not a valid checkpoint {0}", new Object[]{json});
                             }
                         }

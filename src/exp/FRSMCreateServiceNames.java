@@ -4,6 +4,7 @@ import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.CreateServiceName;
+import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 import edu.umass.cs.xdn.docker.DockerKeys;
 import org.json.JSONException;
@@ -36,7 +37,7 @@ public class FRSMCreateServiceNames {
         int cnt = 0;
 
         for (int i=0; i<total; i++) {
-            String serviceName = serviceNamePrefix+i;
+            String serviceName = XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
             Set<InetSocketAddress> initGroup = new HashSet<>();
 
             // FIXME: works only for config file conf/exp/test.properties on Sep 3rd, 2020
