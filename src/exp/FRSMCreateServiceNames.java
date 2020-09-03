@@ -32,11 +32,13 @@ public class FRSMCreateServiceNames {
         XDNAgentClient client = new XDNAgentClient();
 
         Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
+        
+        int cnt = 0;
 
         for (int i=0; i<total; i++) {
             String serviceName = serviceNamePrefix+i;
             Set<InetSocketAddress> initGroup = new HashSet<>();
-            int cnt = 0;
+
             // FIXME: works only for config file conf/exp/test.properties on Sep 3rd, 2020
             initGroup.add(servers.get("AR0"));
             for (int k=0; k<3; k++) {
