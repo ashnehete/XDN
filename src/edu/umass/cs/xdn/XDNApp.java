@@ -183,9 +183,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             HttpActiveReplicaRequest r = (HttpActiveReplicaRequest) request;
             String name = r.getServiceName();
             String containerUrl = null;
+            // TODO: check whether app is running, if not, return false
             if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name))) {
                 DockerContainer dc = containerizedApps.get(serviceNames.get(name));
-                // TODO: this url only works on Linux. Since MacOS does not have docker0 bridge running on the host machine, therefore, the following implementation won't work for MacOS
+                // Note, this url only works on Linux. Since MacOS does not have docker0 bridge running on the host machine, therefore, the following implementation won't work for MacOS
                 // {@url https://docs.docker.com/docker-for-mac/networking/#:~:text=There%20is%20no%20docker0%20bridge,docker0%20interface%20on%20the%20host}
                 if(isLinux)
                     containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort());
@@ -807,7 +808,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 updateServiceAndApps(appName, name, c);
                 return true;
             } else {
-                // TODO: container is running, add the container info into containerizedApps and runningApps
+                // Do nothing
+                log.log(DEBUG_LEVEL, "App {0} is already running, no need to spawn or restart the app.",
+                        new Object[]{appName});
             }
 
         }
