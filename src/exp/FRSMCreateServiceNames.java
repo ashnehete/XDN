@@ -39,12 +39,12 @@ public class FRSMCreateServiceNames {
             int cnt = 0;
             // FIXME: works only for config file conf/exp/test.properties on Sep 3rd, 2020
             initGroup.add(servers.get("AR0"));
-            for (int k=1; k<4; k++) {
+            for (int k=0; k<3; k++) {
                 if( cnt%3 != k ) {
-                    initGroup.add(servers.get("AR" + k));
+                    initGroup.add(servers.get("AR" + (k+1)));
                 }
-                cnt++;
             }
+            cnt++;
 
             JSONObject state = new JSONObject();
             state.put(DockerKeys.NAME.toString(), imageName);
