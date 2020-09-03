@@ -32,7 +32,7 @@ public class FRSMCreateServiceNames {
         XDNAgentClient client = new XDNAgentClient();
 
         Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
-        
+
         int cnt = 0;
 
         for (int i=0; i<total; i++) {
@@ -78,5 +78,6 @@ public class FRSMCreateServiceNames {
             }
         }
 
+        client.close();
     }
 }
