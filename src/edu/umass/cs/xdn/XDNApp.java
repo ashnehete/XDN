@@ -172,13 +172,28 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return "http://" + addr + XDNConfig.xdnRoute;
     }
 
+    private String printMap(Map m){
+        StringBuilder sb = new StringBuilder();
+        sb.append("#############");
+        for (Object key: m.keySet()){
+            sb.append(key);
+            sb.append(":");
+            sb.append(m.get(key));
+        }
+        sb.append("#############");
+        return sb.toString();
+    }
+
     @Override
     public boolean execute(Request request,
                            boolean doNotReplyToClient) {
+
+        log.log(DEBUG_LEVEL, "XDNApp execute request:{0}", new Object[]{request});
         if (XDNConfig.noopEnabled){
             ((HttpActiveReplicaRequest) request).setResponse("");
             return true;
         }
+
         if (request instanceof HttpActiveReplicaRequest) {
             HttpActiveReplicaRequest r = (HttpActiveReplicaRequest) request;
             String name = r.getServiceName();
@@ -192,12 +207,16 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort());
                 else
                     containerUrl = getContainerUrl("localhost:"+dc.getExposePort());
+
+                log.log(DEBUG_LEVEL, "############## Container URL:+{0}+\n DockerContainer:{1}\n containerizedApps:{2}\n serviceNames:{3}",
+                        new Object[]{containerUrl, dc, printMap(containerizedApps), printMap(serviceNames)});
             }
 
             if (containerUrl == null)
                 return false;
 
-            log.info("Execute request "+r+" for service name "+name+" running at address "+containerUrl);
+            log.log(DEBUG_LEVEL,"Execute request {0} for service name {1} running at address {2}",
+                    new Object[]{r, name, containerUrl});
 
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
                 /*
@@ -248,10 +267,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         }
                         in.close();
 
+                        // TODO: check whether the request comes from HttpActiveReplica
                         ((HttpActiveReplicaRequest) request).setResponse(response != null?
                                 response.toString():
                                 "");
-                        log.log(Level.INFO, "{0} received response from underlying app {1}: {2}", new Object[]{this, name, response});
+                        log.log(Level.INFO, "{0} received response from underlying app {1}: {2}",
+                                new Object[]{this, name, response});
 
                         return true;
 
@@ -810,7 +831,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 updateServiceAndApps(appName, name, c);
                 return true;
             } else {
-                // Do nothing
+                DockerContainer c = containerizedApps.get(appName);
+                updateServiceAndApps(appName, name, c);
                 log.log(DEBUG_LEVEL, "App {0} is already running, no need to spawn or restart the app.",
                         new Object[]{appName});
             }
