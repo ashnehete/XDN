@@ -18,7 +18,7 @@ import java.util.Set;
 
 public class FRSMCreateServiceNames {
 
-    static final int total = 10;
+    static final int total = 1000;
 
     static int received = 0;
 
