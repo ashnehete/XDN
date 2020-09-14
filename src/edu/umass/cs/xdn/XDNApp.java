@@ -174,13 +174,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     private String printMap(Map m){
         StringBuilder sb = new StringBuilder();
-        sb.append("#############");
+        sb.append("#############\n");
         for (Object key: m.keySet()){
             sb.append(key);
             sb.append(":");
             sb.append(m.get(key));
+            sb.append("\n");
         }
-        sb.append("#############");
+        sb.append("#############\n");
         return sb.toString();
     }
 
@@ -268,9 +269,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         in.close();
 
                         // TODO: check whether the request comes from HttpActiveReplica
-                        ((HttpActiveReplicaRequest) request).setResponse(response != null?
-                                response.toString():
-                                "");
+                        ((HttpActiveReplicaRequest) request).setResponse(response.toString());
                         log.log(Level.INFO, "{0} received response from underlying app {1}: {2}",
                                 new Object[]{this, name, response});
 

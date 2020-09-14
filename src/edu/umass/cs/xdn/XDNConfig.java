@@ -26,7 +26,7 @@ public class XDNConfig {
         }
 
         for (XC xc : XC.values()){
-            System.out.println(xc+":"+xc.defaultValue);
+            // System.out.println(xc+":"+xc.defaultValue);
         }
     }
 
