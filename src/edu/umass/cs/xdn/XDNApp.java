@@ -923,6 +923,11 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             command.add(vol+":/tmp");
         }
 
+        // FIXME: cpu and memory limit
+        command.add("--cpus=\"2.0\"");
+        command.add("-m");
+        command.add("8G");
+
         //FIXME: only works on cloud node
         if (port > 0){
             command.add("-p");
