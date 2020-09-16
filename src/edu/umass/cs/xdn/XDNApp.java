@@ -866,9 +866,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 return true;
             } else {
                 DockerContainer c = containerizedApps.get(appName);
-                // updateServiceAndApps(appName, name, c);
-                c.addServiceName(name);
-                containerizedApps.put(appName, c);
+                updateServiceAndApps(appName, name, c);
+                // c.addServiceName(name);
+                // containerizedApps.put(appName, c);
                 log.log(DEBUG_LEVEL, "App {0} is already running, no need to spawn or restart the app.",
                         new Object[]{appName});
             }
