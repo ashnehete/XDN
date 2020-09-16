@@ -195,7 +195,7 @@ public class DockerContainer implements XDNContainer {
             e.printStackTrace();
         }
 
-        System.out.println("############ JSON State:" + json);
+        // System.out.println("############ JSON State:" + json);
         return json;
     }
 
