@@ -910,6 +910,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
      */
     // docker run --name xdn-demo-app -p 8080:3000 -e ADDR=172.17.0.1 -d oversky710/xdn-demo-app --ip 172.17.0.100
     private List<String> getRunCommand(String name, int port, int exportPort, List<String> env, String url, String vol) {
+        return getRunCommand(name, port, exportPort, env, url, vol, 2.0, 8);
+    }
+
+    private List<String> getRunCommand(String name, int port, int exportPort,
+                                       List<String> env, String url, String vol,
+                                       double cpus, int memory) {
         List<String> command = new ArrayList<>();
         command.add("docker");
         command.add("run");
@@ -924,9 +930,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         }
 
         // FIXME: cpu and memory limit
-        command.add("--cpus=\"2.0\"");
-        command.add("-m");
-        command.add("8G");
+        command.add("--cpus=\""+cpus+"\"");
+        // command.add("-m");
+        // command.add("8G");
 
         //FIXME: only works on cloud node
         if (port > 0){
