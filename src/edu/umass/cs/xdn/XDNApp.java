@@ -132,7 +132,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         if (!checkpointFolder.exists()) {
             boolean created = checkpointFolder.mkdir();
             if (!created)
-                log.fine(this+" failed to create checkpoint folder!");
+                log.log(Level.FINE,
+                        "{0} failed to create checkpoint folder!",
+                        new Object[]{this});
         }
 
         if (XDNConfig.isEdgeNode) {
@@ -228,7 +230,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         .post(body)
                         .build();
                 try (Response response = httpClient.newCall(req).execute()) {
-                    log.info("Received response from XDN app:"+response);
+                    log.log(Level.FINE, "Received response from XDN app:"+response);
                     // log.fine("Content:"+response.body().string());
                     r.setResponse(response.body() != null?
                             response.body().string():
@@ -303,7 +305,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     public String checkpoint(String name) {
         long start = System.currentTimeMillis();
 
-        log.info(">>>>>>> Checkpoint ServiceName="+name);
+        log.log(Level.INFO, ">>>>>>> Checkpoint ServiceName={0}", new Object[]{name});
 
         if (name.equals(PaxosConfig.getDefaultServiceName())){
             // return empty string for the default app
@@ -340,7 +342,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             // String userName = nameResult[0];
             String appName = nameResult[1];
 
-            log.info(">>>>>>>> About to checkpoint for appName:"+appName);
+            log.log(Level.FINE,
+                    ">>>>>>>> About to checkpoint for appName:{0}",
+                    new Object[]{appName});
 
             if (XDNConfig.volumeCheckpointEnabled) {
                 // checkpoint volume
@@ -368,7 +372,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     e.printStackTrace();
                 }
 
-                log.info(">>>>>>>>> Checkpoint volume: " + json);
+                log.log(Level.FINE,
+                        ">>>>>>>>> Checkpoint volume: {0}",
+                        new Object[]{json});
                 return json.toString();
 
             } else {
@@ -425,7 +431,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     e.printStackTrace();
                 }
 
-                log.info("Checkpoint: LargeCheckpointer " + json+"\n");
+                log.log(Level.FINE,
+                        "Checkpoint: LargeCheckpointer {0}",
+                        new Object[]{json});
 
                 return json.toString();
             }
@@ -456,14 +464,17 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     .build();
 
             try (Response response = httpClient.newCall(req).execute()) {
-                log.fine("Checkpoint: received response from app:"+response);
+                log.log(Level.INFO,
+                        "Checkpoint: received response from app:{0}",
+                        new Object[]{response});
                 // System.out.println("Content:"+response.body().string());
 
                 return response.body()!=null? response.body().string(): "";
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            log.fine("Checkpoint: something wrong with underlying app, no checkpoint is taken.");
+            log.log(Level.WARNING,
+                    "Checkpoint: something wrong with underlying app, no checkpoint is taken.");
             long elapsed = System.currentTimeMillis() - start;
             System.out.println(">>>>>>> It takes "+elapsed+"ms to checkpoint.");
             // underlying app may not implement checkpoint, return an empty string as a checkpoint
@@ -487,7 +498,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             // String userName = nameResult[0];
             appName = nameResult[1];
         }
-        log.info(">>>>>> Restore request: { Name: "+name+"\nAppName: "+appName+"\nState: "+state+"}");
+        log.log(DEBUG_LEVEL,
+                ">>>>>> Restore request:  Name: {0}\nAppName: {1}\nState: {2}",
+                new Object[]{name, appName, state});
 
         // handle XDN service restore
         if (name.equals(PaxosConfig.getDefaultServiceName())){
@@ -525,9 +538,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
         }
 
-        log.info(">>>>>>>> XDN containerized app to restore:"+name);
-        log.info(">>>>>>>> serviceNames:"+serviceNames);
-        log.info(">>>>>>>> runningApps:"+runningApps);
+        log.log(DEBUG_LEVEL,
+                ">>>>>>>> XDN containerized app to restore:{0}\n >>>>>>>> serviceNames:{1}\n>>>>>>>> runningApps:{2}",
+                new Object[]{name, serviceNames, runningApps});
 
         // Handle serviceName (name) restore
         if (serviceNames.containsKey(name)){
@@ -611,14 +624,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
                     List<String> unTarCommand = getUntarCommand(filename, dest);
                     assert (run(unTarCommand));
-                    System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-checkpointTime)+"ms to get checkpoint for app "+container.getName());
-
+                    // System.out.println(">>>>>>>>> It takes "+(System.currentTimeMillis()-checkpointTime)+"ms to get checkpoint for app "+container.getName());
+                    log.log(DEBUG_LEVEL, ">>>>>>>>> It takes {0}ms to get checkpoint for app {1}",
+                            new Object[]{(System.currentTimeMillis()-checkpointTime), container.getName()});
 
                     long startTime = System.currentTimeMillis();
                     List<String> startCommand = getStartCommand(appName);
                     assert (run(startCommand));
                     DockerContainer c = containerizedApps.get(appName);
-                    System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-startTime)+"ms to start app "+container.getName());
+                    // System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-startTime)+"ms to start app "+container.getName());
 
                     updateServiceAndApps(appName, name, c);
 
@@ -649,7 +663,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             .build();
 
                     try (Response response = httpClient.newCall(req).execute()) {
-                        log.fine("Restore: received response from app:"+response);
+                        log.log(DEBUG_LEVEL,
+                                "Restore: received response from app: {0}",
+                                new Object[]{response});
 
                         return response.code()==200;
                     } catch (IOException e) {
@@ -662,7 +678,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             }
 
         } else {
-            log.info("Restore: service name "+name+" does not exist.");
+            log.log(DEBUG_LEVEL,
+                    "Restore: service name {0} does not exist.",
+                    new Object[]{name});
 
             /*
              * This is not a registered service name, follow the steps to set up the service if the app does not exist yet
@@ -676,14 +694,17 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
              * 5. restore user state
              */
             if ( !containerizedApps.containsKey(appName) ) {
-                log.log(DEBUG_LEVEL,"Restore: app "+appName+" does not exist, restore from a new image.");
+                log.log(DEBUG_LEVEL,
+                        "Restore: app {0} does not exist, restore from a new image.",
+                        new Object[]{appName});
                 try {
 
                     // 1. Extract the initial service information
                     assert(state != null);
                     JSONObject json = new JSONObject(state);
                     json.put(DockerKeys.NAME.toString(), appName);
-                    log.info("########## JSON from state:"+state);
+
+                    log.log(DEBUG_LEVEL, "########## JSON from state:{0}", new Object[]{state});
 
                     DockerContainer dockerContainer = null;
                     try {
@@ -691,7 +712,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    log.info("########## Docker from JSON"+ dockerContainer);
+                    log.log(DEBUG_LEVEL, "########## Docker from JSON {0}",
+                            new Object[]{dockerContainer});
 
                     int port = dockerContainer.getPort();
                     String url = dockerContainer.getUrl();
@@ -730,7 +752,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             if(LargeCheckpointer.isCheckpointHandle(json.toString())){
                                 String dest = getVolumeDir(appName);
                                 String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
-                                log.log(DEBUG_LEVEL, "Extract state from volume "+ filename + " to "+dest);
+                                log.log(DEBUG_LEVEL,
+                                        "Extract state from volume {0} to {1}",
+                                        new Object[]{filename, dest});
 
                                 File cp = new File(filename);
                                 LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
@@ -749,7 +773,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             if(LargeCheckpointer.isCheckpointHandle(json.toString())){
                                 String dest = XDNConfig.defaultCheckpointDir + containerizedApps.get(appName).getID() + "/checkpoints/";
                                 String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
-                                log.log(DEBUG_LEVEL, "Extract state from checkpoint "+ filename + " to "+dest);
+                                log.log(DEBUG_LEVEL,
+                                        "Extract state from checkpoint {0} to {1}",
+                                        new Object[]{filename, dest});
                                 File cp = new File(filename);
                                 LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
                                 List<String> unTarCommand = getUntarCommand(filename, dest);
@@ -761,14 +787,16 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             }
                             else {
                                 // This is OK as it only happens when the service name is first time created
-                                log.log(DEBUG_LEVEL, "Not a valid checkpoint {0}", new Object[]{json});
+                                log.log(DEBUG_LEVEL, "Not a valid checkpoint {0}",
+                                        new Object[]{json});
                             }
                         }
 
 
                     }
 
-                    log.info("Restore: start app instance command result is "+result);
+                    log.log(DEBUG_LEVEL, "Restore: start app instance command result is {0}",
+                            new Object[]{result});
                     if (result == null) {
                         // there may be an interruption, let's retry.
                         try {
@@ -779,12 +807,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         assert (result != null);
                         if (result.getRetCode() != 0) {
                             // give up and raise an error
-                            log.log(Level.SEVERE, "unable to restart app for service name {0}: {1}", new Object[]{name, startCommand.toString()});
+                            log.log(Level.SEVERE, "unable to restart app for service name {0}: {1}",
+                                    new Object[]{name, startCommand.toString()});
                             return false;
                         } else {
                             DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
                             updateServiceAndApps(appName, name, container);
-                            log.fine(">>>>>>>>> Service name " + name + " has been created successfully after retry.\n appName:"+appName);
+                            log.log(DEBUG_LEVEL,
+                                    ">>>>>>>>> Service name {0} has been created successfully after retry.\n appName: {1}",
+                                    new Object[]{name, appName});
                             return true;
                         }
                     } else {
@@ -802,7 +833,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             if (result.getRetCode() == 0 ) {
                                 DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
                                 updateServiceAndApps(appName, name, container);
-                                log.fine(">>>>>>>>> Service name " + name + " has been created successfully after stop and retry.\n appName:"+appName);
+                                log.log(Level.FINE,
+                                        ">>>>>>>>> Service name {0} has been created successfully after stop and retry.\n appName: {1}",
+                                        new Object[]{name, appName});
                                 return true;
                             }
                             return false;
@@ -810,7 +843,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             // String id = result.getResult().trim();
                             DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
                             updateServiceAndApps(appName, name, container);
-                            log.info(">>>>>>>>> Service name " + name + " has been created successfully.\n appName:"+appName);
+                            log.log(DEBUG_LEVEL,
+                                    ">>>>>>>>> Service name {0} has been created successfully.\n appName:{1}",
+                                    new Object[]{name, appName});
                             return true;
                         }
 
@@ -831,7 +866,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 return true;
             } else {
                 DockerContainer c = containerizedApps.get(appName);
-                updateServiceAndApps(appName, name, c);
+                // updateServiceAndApps(appName, name, c);
+                c.addServiceName(name);
+                containerizedApps.put(appName, c);
                 log.log(DEBUG_LEVEL, "App {0} is already running, no need to spawn or restart the app.",
                         new Object[]{appName});
             }
@@ -1092,7 +1129,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     private boolean run(List<String> command) {
-        log.info("Command: "+command);
+        log.log(Level.FINE, "Command: {0}", new Object[]{command});
         ProcessResult result;
         try {
             result = ProcessRuntime.executeCommand(command);
@@ -1100,7 +1137,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             e.printStackTrace();
             return false;
         }
-        log.info("Command return value:"+result);
+        log.log(Level.FINE, "Command return value: {0}", new Object[]{result});
         return result.getRetCode() == 0;
     }
 
