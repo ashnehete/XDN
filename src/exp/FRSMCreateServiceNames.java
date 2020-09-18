@@ -28,6 +28,8 @@ public class FRSMCreateServiceNames {
     final static int port = 3000;
     final static int exposePort = 80;
 
+    final static int numCloudServers = 3;
+
     public static void main(String[] args) throws JSONException, IOException, InterruptedException {
 
         XDNAgentClient client = new XDNAgentClient();
@@ -36,12 +38,18 @@ public class FRSMCreateServiceNames {
 
         int cnt = 0;
 
+        Map<String, InetSocketAddress> actives = PaxosConfig.getActives();
+
+        // 3 replicas are for cloud servers, the rest are edge servers
+        int size = actives.size() - numCloudServers;
+
         for (int i=0; i<total; i++) {
             String serviceName = XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
             Set<InetSocketAddress> initGroup = new HashSet<>();
 
             // FIXME: works only for config file conf/exp/test.properties on Sep 3rd, 2020
-            initGroup.add(servers.get("AR0"));
+            // initGroup.add(servers.get("AR0"));
+            initGroup.add(servers.get("AR"+(numCloudServers + cnt%size)));
             for (int k=0; k<3; k++) {
                 if( cnt%3 != k ) {
                     initGroup.add(servers.get("AR" + (k+1)));
