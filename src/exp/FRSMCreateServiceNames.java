@@ -47,12 +47,12 @@ public class FRSMCreateServiceNames {
             String serviceName = XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
             Set<InetSocketAddress> initGroup = new HashSet<>();
 
-            // FIXME: works only for config file conf/exp/test.properties on Sep 3rd, 2020
+
             // initGroup.add(servers.get("AR0"));
             initGroup.add(servers.get("AR"+(numCloudServers + cnt%size)));
-            for (int k=0; k<3; k++) {
-                if( cnt%3 != k ) {
-                    initGroup.add(servers.get("AR" + (k+1)));
+            for (int k=0; k<numCloudServers; k++) {
+                if( cnt%numCloudServers != k ) {
+                    initGroup.add(servers.get("AR" + k));
                 }
             }
             cnt++;
