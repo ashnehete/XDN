@@ -15,7 +15,8 @@ public class XDNConfig {
         File f = new File(filename);
         if (!f.exists()) {
             System.err.println("Config file "+filename+" does not exist");
-            System.exit(0);
+            return;
+            // System.exit(0);
         }
 
         try {
