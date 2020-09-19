@@ -18,7 +18,7 @@ import java.util.Set;
 
 public class FRSMCreateServiceNames {
 
-    static final int total = 1000;
+    static final int total = 10;
 
     static int received = 0;
 
@@ -29,6 +29,8 @@ public class FRSMCreateServiceNames {
     final static int exposePort = 80;
 
     final static int numCloudServers = 3;
+
+    static boolean DEBUG = false;
 
     public static void main(String[] args) throws JSONException, IOException, InterruptedException {
 
@@ -43,6 +45,8 @@ public class FRSMCreateServiceNames {
         // 3 replicas are for cloud servers, the rest are edge servers
         int size = actives.size() - numCloudServers;
 
+        System.out.println("#numCloudServers="+numCloudServers+", #size="+size);
+
         for (int i=0; i<total; i++) {
             String serviceName = XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
             Set<InetSocketAddress> initGroup = new HashSet<>();
@@ -55,7 +59,10 @@ public class FRSMCreateServiceNames {
                     initGroup.add(servers.get("AR" + k));
                 }
             }
+            System.out.println("initGroup="+initGroup);
             cnt++;
+            if(DEBUG)
+                continue;
 
             JSONObject state = new JSONObject();
             state.put(DockerKeys.NAME.toString(), imageName);
