@@ -30,7 +30,7 @@ public class FRSMCreateServiceNames {
 
     final static int numCloudServers = 3;
 
-    static boolean DEBUG = false;
+    static boolean DEBUG = true;
 
     public static void main(String[] args) throws JSONException, IOException, InterruptedException {
 
