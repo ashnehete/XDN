@@ -222,6 +222,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             log.log(DEBUG_LEVEL,"Execute request {0} for service name {1} running at address {2}",
                     new Object[]{r, name, containerUrl});
+
             if (DEBUG) {
                 ((HttpActiveReplicaRequest) request).setResponse("OK");
                 return true;
