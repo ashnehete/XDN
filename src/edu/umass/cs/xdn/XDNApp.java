@@ -88,6 +88,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     Level DEBUG_LEVEL = Level.INFO;
 
+    private static boolean DEBUG = true;
+
     /**
      * 
      */
@@ -220,30 +222,13 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             log.log(DEBUG_LEVEL,"Execute request {0} for service name {1} running at address {2}",
                     new Object[]{r, name, containerUrl});
+            if (DEBUG) {
+                ((HttpActiveReplicaRequest) request).setResponse("OK");
+                return true;
+            }
 
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
-                /*
-                 // old implementation with okhttp lib
-                RequestBody body = RequestBody.create(JSON, r.toString());
-                okhttp3.Request req = new okhttp3.Request.Builder()
-                        .url(containerUrl)
-                        .post(body)
-                        .build();
-                try (Response response = httpClient.newCall(req).execute()) {
-                    log.log(Level.FINE, "Received response from XDN app:"+response);
-                    // log.fine("Content:"+response.body().string());
-                    r.setResponse(response.body() != null?
-                            response.body().string():
-                            "");
-                    return true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-                */
-
                 // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
-
                 URL url = null;
                 try {
                     url = new URL(containerUrl);
@@ -286,17 +271,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
 
             }
-            /*
-            else if (HttpActiveReplicaPacketType.SNAPSHOT.equals(r.getRequestType())) {
-                String name = r.getServiceName();
-                List<String> command = getCheckpointCreateCommand(name);
-                return run(command);
-            } else if (HttpActiveReplicaPacketType.RECOVER.equals(r.getRequestType())) {
-                String name = r.getServiceName();
-                List<String> command = getRestoreCommand(name);
-                return run(command);
-            }
-            */
+
         }
         return false;
     }

@@ -24,7 +24,7 @@ public class FRSMCreateServiceNames {
 
     final static String serviceNamePrefix = "test";
     final static String imageName = "xdn-test-app";
-    final static String imageUrl = "oversky710/xdn-test-app";
+    final static String imageUrl = "oversky710/" + imageName;
     final static int port = 3000;
     final static int exposePort = 80;
 
@@ -38,29 +38,28 @@ public class FRSMCreateServiceNames {
 
         Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
 
-        int cnt = 0;
+//        int cnt = 0;
 
         Map<String, InetSocketAddress> actives = PaxosConfig.getActives();
 
         // 3 replicas are for cloud servers, the rest are edge servers
-        int size = actives.size() - numCloudServers;
+        int numEdgeServers = actives.size() - numCloudServers;
 
-        System.out.println("#numCloudServers="+numCloudServers+", #size="+size);
+        System.out.println("#numCloudServers="+numCloudServers+", #size="+numEdgeServers);
 
         for (int i=0; i<total; i++) {
             String serviceName = XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
             Set<InetSocketAddress> initGroup = new HashSet<>();
 
-
             // initGroup.add(servers.get("AR0"));
-            initGroup.add(servers.get("AR"+(numCloudServers + cnt%size)));
+            initGroup.add(servers.get("AR"+(numCloudServers + i%numEdgeServers)));
             for (int k=0; k<numCloudServers; k++) {
-                if( cnt%numCloudServers != k ) {
+                if( i % numCloudServers != k ) {
                     initGroup.add(servers.get("AR" + k));
                 }
             }
             System.out.println("initGroup="+initGroup);
-            cnt++;
+
             if(DEBUG)
                 continue;
 
