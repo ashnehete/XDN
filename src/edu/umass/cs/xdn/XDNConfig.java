@@ -144,7 +144,7 @@ public class XDNConfig {
     /**
      * Used to test overhead with noop for XDNApp
      */
-    public static boolean noopEnabled = false;
+    public static boolean noopEnabled = true;
 
 
     public static String generateServiceName(String imageName, String name){

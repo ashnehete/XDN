@@ -5,6 +5,7 @@ import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;
 import edu.umass.cs.gigapaxos.interfaces.ClientMessenger;
 import edu.umass.cs.gigapaxos.interfaces.Replicable;
 import edu.umass.cs.gigapaxos.interfaces.Request;
+import edu.umass.cs.gigapaxos.paxospackets.RequestPacket;
 import edu.umass.cs.gigapaxos.paxosutil.LargeCheckpointer;
 import edu.umass.cs.nio.JSONPacket;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
@@ -195,7 +196,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         log.log(DEBUG_LEVEL, "XDNApp execute request:{0}", new Object[]{request});
         if (XDNConfig.noopEnabled){
-            ((HttpActiveReplicaRequest) request).setResponse("");
+            if (request instanceof HttpActiveReplicaRequest)
+                ((HttpActiveReplicaRequest) request).setResponse("");
+            else
+                ((RequestPacket) request).setResponse("");
             return true;
         }
 
@@ -223,10 +227,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             log.log(DEBUG_LEVEL,"Execute request {0} for service name {1} running at address {2}",
                     new Object[]{r, name, containerUrl});
 
-            if (DEBUG) {
-                ((HttpActiveReplicaRequest) request).setResponse("OK");
-                return true;
-            }
 
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
                 // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
