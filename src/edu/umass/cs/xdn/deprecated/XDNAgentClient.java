@@ -5,6 +5,7 @@ import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
+import edu.umass.cs.nio.nioutils.NIOHeader;
 import edu.umass.cs.reconfiguration.ReconfigurableAppClientAsync;
 import edu.umass.cs.reconfiguration.examples.AppRequest;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
@@ -14,7 +15,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,7 +27,8 @@ import java.util.Set;
  * This class a temporary class used by XDNHttpServer to interact with
  * XDNAgentApp (a GigaPaxos App).
  */
-public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implements AppRequestParserBytes {
+public class XDNAgentClient extends ReconfigurableAppClientAsync<Request>
+        implements AppRequestParserBytes {
 
     static int received = 0;
 
@@ -50,6 +54,17 @@ public class XDNAgentClient extends ReconfigurableAppClientAsync<Request> implem
     }
      */
 
+    @Override
+    public Request getRequest(byte[] message, NIOHeader header)
+            throws RequestParseException{
+        try {
+            return new HttpActiveReplicaRequest(message);
+        } catch (UnsupportedEncodingException | UnknownHostException e) {
+            e.printStackTrace();
+            return this.getRequest(new String(message));
+        }
+    }
+    
     @Override
     public Request getRequest(String s) throws RequestParseException {
         try {
