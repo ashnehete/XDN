@@ -10,6 +10,7 @@ import edu.umass.cs.gigapaxos.paxosutil.LargeCheckpointer;
 import edu.umass.cs.nio.JSONPacket;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
 import edu.umass.cs.nio.interfaces.SSLMessenger;
+import edu.umass.cs.nio.nioutils.NIOHeader;
 import edu.umass.cs.reconfiguration.examples.AbstractReconfigurablePaxosApp;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
@@ -31,6 +32,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -1124,6 +1126,17 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     @Override
     public boolean execute(Request request) {
         return execute(request,false);
+    }
+
+    @Override
+    public Request getRequest(byte[] message, NIOHeader header)
+            throws RequestParseException{
+        try {
+            return new HttpActiveReplicaRequest(message);
+        } catch (UnsupportedEncodingException | UnknownHostException e) {
+            e.printStackTrace();
+            return this.getRequest(new String(message));
+        }
     }
 
     @Override
