@@ -198,10 +198,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         log.log(DEBUG_LEVEL, "XDNApp execute request:{0}", new Object[]{request});
         if (XDNConfig.noopEnabled){
+
             if (request instanceof HttpActiveReplicaRequest)
                 ((HttpActiveReplicaRequest) request).setResponse("");
-            else
-                ((RequestPacket) request).setResponse("");
+            else {
+                System.out.println("Unrecognized request type: "+request);
+            }
             return true;
         }
 
