@@ -470,12 +470,13 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         // String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
         String appName = name;
-        // FIXME: derive appName based on name (serviceName)
+        // FIXME: don not derive appName based on name (serviceName)
         if (name.contains(XDNConfig.xdnDomainName)){
             String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
             // String userName = nameResult[0];
             appName = nameResult[1];
         }
+
         log.log(DEBUG_LEVEL,
                 ">>>>>> Restore request:  Name: {0}\nAppName: {1}\nState: {2}",
                 new Object[]{name, appName, state});
@@ -568,6 +569,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 return true;
             } else {
                 System.out.println(">>>>>>>>>>>>>>>>>>> Restore from a non-empty state: "+state);
+
                 // restore from a checkpoint which is either a docker checkpoint or a volume checkpoint
                 if (XDNConfig.largeCheckPointerEnabled) {
 
@@ -660,6 +662,16 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     "Restore: service name {0} does not exist.",
                     new Object[]{name});
 
+            assert(state != null);
+            JSONObject json = null;
+            try {
+                json = new JSONObject(state);
+                appName = json.getString(DockerKeys.NAME.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            log.log(DEBUG_LEVEL, "########## JSON from state:{0}", new Object[]{state});
+
             /*
              * This is not a registered service name, follow the steps to set up the service if the app does not exist yet
              * 1. Extract the initial service information:
@@ -672,17 +684,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
              * 5. restore user state
              */
             if ( !containerizedApps.containsKey(appName) ) {
-                log.log(DEBUG_LEVEL,
-                        "Restore: app {0} does not exist, restore from a new image.",
-                        new Object[]{appName});
                 try {
-
+                    assert (json != null);
                     // 1. Extract the initial service information
-                    assert(state != null);
-                    JSONObject json = new JSONObject(state);
-                    json.put(DockerKeys.NAME.toString(), appName);
-
-                    log.log(DEBUG_LEVEL, "########## JSON from state:{0}", new Object[]{state});
+                    log.log(DEBUG_LEVEL,
+                            "Restore: app {0} does not exist, restore from a new image.",
+                            new Object[]{appName});
 
                     DockerContainer dockerContainer = null;
                     try {
@@ -835,6 +842,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 }
                 return false;
             } else if ( !runningApps.contains(appName) ) {
+
                 // there is already an app instance, if it's not running, boot it up
                 List<String> startCommand = getStartCommand(appName);
                 assert (run(startCommand));
@@ -843,11 +851,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 updateServiceAndApps(appName, name, c);
                 return true;
             } else {
+
                 DockerContainer c = containerizedApps.get(appName);
                 updateServiceAndApps(appName, name, c);
                 // c.addServiceName(name);
                 // containerizedApps.put(appName, c);
-                log.log(DEBUG_LEVEL, "App {0} is already running, no need to spawn or restart the app.",
+                log.log(Level.WARNING, "App {0} is already running, no need to spawn or restart the app.",
                         new Object[]{appName});
             }
 
