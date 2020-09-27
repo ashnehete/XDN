@@ -18,7 +18,7 @@ public class NoEdgeFRSMCreateServiceNames {
 
     static int received = 0;
 
-    final static String serviceNamePrefix = "test";
+    final static String serviceNamePrefix = "x";
     final static String imageName = "xdn-test-app";
     final static String imageUrl = "oversky710/" + imageName;
     final static int port = 3000;
