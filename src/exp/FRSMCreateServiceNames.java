@@ -18,8 +18,6 @@ import java.util.Set;
 
 public class FRSMCreateServiceNames {
 
-    static final int total = 10;
-
     static int received = 0;
 
     final static String serviceNamePrefix = "test";
@@ -33,6 +31,7 @@ public class FRSMCreateServiceNames {
     static boolean DEBUG = false;
 
     public static void main(String[] args) throws JSONException, IOException, InterruptedException {
+        int total = Integer.parseInt(args[0]);
 
         XDNAgentClient client = new XDNAgentClient();
 
@@ -47,7 +46,7 @@ public class FRSMCreateServiceNames {
 
         System.out.println("#numCloudServers="+numCloudServers+", #size="+numEdgeServers);
 
-        for (int i=0; i<total; i++) {
+        for (int i = 0; i< total; i++) {
             String serviceName = XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
             Set<InetSocketAddress> initGroup = new HashSet<>();
 
