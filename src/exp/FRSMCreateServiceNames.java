@@ -4,7 +4,6 @@ import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.CreateServiceName;
-import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 import edu.umass.cs.xdn.docker.DockerKeys;
 import org.json.JSONException;
@@ -20,7 +19,7 @@ public class FRSMCreateServiceNames {
 
     static int received = 0;
 
-    final static String serviceNamePrefix = "test";
+    final static String serviceNamePrefix = "x";
     final static String imageName = "xdn-test-app";
     final static String imageUrl = "oversky710/" + imageName;
     final static int port = 3000;
@@ -47,7 +46,7 @@ public class FRSMCreateServiceNames {
         System.out.println("#numCloudServers="+numCloudServers+", #size="+numEdgeServers);
 
         for (int i = 0; i< total; i++) {
-            String serviceName = XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
+            String serviceName = serviceNamePrefix+i; //XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
             Set<InetSocketAddress> initGroup = new HashSet<>();
 
             // initGroup.add(servers.get("AR0"));

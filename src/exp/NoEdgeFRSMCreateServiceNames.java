@@ -4,7 +4,6 @@ import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.reconfigurationpackets.CreateServiceName;
-import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 import edu.umass.cs.xdn.docker.DockerKeys;
 import org.json.JSONException;
@@ -34,10 +33,6 @@ public class NoEdgeFRSMCreateServiceNames {
 
         XDNAgentClient client = new XDNAgentClient();
 
-        Map<String, InetSocketAddress> servers = PaxosConfig.getActives();
-
-//        int cnt = 0;
-
         Map<String, InetSocketAddress> actives = PaxosConfig.getActives();
 
         // 3 replicas are for cloud servers, the rest are edge servers
@@ -46,7 +41,7 @@ public class NoEdgeFRSMCreateServiceNames {
         System.out.println("#numCloudServers="+numCloudServers+", #size="+numEdgeServers);
 
         for (int i = 0; i< total; i++) {
-            String serviceName = XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
+            String serviceName = serviceNamePrefix+i; //XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
             // Set<InetSocketAddress> initGroup = new HashSet<>();
 
             // initGroup.add(servers.get("AR0"));
