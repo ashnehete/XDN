@@ -859,7 +859,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 updateServiceAndApps(appName, name, c);
                 // c.addServiceName(name);
                 // containerizedApps.put(appName, c);
-                log.log(Level.WARNING, "App {0} is already running, no need to spawn or restart the app.",
+                log.log(Level.INFO, "App {0} is already running, no need to spawn or restart the app.",
                         new Object[]{appName});
             }
 
@@ -884,8 +884,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 // "NetworkSettings" -> "IPAddress"
                 String ipAddr = json.getJSONObject("NetworkSettings").getString("IPAddress");
                 container.setAddr(ipAddr);
-            } catch (IOException | InterruptedException | JSONException e) {
-                e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
             }
