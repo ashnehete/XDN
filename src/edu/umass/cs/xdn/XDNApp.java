@@ -283,6 +283,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     @Override
     public String checkpoint(String name) {
+        if (DEBUG)
+            return "";
+
         long start = System.currentTimeMillis();
 
         log.log(Level.INFO, ">>>>>>> Checkpoint ServiceName={0}", new Object[]{name});
