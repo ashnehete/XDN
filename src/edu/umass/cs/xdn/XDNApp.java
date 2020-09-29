@@ -318,9 +318,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         // Now let's handle app state and user state event
         if (XDNConfig.largeCheckPointerEnabled) {
-            String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
+            // String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
             // String userName = nameResult[0];
-            String appName = nameResult[1];
+            // String appName = nameResult[1];
+            String appName = containerizedApps.get(name).getName();
 
             log.log(Level.FINE,
                     ">>>>>>>> About to checkpoint for appName:{0}",

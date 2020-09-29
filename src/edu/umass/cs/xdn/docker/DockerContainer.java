@@ -10,6 +10,9 @@ import java.util.List;
 
 public class DockerContainer implements XDNContainer {
 
+    /*
+     * The name of the docker
+     */
     final String name;
 
     /**
