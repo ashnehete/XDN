@@ -43,7 +43,7 @@ public class FRSMCreateServiceNames {
         // 3 replicas are for cloud servers, the rest are edge servers
         int numEdgeServers = actives.size() - numCloudServers;
 
-        System.out.println("#numCloudServers="+numCloudServers+", #size="+numEdgeServers);
+        System.out.println("#numCloudServers="+numCloudServers+", #numEdgeServers="+numEdgeServers);
 
         for (int i = 0; i< total; i++) {
             String serviceName = serviceNamePrefix+i; //XDNConfig.generateServiceName(imageName, serviceNamePrefix+i);
