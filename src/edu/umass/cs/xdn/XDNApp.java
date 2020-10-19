@@ -90,7 +90,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     Level DEBUG_LEVEL = Level.INFO;
 
-    private static boolean DEBUG = false;
+    private static boolean DEBUG = true;
 
     /**
      * 
