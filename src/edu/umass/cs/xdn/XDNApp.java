@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 /**
  *  XDNApp is a GigaPaxos application used for
  */
-public class XDNAppNoHttpPool extends AbstractReconfigurablePaxosApp<String>
+public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         implements Replicable, Reconfigurable, AppRequestParserBytes, ClientMessenger {
 
     // used by execute method to post coordinated requests to underlying app
@@ -95,7 +95,7 @@ public class XDNAppNoHttpPool extends AbstractReconfigurablePaxosApp<String>
     /**
      * 
      */
-    public XDNAppNoHttpPool() {
+    public XDNApp() {
         httpClient = new OkHttpClient();
 
         gatewayIPAddress = "172.17.0.1";
@@ -167,7 +167,7 @@ public class XDNAppNoHttpPool extends AbstractReconfigurablePaxosApp<String>
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    LocalDNSResolver resolver = new LocalDNSResolver(XDNAppNoHttpPool.this);
+                    LocalDNSResolver resolver = new LocalDNSResolver(XDNApp.this);
                 }
             };
             new Thread(runnable).start();
