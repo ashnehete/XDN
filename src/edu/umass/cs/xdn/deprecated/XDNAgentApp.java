@@ -15,9 +15,8 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
- * Old async app
+ * Async app only for test
  */
-@Deprecated
 public class XDNAgentApp implements Replicable {
 
     private static final MediaType JSON

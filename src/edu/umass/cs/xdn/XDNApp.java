@@ -5,7 +5,6 @@ import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;
 import edu.umass.cs.gigapaxos.interfaces.ClientMessenger;
 import edu.umass.cs.gigapaxos.interfaces.Replicable;
 import edu.umass.cs.gigapaxos.interfaces.Request;
-import edu.umass.cs.gigapaxos.paxospackets.RequestPacket;
 import edu.umass.cs.gigapaxos.paxosutil.LargeCheckpointer;
 import edu.umass.cs.nio.JSONPacket;
 import edu.umass.cs.nio.interfaces.IntegerPacketType;
@@ -41,7 +40,7 @@ import java.util.logging.Logger;
 /**
  *  XDNApp is a GigaPaxos application used for
  */
-public class XDNApp extends AbstractReconfigurablePaxosApp<String>
+public class XDNAppNoHttpPool extends AbstractReconfigurablePaxosApp<String>
         implements Replicable, Reconfigurable, AppRequestParserBytes, ClientMessenger {
 
     // used by execute method to post coordinated requests to underlying app
@@ -96,7 +95,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     /**
      * 
      */
-    public XDNApp() {
+    public XDNAppNoHttpPool() {
         httpClient = new OkHttpClient();
 
         gatewayIPAddress = "172.17.0.1";
@@ -168,7 +167,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    LocalDNSResolver resolver = new LocalDNSResolver(XDNApp.this);
+                    LocalDNSResolver resolver = new LocalDNSResolver(XDNAppNoHttpPool.this);
                 }
             };
             new Thread(runnable).start();
