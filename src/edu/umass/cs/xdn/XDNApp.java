@@ -959,7 +959,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         // FIXME: cpu and memory limit
         if(cpus > 0) {
             // command.add("--cpus=\"" + cpus + "\"");
-            command.add("--cpuset-cpus=0-3");
+            // command.add("--cpuset-cpus=0-3");
         }
         // command.add("-m");
         // command.add("8G");
