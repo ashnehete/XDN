@@ -29,6 +29,7 @@ public class CloudlabDnsTrafficPolicy implements DnsTrafficPolicy {
         }
 
         int idx = num % targetList.size();
+        if (idx < 0) idx += targetList.size();
 
         result.add(targetList.get(idx));
 
