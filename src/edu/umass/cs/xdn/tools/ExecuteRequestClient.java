@@ -71,7 +71,7 @@ public class ExecuteRequestClient {
             addr = PaxosConfig.getActives().get(target);
         }
 
-        System.out.println("Start sending request to address:"+addr.toString());
+        System.out.println("Start sending request to address:"+addr);
 
         for (int i=0; i<numReq; i++){
             Request result = null;
