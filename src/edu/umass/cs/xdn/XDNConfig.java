@@ -78,7 +78,11 @@ public class XDNConfig {
         /**
          *
          */
-        NUM_REQ(1)
+        NUM_REQ(1),
+        /**
+         * the target to send request to
+         */
+        TARGET("")
         ;
 
         final Object defaultValue;

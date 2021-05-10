@@ -39,8 +39,8 @@ public class ExecuteRequestClient {
             numReq = Integer.parseInt(XDNConfig.prop.getProperty(XDNConfig.XC.NUM_REQ.toString()));
 
         target = null;
-        if( XDNConfig.prop.getProperty(XDNConfig.XC.NUM_REQ.toString()) != null)
-            target = XDNConfig.prop.getProperty(XDNConfig.XC.NUM_REQ.toString());
+        if( XDNConfig.prop.getProperty(XDNConfig.XC.TARGET.toString()) != null)
+            target = XDNConfig.prop.getProperty(XDNConfig.XC.TARGET.toString());
 
 
         serviceName = XDNConfig.generateServiceName(imageName, name);
