@@ -117,7 +117,7 @@ public class ExecuteRequestClient {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                while(sent < received){
+                while(received < sent ){
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
