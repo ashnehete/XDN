@@ -2,6 +2,7 @@ package edu.umass.cs.xdn.tools;
 
 import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.Request;
+import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.xdn.XDNConfig;
@@ -22,6 +23,7 @@ public class ExecuteRequestClient {
     String target;
 
     int id;
+    static int received = 0;
 
     final private static long timeout = 1000;
 
@@ -73,28 +75,56 @@ public class ExecuteRequestClient {
 
         System.out.println("Start sending request to target: "+target+", address:"+addr);
 
+        int sent = 0;
         for (int i=0; i<numReq; i++){
             Request result = null;
             long start = System.currentTimeMillis();
-            if (target == null)
+            if (target == null) {
                 try {
                     result = client.sendRequest(getRequest(), timeout);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            else{
+                if (result == null){
+                    System.out.println(i+"th request:"+"timed out");
+                    return;
+                }
+                // System.out.println(i+"th request:"+(System.currentTimeMillis()-start)+"ms");
+                System.out.println((System.currentTimeMillis()-start));
+
                 try {
-                    result = client.sendRequest(getRequest(), addr, timeout);
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            } else {
+                sent++;
+                try {
+                    client.sendRequest(getRequest(), addr, new RequestCallback() {
+                        final long createTime = System.currentTimeMillis();
+                        @Override
+                        public void handleResponse(Request response) {
+//                            System.out.println("Response to create service name ="
+//                                    + (response)
+//                                    + " received in "
+//                                    + (System.currentTimeMillis() - createTime)
+//                                    + "ms");
+                            System.out.println((System.currentTimeMillis() - createTime));
+                            received += 1;
+                        }
+                    });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                while(sent < received){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-            if (result == null){
-                System.out.println(i+"th request:"+"timed out");
-                return;
-            }
-            // System.out.println(i+"th request:"+(System.currentTimeMillis()-start)+"ms");
-            System.out.println((System.currentTimeMillis()-start));
         }
     }
 
