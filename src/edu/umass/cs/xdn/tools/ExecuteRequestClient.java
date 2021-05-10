@@ -95,6 +95,12 @@ public class ExecuteRequestClient {
             }
             // System.out.println(i+"th request:"+(System.currentTimeMillis()-start)+"ms");
             System.out.println((System.currentTimeMillis()-start));
+            
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
