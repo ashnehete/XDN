@@ -91,7 +91,7 @@ public class ExecuteRequestClient {
                 System.out.println(i+"th request:"+"timed out");
                 return;
             }
-            System.out.println(i+"th request:"+(System.currentTimeMillis()-start)+"ms");
+            System.out.println(i+"th request:"+(System.currentTimeMillis()-start)+"ms "+(target!=null? target: "no target speciied"));
         }
     }
 
