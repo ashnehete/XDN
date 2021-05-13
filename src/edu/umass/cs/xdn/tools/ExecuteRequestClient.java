@@ -102,7 +102,8 @@ public class ExecuteRequestClient {
                 sent++;
                 try {
                     client.sendRequest(getRequest(), addr, new RequestCallback() {
-                        final long createTime = System.currentTimeMillis();
+                        // final long createTime = System.currentTimeMillis();
+                        final long createTime = System.nanoTime();
                         @Override
                         public void handleResponse(Request response) {
 //                            System.out.println("Response to create service name ="
@@ -110,7 +111,8 @@ public class ExecuteRequestClient {
 //                                    + " received in "
 //                                    + (System.currentTimeMillis() - createTime)
 //                                    + "ms");
-                            System.out.println((System.currentTimeMillis() - createTime));
+                            // System.out.println((System.currentTimeMillis() - createTime));
+                            String.format("%,.4f", (System.nanoTime()-createTime)/1000.0/1000.0)
                             received += 1;
                         }
                     });
