@@ -112,7 +112,7 @@ public class ExecuteRequestClient {
 //                                    + (System.currentTimeMillis() - createTime)
 //                                    + "ms");
                             // System.out.println((System.currentTimeMillis() - createTime));
-                            String.format("%,.4f", (System.nanoTime()-createTime)/1000.0/1000.0)
+                            String.format("%,.4f", (System.nanoTime()-createTime)/1000.0/1000.0);
                             received += 1;
                         }
                     });
