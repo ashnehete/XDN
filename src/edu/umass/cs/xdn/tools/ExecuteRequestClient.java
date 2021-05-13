@@ -90,7 +90,7 @@ public class ExecuteRequestClient {
                     return;
                 }
                 // System.out.println(i+"th request:"+(System.currentTimeMillis()-start)+"ms");
-                System.out.println(String.format("%,.4f", (System.nanoTime()-start)/1000.0/1000));
+                System.out.println(String.format("%,.4f", (System.nanoTime()-start)/1000.0/1000.0));
 
                 try {
                     Thread.sleep(100);
