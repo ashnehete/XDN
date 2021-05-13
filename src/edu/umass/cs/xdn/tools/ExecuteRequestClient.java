@@ -78,7 +78,7 @@ public class ExecuteRequestClient {
         int sent = 0;
         for (int i=0; i<numReq; i++){
             Request result = null;
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime(); // System.currentTimeMillis();
             if (target == null) {
                 try {
                     result = client.sendRequest(getRequest(), timeout);
@@ -90,7 +90,7 @@ public class ExecuteRequestClient {
                     return;
                 }
                 // System.out.println(i+"th request:"+(System.currentTimeMillis()-start)+"ms");
-                System.out.println((System.currentTimeMillis()-start));
+                System.out.println(String.format("%,.4f", (System.nanoTime()-start)/1000.0/1000));
 
                 try {
                     Thread.sleep(100);
