@@ -43,7 +43,7 @@ script/gpServer.sh -DgigapaxosConfig=conf/xdn.local.properties start all
 
 Run the client to create an XDN application:
 ```
-script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties test.CreateServices
+script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.CeateServiceClient
 ```
 
 It creates an stateful counter app wrapped in docker called xdn-demo-app. You can find its docker image on DockerHub: [xdn-demo-app docker image](https://hub.docker.com/repository/docker/oversky710/xdn-demo-app).
@@ -51,7 +51,7 @@ Open your browser to check the counter's current value: [http://127.0.0.1/xdnapp
 
 Run the client to send a request:
 ```
-script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties test.ExecuteServices
+script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.ExecuteRequestClient
 ```
 
 The client will send a request with a value "1", the the underlying app [xdn-demo-app](https://github.com/ZhaoyuUmass/xdn-demo-app) add value 1 to its current state.
@@ -103,12 +103,12 @@ script/gpServer.sh -DgigapaxosConfig=conf/exp.properties start all
 
 Run the client to create an XDN application:
 ```
-script/gpClient.sh -DgigapaxosConfig=conf/exp.properties test.CreateServices
+script/gpClient.sh -DgigapaxosConfig=conf/exp.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.CeateServiceClient
 ```
 
 Run the client to send a request:
 ```
-script/gpClient.sh -DgigapaxosConfig=conf/exp.properties test.ExecuteServices
+script/gpClient.sh -DgigapaxosConfig=conf/exp.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.ExecuteRequestClient
 ```
 
 Run it multiple times, you will see that the service app is moved back-and-forth between <i>node-0</i> and <i>node-1</i> on every request.
