@@ -668,6 +668,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     new Object[]{name});
 
             assert(state != null);
+            log.log(DEBUG_LEVEL,
+                    "Restore: service name {0} from state {1}.",
+                    new Object[]{name, state});
             JSONObject json = null;
             try {
                 json = new JSONObject(state);
