@@ -141,27 +141,28 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         new Object[]{this});
         }
 
+        /**
+         * Check whether the current process has administrator priviledge.
+         * It is useful for XDN to access Docker volume dir for checkpoint and restore and bind to port 53 for DNS.
+         * If the process does not have administrator priviledge, exit.
+         */
+        List<String> whoCommand = new ArrayList<>();
+        whoCommand.add("whoami");
+        ProcessResult result = null;
+        try {
+            result = ProcessRuntime.executeCommand(whoCommand);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assert (result != null);
+        if ( !result.getResult().trim().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
+            // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
+            log.severe("LargeCheckpointer is enabled, must run with root privilege, please restart with root privilege.");
+            System.exit(1);
+        }
+
         if (XDNConfig.isEdgeNode) {
-            /**
-             * Check whether the current process has root privilege to bind to port 53 for DNS.
-             * If not, exit as edge server must bind to port 53.
-             */
-            List<String> whoCommand = new ArrayList<>();
-            whoCommand.add("whoami");
-            ProcessResult result = null;
-            try {
-                result = ProcessRuntime.executeCommand(whoCommand);
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            assert (result != null);
-
-            if ( !result.getResult().trim().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
-                // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
-                log.severe("LargeCheckpointer is enabled, must run with root privilege, please restart with root privilege.");
-                System.exit(1);
-            }
 
             // start LDNS server on the edge node
             Runnable runnable = new Runnable() {
@@ -534,7 +535,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             DockerContainer container = containerizedApps.get(appName);
             assert (container != null);
 
-            if ( state == null ){
+            if ( state == null || state.equals("")){
                 // we do not need to remove name from serviceNames table
                 // serviceNames.remove(name);
                 // remove pointer from service name list in containerizedApps, must succeed
