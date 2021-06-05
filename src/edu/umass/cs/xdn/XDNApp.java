@@ -90,7 +90,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     Level DEBUG_LEVEL = Level.INFO;
 
-    private static boolean DEBUG = true;
+    private static boolean DEBUG = false;
 
     /**
      * 
@@ -535,7 +535,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             DockerContainer container = containerizedApps.get(appName);
             assert (container != null);
 
-            if ( state == null || state.equals("")){
+            if ( state == null ){ // || state.equals("")
                 // we do not need to remove name from serviceNames table
                 // serviceNames.remove(name);
                 // remove pointer from service name list in containerizedApps, must succeed
