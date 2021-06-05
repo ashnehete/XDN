@@ -50,7 +50,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     private static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 
-    private static Logger log = PaxosConfig.getLogger();
+    private static final Logger log = PaxosConfig.getLogger();
 
     // used to propagate coordinated result to applications
     private static OkHttpClient httpClient;
@@ -58,9 +58,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     private final boolean isLinux;
 
     /**
-     * A map of app name to containerizedApps
+     * A map of app name to container
      */
-    private Map<String, DockerContainer> containerizedApps;
+    private final Map<String, DockerContainer> containerizedApps;
 
     public boolean nameExists(String name) {
         return containerizedApps.containsKey(name);
@@ -73,9 +73,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     /**
      * A map of service name to container app name
      */
-    private Map<String, String> serviceNames;
+    private final Map<String, String> serviceNames;
 
-    private Set<String> runningApps;
+    private final Set<String> runningApps;
 
     public boolean isRunning(String name) {
         return runningApps.contains(name);
@@ -321,10 +321,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         // Now let's handle app state and user state event
         if (XDNConfig.largeCheckPointerEnabled) {
-            // String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
-            // String userName = nameResult[0];
-            // String appName = nameResult[1];
-            String appName = containerizedApps.get(name).getName();
+            String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
+            String userName = nameResult[0];
+            String appName = nameResult[1];
+            // String appName = containerizedApps.get(name).getName();
 
             log.log(Level.FINE,
                     ">>>>>>>> About to checkpoint for appName:{0}",
