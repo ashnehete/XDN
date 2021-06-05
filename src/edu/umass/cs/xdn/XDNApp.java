@@ -88,7 +88,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         SERVICE_NAME
     }
 
-    Level DEBUG_LEVEL = Level.INFO;
+    Level DEBUG_LEVEL = Level.WARNING;
 
     private static boolean DEBUG = false;
 
@@ -288,7 +288,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         long start = System.currentTimeMillis();
 
-        log.log(Level.INFO, ">>>>>>> Checkpoint ServiceName={0}", new Object[]{name});
+        log.log(Level.INFO, ">>>>>>> Checkpoint: ServiceName={0}", new Object[]{name});
 
         if (name.equals(PaxosConfig.getDefaultServiceName())){
             // return empty string for the default app
@@ -524,8 +524,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         }
 
         log.log(DEBUG_LEVEL,
-                ">>>>>>>> XDN containerized app to restore:{0}\n >>>>>>>> serviceNames:{1}\n>>>>>>>> runningApps:{2}",
-                new Object[]{name, serviceNames, runningApps});
+                ">>>>>>>> XDN containerized app to restore:{0}\n>>>>>>>> serviceNames:{1}\n>>>>>>>> runningApps:{2}\n>>>>>>>> containerizedApps:{3}",
+                new Object[]{name, serviceNames, runningApps, containerizedApps});
 
         // Handle serviceName (name) restore
         if (serviceNames.containsKey(name)){
