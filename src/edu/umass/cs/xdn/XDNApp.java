@@ -58,7 +58,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     private final boolean isLinux;
 
     /**
-     * A map of app name to container
+     * A map of service name to containerApp
      */
     private final Map<String, DockerContainer> containerizedApps;
 
@@ -71,7 +71,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     /**
-     * A map of service name to container app name
+     * A map of service name to containerApp
      */
     private final Map<String, String> serviceNames;
 
@@ -322,7 +322,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         // Now let's handle app state and user state event
         if (XDNConfig.largeCheckPointerEnabled) {
             String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
-            String userName = nameResult[0];
+            // String userName = nameResult[0];
             String appName = nameResult[1];
             // String appName = containerizedApps.get(name).getName();
 
