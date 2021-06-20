@@ -103,7 +103,7 @@ script/gpServer.sh -DgigapaxosConfig=conf/exp.properties start all
 
 Run the client to create an XDN application:
 ```
-script/gpClient.sh -DgigapaxosConfig=conf/exp.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.CeateServiceClient
+script/gpClient.sh -DgigapaxosConfig=conf/exp.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.CreateServiceClient
 ```
 
 Run the client to send a request:
