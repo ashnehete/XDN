@@ -43,7 +43,7 @@ script/gpServer.sh -DgigapaxosConfig=conf/xdn.local.properties start all
 
 Run the client to create an XDN application:
 ```
-script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.CeateServiceClient
+script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.CreateServiceClient
 ```
 
 It creates an stateful counter app wrapped in docker called xdn-demo-app. You can find its docker image on DockerHub: [xdn-demo-app docker image](https://hub.docker.com/repository/docker/oversky710/xdn-demo-app).
