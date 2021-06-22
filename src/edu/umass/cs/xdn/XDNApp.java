@@ -176,7 +176,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     private String getContainerUrl(String addr) {
-        return "http://" + addr + XDNConfig.XC.XDN_ROUTE;
+        return "http://" + addr + XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString());
     }
 
     private String printMap(Map m){
