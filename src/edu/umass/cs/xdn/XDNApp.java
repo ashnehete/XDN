@@ -83,6 +83,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     private String gatewayIPAddress;
 
+    private static String xdnRoute = "/";
+
     private enum XDNAppKeys {
         APP,
         SERVICE_NAME
@@ -119,6 +121,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         isLinux = System.getProperty("os.name").equals("Linux");
 
+        xdnRoute = XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString()) != null?
+                XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString()) : "/";
+        
         containerizedApps = new ConcurrentHashMap<>();
         // avoid throwing an exception when bootup
         containerizedApps.put(PaxosConfig.getDefaultServiceName(),
@@ -176,7 +181,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     private String getContainerUrl(String addr) {
-        return "http://" + addr + XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString());
+        return "http://" + addr + xdnRoute;
     }
 
     private String printMap(Map m){
