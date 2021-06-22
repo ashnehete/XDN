@@ -17,6 +17,7 @@ public class HttpClient {
     private static final String USER_AGENT = "Mozilla/5.0";
 
     private static String TEST_URL = "http://localhost:3000";
+    private static String NAME = "";
 
     private static void get() throws IOException {
         URL obj = new URL(TEST_URL);
@@ -54,6 +55,7 @@ public class HttpClient {
         try {
             json.put("value", "1");
             json.put("id", 0);
+            json.put("name", NAME);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -88,15 +90,18 @@ public class HttpClient {
     }
 
     public static void main(String[] args) throws IOException {
-        if (args.length >= 1){
+        if (args.length == 1){
             TEST_URL = args[0];
+        } else if (args.length == 2){
+            TEST_URL = args[0];
+            NAME = args[1];
         }
 
         for (int i =0; i<1100; i++) {
-            long start = System.nanoTime();
+            long start = System.currentTimeMillis();
             post();
-            long elapsed = System.nanoTime() - start;
-            System.out.println(elapsed/1000.0);
+            long elapsed = System.currentTimeMillis() - start;
+            System.out.println(elapsed);
         }
     }
 }
