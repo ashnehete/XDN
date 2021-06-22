@@ -88,7 +88,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         SERVICE_NAME
     }
 
-    Level DEBUG_LEVEL = Level.WARNING;
+    Level DEBUG_LEVEL = Level.FINE;
 
     private static boolean DEBUG = false;
 
@@ -176,7 +176,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     private String getContainerUrl(String addr) {
-        return "http://" + addr + XDNConfig.xdnRoute;
+        return "http://" + addr + XDNConfig.XC.XDN_ROUTE;
     }
 
     private String printMap(Map m){

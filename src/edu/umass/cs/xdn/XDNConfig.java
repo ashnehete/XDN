@@ -82,7 +82,11 @@ public class XDNConfig {
         /**
          * the target to send request to
          */
-        TARGET("")
+        TARGET(""),
+        /**
+         *
+         */
+        XDN_ROUTE("/")
         ;
 
         final Object defaultValue;
@@ -98,7 +102,7 @@ public class XDNConfig {
     /**
      *
      */
-    final public static String xdnRoute = "/xdnapp";
+    // final public static String xdnRoute = "/xdnapp";
 
     /**
      * Docker's default checkpoint location
