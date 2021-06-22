@@ -86,7 +86,7 @@ public class XDNConfig {
         /**
          *
          */
-        XDN_ROUTE("/")
+        XDN_ROUTE("//")
         ;
 
         final Object defaultValue;
