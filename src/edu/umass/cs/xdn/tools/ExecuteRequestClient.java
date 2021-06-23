@@ -93,7 +93,7 @@ public class ExecuteRequestClient {
                 System.out.println(String.format("%,.4f", (System.nanoTime()-start)/1000.0/1000.0));
 
                 try {
-                    Thread.sleep(1);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -121,7 +121,7 @@ public class ExecuteRequestClient {
                 }
                 while(received < sent ){
                     try {
-                        Thread.sleep(1);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
