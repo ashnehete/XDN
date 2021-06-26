@@ -1,5 +1,7 @@
 package test;
 
+import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
+import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,12 +47,13 @@ public class HttpClient {
         }
     }
 
-    private static void post() throws IOException {
+    private static void post(HttpActiveReplicaRequest req) throws IOException, JSONException {
         URL obj = new URL(TEST_URL);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("User-Agent", USER_AGENT);
 
+        /*
         JSONObject json = new JSONObject();
         try {
             json.put("value", "1");
@@ -59,11 +62,12 @@ public class HttpClient {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        */
 
         // For POST only - START
         con.setDoOutput(true);
         OutputStream os = con.getOutputStream();
-        os.write(json.toString().getBytes());
+        os.write(req.toJSONObject().toString().getBytes());
         os.flush();
         os.close();
         // For POST only - END
@@ -89,7 +93,7 @@ public class HttpClient {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, JSONException {
         if (args.length == 1){
             TEST_URL = args[0];
         } else if (args.length == 2){
@@ -97,9 +101,12 @@ public class HttpClient {
             NAME = args[1];
         }
 
+        HttpActiveReplicaRequest req = new HttpActiveReplicaRequest(HttpActiveReplicaPacketType.EXECUTE,
+                NAME, 0, "1", true, false, 0);
+
         for (int i =0; i<1100; i++) {
             long start = System.nanoTime();
-            post();
+            post(req);
             long elapsed = System.nanoTime() - start;
             System.out.println(String.format("%,.4f", elapsed/1000.0/1000.0));
         }
