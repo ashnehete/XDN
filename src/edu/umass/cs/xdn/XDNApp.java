@@ -238,6 +238,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     new Object[]{r, name, containerUrl});
 
 
+            long start = System.nanoTime();
+
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
                 // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
                 URL url = null;
@@ -271,6 +273,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         ((HttpActiveReplicaRequest) request).setResponse(response.toString());
                         log.log(Level.INFO, "{0} received response from underlying app {1}: {2}",
                                 new Object[]{this, name, response});
+                        log.log(Level.WARNING, "It takes {0}ms to execute request:{1}, response:{2}",
+                                new Object[]{
+                                        (System.nanoTime()-start)/1000.0/1000.0,
+                                        request,
+                                        response,
+                                });
 
                         return true;
 
