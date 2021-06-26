@@ -18,7 +18,8 @@ public class HttpBenchmarkClient {
     private static String TEST_URL = "http://localhost:3000";
     private static String NAME = "";
 
-    private static void post(JSONObject json){
+    private static String post(JSONObject json){
+        StringBuilder response = new StringBuilder();
 
         URL url = null;
         try {
@@ -34,7 +35,7 @@ public class HttpBenchmarkClient {
             os.flush();
             os.close();
 
-            StringBuilder response = new StringBuilder();
+
 
             int responseCode = con.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) { //success
@@ -42,16 +43,16 @@ public class HttpBenchmarkClient {
                         con.getInputStream()));
                 String inputLine;
 
-
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
                 }
                 in.close();
             }
-            System.out.println(response.toString());
+            // System.out.println(response.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return response.toString();
     }
 
     public static void main(String[] args){
