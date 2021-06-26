@@ -249,7 +249,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     con.setRequestProperty("Accept", "application/json");
                     con.setDoOutput(true);
                     OutputStream os = con.getOutputStream();
-                    os.write(r.toString().getBytes());
+                    // os.write(r.toString().getBytes());
+                    os.write(r.toJSONObject().toString().getBytes());
                     os.flush();
                     os.close();
 
@@ -275,7 +276,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     } else {
                         return false;
                     }
-                } catch (IOException e) {
+                } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
 
