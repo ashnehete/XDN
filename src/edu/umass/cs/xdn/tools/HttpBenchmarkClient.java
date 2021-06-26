@@ -1,5 +1,7 @@
 package edu.umass.cs.xdn.tools;
 
+import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
+import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,18 +34,21 @@ public class HttpBenchmarkClient {
             os.flush();
             os.close();
 
+            StringBuilder response = new StringBuilder();
+
             int responseCode = con.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) { //success
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         con.getInputStream()));
                 String inputLine;
-                StringBuilder response = new StringBuilder();
+
 
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
                 }
                 in.close();
             }
+            System.out.println(response.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

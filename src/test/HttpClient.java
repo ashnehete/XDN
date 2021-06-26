@@ -52,17 +52,8 @@ public class HttpClient {
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("User-Agent", USER_AGENT);
-
-        /*
-        JSONObject json = new JSONObject();
-        try {
-            json.put("value", "1");
-            json.put("id", 0);
-            json.put("name", NAME);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        */
+        con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        con.setRequestProperty("Accept", "application/json");
 
         // For POST only - START
         con.setDoOutput(true);
@@ -89,7 +80,7 @@ public class HttpClient {
             // print result
             // System.out.println(response.toString());
         } else {
-            // System.out.println("POST request not worked");
+            System.out.println("POST request not worked");
         }
     }
 
