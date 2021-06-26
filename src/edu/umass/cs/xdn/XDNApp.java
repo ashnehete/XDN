@@ -212,7 +212,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             return true;
         }
 
-        if (request instanceof HttpActiveReplicaRequest) {
+        // assert(request instanceof HttpActiveReplicaRequest);
+        {
             HttpActiveReplicaRequest r = (HttpActiveReplicaRequest) request;
             String name = r.getServiceName();
             String containerUrl = null;
