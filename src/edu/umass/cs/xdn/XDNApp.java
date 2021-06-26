@@ -201,6 +201,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     public boolean execute(Request request,
                            boolean doNotReplyToClient) {
 
+        long begin = System.nanoTime();
+
         log.log(DEBUG_LEVEL, "XDNApp execute request:{0}", new Object[]{request});
         if (XDNConfig.noopEnabled){
 
@@ -236,7 +238,11 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             log.log(DEBUG_LEVEL,"Execute request {0} for service name {1} running at address {2}",
                     new Object[]{r, name, containerUrl});
-
+            log.log(Level.WARNING, "It takes {0}ms to execute request:{1}",
+                    new Object[]{
+                            (System.nanoTime()-begin)/1000.0/1000.0,
+                            request
+                    });
 
             long start = System.nanoTime();
 
@@ -273,11 +279,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         ((HttpActiveReplicaRequest) request).setResponse(response.toString());
                         log.log(Level.INFO, "{0} received response from underlying app {1}: {2}",
                                 new Object[]{this, name, response});
-                        log.log(Level.WARNING, "It takes {0}ms to execute request:{1}, response:{2}",
+                        log.log(Level.WARNING, "It takes {0}ms to execute request:{1}",
                                 new Object[]{
                                         (System.nanoTime()-start)/1000.0/1000.0,
-                                        request,
-                                        response,
+                                        request
                                 });
 
                         return true;
