@@ -238,7 +238,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             log.log(DEBUG_LEVEL,"Execute request {0} for service name {1} running at address {2}",
                     new Object[]{r, name, containerUrl});
-            log.log(Level.WARNING, "It takes {0}ms to execute request:{1}",
+            
+            log.log(Level.FINEST, "It takes {0}ms to execute request:{1}",
                     new Object[]{
                             (System.nanoTime()-begin)/1000.0/1000.0,
                             request
