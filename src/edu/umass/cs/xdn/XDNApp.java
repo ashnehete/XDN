@@ -247,20 +247,25 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             long start = System.nanoTime();
 
+
+
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
                 // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
+
                 URL url = null;
                 try {
+                    byte[] postData = r.toJSONObject().toString().getBytes();
                     url = new URL(containerUrl);
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("POST");
                     con.setRequestProperty("User-Agent", USER_AGENT);
                     con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                     con.setRequestProperty("Accept", "application/json");
+                    con.setRequestProperty( "Content-Length", Integer.toString( postData.length ));
                     con.setDoOutput(true);
                     OutputStream os = con.getOutputStream();
                     // os.write(r.toString().getBytes());
-                    os.write(r.toJSONObject().toString().getBytes());
+                    os.write(postData);
                     os.flush();
                     os.close();
 
@@ -275,10 +280,11 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             response.append(inputLine);
                         }
                         in.close();
-                        log.log(Level.FINEST, "It takes {0}ms to execute request:{1}",
+
+                        log.log(Level.WARNING, "It takes {0}ms to get response:{1}",
                                 new Object[]{
                                         (System.nanoTime()-start)/1000.0/1000.0,
-                                        request
+                                        response
                                 });
 
                         // TODO: check whether the request comes from HttpActiveReplica
