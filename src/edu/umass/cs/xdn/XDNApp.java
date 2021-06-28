@@ -90,7 +90,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         SERVICE_NAME
     }
 
-    Level DEBUG_LEVEL = Level.FINE;
+    Level DEBUG_LEVEL = Level.INFO;
 
     private static boolean DEBUG = false;
 
