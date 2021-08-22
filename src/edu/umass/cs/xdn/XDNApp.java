@@ -129,6 +129,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         containerizedApps.put(PaxosConfig.getDefaultServiceName(),
                 new DockerContainer(PaxosConfig.getDefaultServiceName(),
                         null, -1, -1, null, ""));
+
         // TODO: change HashSet to a sorted list to track resource usage
         runningApps = new HashSet<>();
 
@@ -161,10 +162,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         }
 
         assert (result != null);
-        if ( !result.getResult().trim().equals("root") && XDNConfig.largeCheckPointerEnabled ) {
+        if ( !result.getResult().trim().equals("root") && XDNConfig.adminPrivilegeRequired) {
             // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
-            log.severe("LargeCheckpointer is enabled, must run with root privilege, please restart with root privilege.");
-            System.exit(1);
+            log.severe("Admin privilege is required, must run with root privilege, please restart with root privilege.");
+            // System.exit(1);
         }
 
         if (XDNConfig.isEdgeNode) {
@@ -301,6 +302,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     e.printStackTrace();
                 }
 
+
+            } else {
+                // TODO: put and get APIs
 
             }
 

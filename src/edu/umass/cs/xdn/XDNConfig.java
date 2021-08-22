@@ -86,7 +86,11 @@ public class XDNConfig {
         /**
          *
          */
-        XDN_ROUTE("//")
+        XDN_ROUTE("//"),
+        /**
+         *
+         */
+        ADMIN_PRIVILEGE_REQUIRED(false),
         ;
 
         final Object defaultValue;
@@ -141,6 +145,11 @@ public class XDNConfig {
      * Otherwise, XDN just uses stringified checkpoint.
      */
     public static boolean largeCheckPointerEnabled = true;
+
+    /**
+     * Need
+     */
+    public static boolean adminPrivilegeRequired = false;
 
     /**
      * If true, all state is kept in a volume on a docker host.
