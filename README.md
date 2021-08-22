@@ -43,15 +43,15 @@ script/gpServer.sh -DgigapaxosConfig=conf/xdn.local.properties start all
 
 Run the client to create an XDN application:
 ```
-script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.CreateServiceClient
+script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/app/tutorial.properties edu.umass.cs.xdn.tools.CreateServiceClient
 ```
 
-It creates an stateful counter app wrapped in docker called xdn-demo-app. You can find its docker image on DockerHub: [xdn-demo-app docker image](https://hub.docker.com/repository/docker/oversky710/xdn-demo-app).
+It creates an stateful counter app wrapped in docker called tutorial-1. You can find its docker image on DockerHub: [tutorial-1 docker image](https://hub.docker.com/repository/docker/oversky710/tutorial-1).
 Open your browser to check the counter's current value: [http://127.0.0.1/xdnapp](http://127.0.0.1/xdnapp).
 
 Run the client to send a request:
 ```
-script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/app/test.properties edu.umass.cs.xdn.tools.ExecuteRequestClient
+script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/app/tutorial.properties edu.umass.cs.xdn.tools.ExecuteRequestClient
 ```
 
 The client will send a request with a value "1", the the underlying app [xdn-demo-app](https://github.com/ZhaoyuUmass/xdn-demo-app) add value 1 to its current state.
@@ -60,10 +60,10 @@ Open your browser to check the counter's current value after operation: [http://
 You may also issue a request directly to our HTTP API with `curl`:
 
 ```
-curl "http://127.0.0.1:2300?name=xdn-demo-app_xdn_Alvin&qval=1"
+curl "http://127.0.0.1:2300?name=www.tutorial-1.xdnedge.xyz&qval=1"
 ```
 
-Or open the following link with your browser to send a request: [http://127.0.0.1:2300?name=xdn-demo-app_xdn_Alvin&qval=1](http://127.0.0.1:2300?name=xdn-demo-app_xdn_Alvin&qval=1).
+Or open the following link with your browser to send a request: [http://127.0.0.1:2300?name=www.tutorial-1.xdnedge.xyz&qval=1](http://127.0.0.1:2300?name=www.tutorial-1.xdnedge.xyz&qval=1).
 
 Find out more usage instructions with our HTTP APIs on [GigaPaxos Wiki](http://github.com/MobilityFirst/gigapaxos/wiki).
 
