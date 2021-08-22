@@ -27,7 +27,7 @@ public class XDNConfig {
         }
 
         for (XC xc : XC.values()){
-            // System.out.println(xc+":"+xc.defaultValue);
+            System.out.println(">>>>>>>>>>"+xc+":"+xc.defaultValue);
         }
     }
 
@@ -41,9 +41,9 @@ public class XDNConfig {
         XDN_DOMAIN_NAME("xdnedge.xyz"),
 
         /**
-         * a name that is unique for an app, i.e., IMAGE_NAME
+         * a name that is unique for an app
          */
-        NAME("Umass"),
+        NAME("www"),
         /**
          *
          */
@@ -53,10 +53,12 @@ public class XDNConfig {
          * URL to fetch docker image from DockerHub
          */
         IMAGE_URL("oversky710/xdn-demo-app"),
+
         /**
          * Docker port number
          */
         DOCKER_PORT(3000),
+
         /**
          * public exposed port number
          */
