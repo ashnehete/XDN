@@ -83,7 +83,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     private String gatewayIPAddress;
 
-    private static String xdnRoute = "/";
+    private static String xdnRoute = "/xdnapp";
 
     private enum XDNAppKeys {
         APP,
