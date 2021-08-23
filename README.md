@@ -47,7 +47,7 @@ script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/
 ```
 
 It creates an stateful counter app wrapped in docker called tutorial-1. You can find its docker image on DockerHub: [tutorial-1 docker image](https://hub.docker.com/repository/docker/oversky710/tutorial-1).
-Open your browser to check the counter's current value: [http://127.0.0.1/xdnapp](http://127.0.0.1/xdnapp).
+Open your browser to check the counter's current value: [http://127.0.0.1/](http://127.0.0.1/).
 
 Run the client to send a request:
 ```
@@ -55,7 +55,7 @@ script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/
 ```
 
 The client will send a request with a value "1", the the underlying app [xdn-demo-app](https://github.com/ZhaoyuUmass/xdn-demo-app) add value 1 to its current state.
-Open your browser to check the counter's current value after operation: [http://127.0.0.1/xdnapp](http://127.0.0.1/xdnapp).
+Open your browser to check the counter's current value after operation: [http://127.0.0.1/](http://127.0.0.1/).
 
 You may also issue a request directly to our HTTP API with `curl`:
 
