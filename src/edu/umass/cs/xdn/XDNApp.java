@@ -122,7 +122,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         isLinux = System.getProperty("os.name").equals("Linux");
 
         xdnRoute = XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString()) != null?
-                XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString()) : "/";
+                XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString()) : xdnRoute;
         
         containerizedApps = new ConcurrentHashMap<>();
         // avoid throwing an exception when bootup
@@ -230,7 +230,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 else
                     containerUrl = getContainerUrl("localhost:"+dc.getExposePort());
 
-                log.log(DEBUG_LEVEL, "############## Container URL:+{0}+\n DockerContainer:{1}\n containerizedApps:{2}\n serviceNames:{3}",
+                log.log(DEBUG_LEVEL, "############## Container URL:{0}\n DockerContainer:{1}\n containerizedApps:{2}\n serviceNames:{3}",
                         new Object[]{containerUrl, dc, printMap(containerizedApps), printMap(serviceNames)});
             }
 
