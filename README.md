@@ -55,9 +55,9 @@ script/gpClient.sh -DgigapaxosConfig=conf/xdn.local.properties -DappConfig=conf/
 ```
 
 The client will send a request with a value "1", the the underlying app [xdn-demo-app](https://github.com/ZhaoyuUmass/xdn-demo-app) add value 1 to its current state.
-Open your browser to check the counter's current value after operation: [http://127.0.0.1/](http://127.0.0.1/).
+Open your browser to check the counter's current value after 10 requests being sent: [http://127.0.0.1/](http://127.0.0.1/).
 
-You may also issue a request directly to our HTTP API with `curl`:
+You may also issue a request directly to our HTTP API with `curl` (only 1 request will be sent):
 
 ```
 curl "http://127.0.0.1:2300?name=www.tutorial-1.xdnedge.xyz&qval=1"
