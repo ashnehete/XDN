@@ -1,5 +1,6 @@
 package edu.umass.cs.xdn;
 
+import com.google.gson.JsonSyntaxException;
 import edu.umass.cs.gigapaxos.PaxosConfig;
 import edu.umass.cs.gigapaxos.interfaces.AppRequestParserBytes;
 import edu.umass.cs.gigapaxos.interfaces.ClientMessenger;
@@ -18,6 +19,7 @@ import edu.umass.cs.reconfiguration.reconfigurationutils.RequestParseException;
 import edu.umass.cs.xdn.dns.LocalDNSResolver;
 import edu.umass.cs.xdn.docker.DockerKeys;
 import edu.umass.cs.xdn.docker.DockerContainer;
+import edu.umass.cs.xdn.tools.XDNAppHttpRequest;
 import edu.umass.cs.xdn.util.ProcessResult;
 import edu.umass.cs.xdn.util.ProcessRuntime;
 import okhttp3.MediaType;
@@ -44,7 +46,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         implements Replicable, Reconfigurable, AppRequestParserBytes, ClientMessenger {
 
     // used by execute method to post coordinated requests to underlying app
-    private static final String USER_AGENT = "Mozilla/5.0";
+    private static final String DEFAULT_USER_AGENT = "Mozilla/5.0";
 
     private String myID;
     private static final MediaType JSON
@@ -83,7 +85,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     private String gatewayIPAddress;
 
-    private static String xdnRoute = "/xdnapp";
+    private static String xdnRoute = "";
 
     private enum XDNAppKeys {
         APP,
@@ -198,6 +200,11 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return sb.toString();
     }
 
+    // return true if the code given is 2xx
+    private boolean isSuccessResponseCode(int code) {
+        return (code >=200 && code <= 299);
+    }
+
     @Override
     public boolean execute(Request request,
                            boolean doNotReplyToClient) {
@@ -248,30 +255,42 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
             long start = System.nanoTime();
 
-
-
             if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
                 // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
-
-                URL url = null;
                 try {
-                    byte[] postData = r.toJSONObject().toString().getBytes();
-                    url = new URL(containerUrl);
+                    byte[] payload = r.toJSONObject().toString().getBytes();
+                    URL url = new URL(containerUrl);
+
+                    // try to parse value givin by client/user into XDNAppHttpRequest, use default json type if failed
+                    XDNAppHttpRequest clientRequest;
+                    try {
+                        clientRequest = XDNAppHttpRequest.initFromJSONString(r.getValue());
+                        payload = clientRequest.getPayload();
+                        url = new URL(containerUrl + clientRequest.getPath());
+                    } catch (JsonSyntaxException e) {
+                        // for backward compatibility, use default json type
+                        clientRequest = new XDNAppHttpRequest();
+                        clientRequest.setMethod("POST");
+                        clientRequest.addHeader("User-Agent", DEFAULT_USER_AGENT);
+                        clientRequest.addHeader("Content-Type", "application/json; charset=UTF-8");
+                        clientRequest.addHeader("Accept", "application/json");
+                        clientRequest.addHeader("Content-Length", Integer.toString( payload.length ));
+                    }
+
+                    // preparing HttpRequest for ActiveReplica
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod("POST");
-                    con.setRequestProperty("User-Agent", USER_AGENT);
-                    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                    con.setRequestProperty("Accept", "application/json");
-                    con.setRequestProperty( "Content-Length", Integer.toString( postData.length ));
+                    con.setRequestMethod(clientRequest.getMethod());
+                    for (String headerKey: clientRequest.getHeaders().keySet()) {
+                        con.setRequestProperty(headerKey, String.join(",", clientRequest.getHeaders().get(headerKey)));
+                    }
                     con.setDoOutput(true);
                     OutputStream os = con.getOutputStream();
-                    // os.write(r.toString().getBytes());
-                    os.write(postData);
+                    os.write(payload);
                     os.flush();
                     os.close();
 
                     int responseCode = con.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK) { //success
+                    if (isSuccessResponseCode(responseCode)) { //success
                         BufferedReader in = new BufferedReader(new InputStreamReader(
                                 con.getInputStream()));
                         String inputLine;
@@ -283,10 +302,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         in.close();
 
                         log.log(Level.WARNING, "It takes {0}ms to get response:{1}",
-                                new Object[]{
-                                        (System.nanoTime()-start)/1000.0/1000.0,
-                                        response
-                                });
+                            new Object[]{
+                                    (System.nanoTime()-start)/1000.0/1000.0,
+                                    response
+                            });
 
                         // TODO: check whether the request comes from HttpActiveReplica
                         ((HttpActiveReplicaRequest) request).setResponse(response.toString());
@@ -294,14 +313,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 new Object[]{this, name, response});
 
                         return true;
-
                     } else {
                         return false;
                     }
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
-
 
             } else {
                 // TODO: put and get APIs

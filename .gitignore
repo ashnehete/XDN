@@ -1,0 +1,7 @@
+.idea/
+*.iml
+bin/
+build.number
+derby.log
+gigapaxos.log*
+jars/
