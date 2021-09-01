@@ -5,3 +5,5 @@ build.number
 derby.log
 gigapaxos.log*
 jars/
+script/
+src/test

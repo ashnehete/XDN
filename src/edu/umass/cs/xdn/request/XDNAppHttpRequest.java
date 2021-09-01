@@ -1,4 +1,4 @@
-package edu.umass.cs.xdn.tools;
+package edu.umass.cs.xdn.request;
 
 import com.google.gson.Gson;
 

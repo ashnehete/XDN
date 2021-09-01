@@ -6,10 +6,10 @@ import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
+import edu.umass.cs.xdn.request.XDNAppHttpRequest;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class OwnCloudUploaderClient {
