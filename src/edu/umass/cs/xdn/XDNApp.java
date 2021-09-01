@@ -231,7 +231,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name))) {
                 DockerContainer dc = containerizedApps.get(serviceNames.get(name));
                 // Note, this url only works on Linux. Since MacOS does not have docker0 bridge running on the host machine, therefore, the following implementation won't work for MacOS
-                // {@url https://docs.docker.com/doccontainerUrlker-for-mac/networking/#:~:text=There%20is%20no%20docker0%20bridge,docker0%20interface%20on%20the%20host}
+                // {@url https://docs.docker.com/docker-for-mac/networking/#:~:text=There%20is%20no%20docker0%20bridge,docker0%20interface%20on%20the%20host}
                 if(isLinux)
                     containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort());
                 else
