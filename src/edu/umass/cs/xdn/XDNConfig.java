@@ -93,6 +93,14 @@ public class XDNConfig {
          *
          */
         ADMIN_PRIVILEGE_REQUIRED(false),
+        /**
+         *
+         */
+        ENV(""),
+        /**
+         *
+         */
+        XDN_FORMAT("")
         ;
 
         final Object defaultValue;

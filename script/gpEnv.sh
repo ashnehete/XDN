@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ssh key to be used for remote installs
-SSH_KEY=
+SSH_KEY=~/.ssh/id_rsa
 
 # Remote install location if different from the remote home directory.
 # Setting this value to "~" is likely incorrect because it will get

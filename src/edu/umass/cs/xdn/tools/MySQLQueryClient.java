@@ -5,16 +5,21 @@ import edu.umass.cs.gigapaxos.interfaces.Request;
 import edu.umass.cs.gigapaxos.interfaces.RequestCallback;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaPacketType;
 import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
-import edu.umass.cs.reconfiguration.interfaces.ReconfigurableRequest;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.sql.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
-public class ExecuteRequestClient {
-
+public class MySQLQueryClient {
     String serviceName;
     String name;
     String imageName;
@@ -22,15 +27,18 @@ public class ExecuteRequestClient {
     boolean coord;
     int numReq;
     String target;
+    String database;
+    String query;
 
     int id;
     static int received = 0;
 
     final private static long timeout = 1000;
+    private final static String formatHeader = "XDN_FORMAT:MYSQL;";
 
     XDNAgentClient client;
 
-    private ExecuteRequestClient() throws IOException {
+    private MySQLQueryClient() throws IOException {
         XDNConfig.load();
         name = XDNConfig.prop.getProperty(XDNConfig.XC.NAME.toString());
         imageName = XDNConfig.prop.getProperty(XDNConfig.XC.IMAGE_NAME.toString());
@@ -65,7 +73,7 @@ public class ExecuteRequestClient {
                 coord,
                 false,
                 0
-                );
+        );
     }
 
     private void sendRequest() {
@@ -103,16 +111,9 @@ public class ExecuteRequestClient {
                 sent++;
                 try {
                     client.sendRequest(getRequest(), addr, new RequestCallback() {
-                        // final long createTime = System.currentTimeMillis();
-                        final long createTime = System.nanoTime();
                         @Override
                         public void handleResponse(Request response) {
-                            System.out.println("Response to create service name ="
-                                    + (response)
-                                    + " received in "
-                                    + (System.currentTimeMillis() - createTime)
-                                    + "ms");
-//                             System.out.println((System.currentTimeMillis() - createTime));
+                            System.out.println("Response to create service name =" + (response));
                             System.out.println(String.format("Response: %,.4f", (System.nanoTime()-start)/1000.0/1000.0));
                             received += 1;
                         }
@@ -131,8 +132,8 @@ public class ExecuteRequestClient {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        ExecuteRequestClient c = new ExecuteRequestClient();
+    public static void main(String[] args) throws IOException, JSONException {
+        MySQLQueryClient c = new MySQLQueryClient();
         c.sendRequest();
         c.close();
         System.out.println("Exit main");

@@ -9,5 +9,6 @@ public enum DockerKeys {
     PORT,
     ENV,
     VOL,
-    PUBLIC_EXPOSE_PORT
+    PUBLIC_EXPOSE_PORT,
+    XDN_FORMAT
 }

@@ -20,8 +20,10 @@ public class CreateServiceClient {
     final String name;
     final String imageName;
     final String imageUrl;
+    final List<String> env;
     final int port;
     final int exposePort;
+    final String xdnFormat;
 
     Set<InetSocketAddress> initGroup;
     static int received = 0;
@@ -42,9 +44,11 @@ public class CreateServiceClient {
 
         imageName = XDNConfig.prop.getProperty(XDNConfig.XC.IMAGE_NAME.toString());
         imageUrl = XDNConfig.prop.getProperty(XDNConfig.XC.IMAGE_URL.toString());
+        env = XDNConfig.prop.getProperty(XDNConfig.XC.ENV.toString()) != null ? getEnvList(XDNConfig.prop.getProperty(XDNConfig.XC.ENV.toString())) : null;
         port = Integer.parseInt(XDNConfig.prop.getProperty(XDNConfig.XC.DOCKER_PORT.toString()));
         exposePort = Integer.parseInt(XDNConfig.prop.getProperty(XDNConfig.XC.PUBLIC_EXPOSE_PORT.toString()));
         serviceName = XDNConfig.generateServiceName(imageName, name);
+        xdnFormat = XDNConfig.prop.getProperty(XDNConfig.XC.XDN_FORMAT.toString());
 
         String initGroupString = XDNConfig.prop.getProperty(XDNConfig.XC.INIT_GROUP.toString()) == null?
                 "ALL" :
@@ -73,14 +77,21 @@ public class CreateServiceClient {
         client = new XDNAgentClient();
     }
 
+    private List<String> getEnvList(String env) {
+        return Arrays.asList(env.split("\\s*,\\s*"));
+    }
+
     private CreateServiceName generateCreateServiceNamePacket() throws JSONException {
         JSONObject state = new JSONObject();
         state.put(DockerKeys.NAME.toString(), this.imageName);
         state.put(DockerKeys.IMAGE_URL.toString(), this.imageUrl);
-        // json.put(DockerKeys.ENV.toString(), null);
+        state.put(DockerKeys.ENV.toString(), this.env);
         state.put(DockerKeys.PORT.toString(), this.port);
         state.put(DockerKeys.VOL.toString(), this.imageName);
         state.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), this.exposePort);
+
+        if (!xdnFormat.equals(""))
+            state.put(DockerKeys.XDN_FORMAT.toString(), this.xdnFormat);
 
         return new CreateServiceName(this.serviceName, state.toString(), this.initGroup);
     }

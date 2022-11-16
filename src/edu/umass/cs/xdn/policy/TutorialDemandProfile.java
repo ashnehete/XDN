@@ -44,7 +44,7 @@ public class TutorialDemandProfile extends AbstractDemandProfile {
 	 * The minimum number of requests after which a demand report will be sent
 	 * to reconfigurators.
 	 */
-	protected static int minRequestsBeforeDemandReport = 10;
+	protected static int minRequestsBeforeDemandReport = 3;
 	/**
 	 * The minimum amount of time (ms) that must elapse since the previous
 	 * reconfiguration before the next reconfiguration can happen.

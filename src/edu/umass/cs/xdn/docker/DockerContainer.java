@@ -54,6 +54,8 @@ public class DockerContainer implements XDNContainer {
      */
     final private String volume;
 
+    private String xdnFormat = null;
+
     /**
      *
      * @param name
@@ -73,6 +75,21 @@ public class DockerContainer implements XDNContainer {
         this.serviceNames = new ArrayList<>();
     }
 
+    /**
+     *
+     * @param name
+     * @param imageUrl
+     * @param port
+     * @param exposePort
+     * @param env
+     * @param volume
+     * @param xdnFormat
+     */
+    public DockerContainer(String name, String imageUrl, int port, int exposePort, JSONArray env, String volume, String xdnFormat) {
+        this(name, imageUrl, port, exposePort, env, volume);
+        this.xdnFormat = xdnFormat;
+    }
+
 
     public DockerContainer(JSONObject json) throws JSONException {
         this.name = json.getString(DockerKeys.NAME.toString());
@@ -81,6 +98,7 @@ public class DockerContainer implements XDNContainer {
         this.imageUrl = json.getString(DockerKeys.IMAGE_URL.toString());
         this.port = json.getInt(DockerKeys.PORT.toString());
         this.exposePort = json.getInt(DockerKeys.PUBLIC_EXPOSE_PORT.toString());
+        this.xdnFormat = json.getString(DockerKeys.XDN_FORMAT.toString());
         JSONArray users = json.getJSONArray(DockerKeys.SERVICE_NAMES.toString());
         this.serviceNames = new ArrayList<>();
         if (users != null) {
@@ -127,6 +145,14 @@ public class DockerContainer implements XDNContainer {
 
     public String getID() {
         return id;
+    }
+
+    public String getXdnFormat() {
+        return xdnFormat;
+    }
+
+    public void setXdnFormat(String xdnFormat) {
+        this.xdnFormat = xdnFormat;
     }
 
     @Override
@@ -193,6 +219,8 @@ public class DockerContainer implements XDNContainer {
             json.put(DockerKeys.PORT.toString(), container.port);
             json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), container.exposePort);
             json.put(DockerKeys.ENV.toString(), container.env);
+            if (container.xdnFormat != null)
+                json.put(DockerKeys.XDN_FORMAT.toString(), container.xdnFormat);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -210,8 +238,9 @@ public class DockerContainer implements XDNContainer {
         JSONArray jEnv = json.has(DockerKeys.ENV.toString()) ? json.getJSONArray(DockerKeys.ENV.toString()) : null;
         String vol = json.has(DockerKeys.VOL.toString()) ? json.getString(DockerKeys.VOL.toString()) : null;
         int exposePort = json.has(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) ? json.getInt(DockerKeys.PUBLIC_EXPOSE_PORT.toString()) : 80;
+        String xdnFormat = json.has(DockerKeys.XDN_FORMAT.toString()) ? json.getString(DockerKeys.XDN_FORMAT.toString()) : null;
 
-        return new DockerContainer(appName, url, port, exposePort, jEnv, vol);
+        return new DockerContainer(appName, url, port, exposePort, jEnv, vol, xdnFormat);
     }
 
     public static void main(String[] args) {

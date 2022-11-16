@@ -32,13 +32,16 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
- *  XDNApp is a GigaPaxos application used for
+ * XDNApp is a GigaPaxos application used for
  */
 public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         implements Replicable, Reconfigurable, AppRequestParserBytes, ClientMessenger {
@@ -94,8 +97,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     private static boolean DEBUG = false;
 
+    private enum XDNFormat {
+        MYSQL
+    }
+
     /**
-     * 
+     *
      */
     public XDNApp() {
         httpClient = new OkHttpClient();
@@ -105,9 +112,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             gatewayIPAddress = System.getProperty("gateway");
 
         try {
-            ProcessResult r= ProcessRuntime.executeCommand(getBridgeInspectCommand());
+            ProcessResult r = ProcessRuntime.executeCommand(getBridgeInspectCommand());
             // a valid result is returned
-            if(r.getRetCode() == 0) {
+            if (r.getRetCode() == 0) {
                 JSONArray arr = new JSONArray(r.getResult());
                 // get IP address management info from the result
                 JSONObject json = arr.getJSONObject(0).getJSONObject("IPAM");
@@ -121,14 +128,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         isLinux = System.getProperty("os.name").equals("Linux");
 
-        xdnRoute = XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString()) != null?
+        xdnRoute = XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString()) != null ?
                 XDNConfig.prop.getProperty(XDNConfig.XC.XDN_ROUTE.toString()) : xdnRoute;
-        
+
         containerizedApps = new ConcurrentHashMap<>();
         // avoid throwing an exception when bootup
         containerizedApps.put(PaxosConfig.getDefaultServiceName(),
                 new DockerContainer(PaxosConfig.getDefaultServiceName(),
-                        null, -1, -1, null, ""));
+                        null, -1, -1, null, "", null));
 
         // TODO: change HashSet to a sorted list to track resource usage
         runningApps = new HashSet<>();
@@ -162,7 +169,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         }
 
         assert (result != null);
-        if ( !result.getResult().trim().equals("root") && XDNConfig.adminPrivilegeRequired) {
+        if (!result.getResult().trim().equals("root") && XDNConfig.adminPrivilegeRequired) {
             // if largeCheckPointerEnabled is enabled but the program is not running with root privilege, log a severe error and exit, because checkpoint won't work.
             log.severe("Admin privilege is required, must run with root privilege, please restart with root privilege.");
             // System.exit(1);
@@ -185,10 +192,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return "http://" + addr + xdnRoute;
     }
 
-    private String printMap(Map m){
+    private String getMySQLContainerUrl(String addr) {
+        return "jdbc:mysql://" + addr;
+    }
+
+    private String printMap(Map m) {
         StringBuilder sb = new StringBuilder();
         sb.append("#############\n");
-        for (Object key: m.keySet()){
+        for (Object key : m.keySet()) {
             sb.append(key);
             sb.append(":");
             sb.append(m.get(key));
@@ -204,13 +215,15 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         long begin = System.nanoTime();
 
+        System.out.println("[" + myID + "] Execute: " + request + " doNotReplyToClient=" + doNotReplyToClient);
+
         log.log(DEBUG_LEVEL, "XDNApp execute request:{0}", new Object[]{request});
-        if (XDNConfig.noopEnabled){
+        if (XDNConfig.noopEnabled) {
 
             if (request instanceof HttpActiveReplicaRequest)
                 ((HttpActiveReplicaRequest) request).setResponse("");
             else {
-                System.out.println("Unrecognized request type: "+request);
+                System.out.println("Unrecognized request type: " + request);
             }
             return true;
         }
@@ -219,16 +232,23 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         {
             HttpActiveReplicaRequest r = (HttpActiveReplicaRequest) request;
             String name = r.getServiceName();
+            String value = r.getValue();
+            XDNFormat format = this.detectFormat(value);
+            System.out.println("Format: " + format);
+
             String containerUrl = null;
             // TODO: check whether app is running, if not, return false
             if (serviceNames.containsKey(name) && containerizedApps.containsKey(serviceNames.get(name))) {
                 DockerContainer dc = containerizedApps.get(serviceNames.get(name));
                 // Note, this url only works on Linux. Since MacOS does not have docker0 bridge running on the host machine, therefore, the following implementation won't work for MacOS
                 // {@url https://docs.docker.com/docker-for-mac/networking/#:~:text=There%20is%20no%20docker0%20bridge,docker0%20interface%20on%20the%20host}
-                if(isLinux)
-                    containerUrl = getContainerUrl(dc.getAddr()+":"+dc.getPort());
+                String addr = isLinux ? dc.getAddr() + ":" + dc.getPort() : "localhost:" + dc.getExposePort();
+
+                if (format == XDNFormat.MYSQL)
+                    containerUrl = getMySQLContainerUrl(addr);
                 else
-                    containerUrl = getContainerUrl("localhost:"+dc.getExposePort());
+                    containerUrl = getContainerUrl(addr);
+
 
                 log.log(DEBUG_LEVEL, "############## Container URL:{0}\n DockerContainer:{1}\n containerizedApps:{2}\n serviceNames:{3}",
                         new Object[]{containerUrl, dc, printMap(containerizedApps), printMap(serviceNames)});
@@ -237,72 +257,79 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (containerUrl == null)
                 return false;
 
-            log.log(DEBUG_LEVEL,"Execute request {0} for service name {1} running at address {2}",
+            log.log(DEBUG_LEVEL, "Execute request {0} for service name {1} running at address {2}",
                     new Object[]{r, name, containerUrl});
 
             log.log(Level.FINEST, "It takes {0}ms to execute request:{1}",
                     new Object[]{
-                            (System.nanoTime()-begin)/1000.0/1000.0,
+                            (System.nanoTime() - begin) / 1000.0 / 1000.0,
                             request
                     });
 
             long start = System.nanoTime();
 
 
+            if (HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType())) {
+                if (format == XDNFormat.MYSQL) {
+                    return this.executeMySQLRequest(r, containerUrl);
+                } else {
 
-            if ( HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType()) ) {
-                // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
+                    // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
 
-                URL url = null;
-                try {
-                    byte[] postData = r.toJSONObject().toString().getBytes();
-                    url = new URL(containerUrl);
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod("POST");
-                    con.setRequestProperty("User-Agent", USER_AGENT);
-                    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                    con.setRequestProperty("Accept", "application/json");
-                    con.setRequestProperty( "Content-Length", Integer.toString( postData.length ));
-                    con.setDoOutput(true);
-                    OutputStream os = con.getOutputStream();
-                    // os.write(r.toString().getBytes());
-                    os.write(postData);
-                    os.flush();
-                    os.close();
+                    URL url = null;
 
-                    int responseCode = con.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK) { //success
-                        BufferedReader in = new BufferedReader(new InputStreamReader(
-                                con.getInputStream()));
-                        String inputLine;
-                        StringBuilder response = new StringBuilder();
+                    try {
 
-                        while ((inputLine = in.readLine()) != null) {
-                            response.append(inputLine);
+
+                        System.out.println(r.toJSONObject().toString());
+                        byte[] postData = r.toJSONObject().toString().getBytes();
+                        url = new URL(containerUrl);
+                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                        con.setRequestMethod("POST");
+                        con.setRequestProperty("User-Agent", USER_AGENT);
+                        con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                        con.setRequestProperty("Accept", "application/json");
+                        con.setRequestProperty("Content-Length", Integer.toString(postData.length));
+                        con.setDoOutput(true);
+                        OutputStream os = con.getOutputStream();
+                        // os.write(r.toString().getBytes());
+                        os.write(postData);
+                        os.flush();
+                        os.close();
+
+                        int responseCode = con.getResponseCode();
+                        if (responseCode == HttpURLConnection.HTTP_OK) { //success
+                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                    con.getInputStream()));
+                            String inputLine;
+                            StringBuilder response = new StringBuilder();
+
+                            while ((inputLine = in.readLine()) != null) {
+                                response.append(inputLine);
+                            }
+                            in.close();
+
+                            log.log(Level.WARNING, "It takes {0}ms to get response:{1}",
+                                    new Object[]{
+                                            (System.nanoTime() - start) / 1000.0 / 1000.0,
+                                            response
+                                    });
+
+                            // TODO: check whether the request comes from HttpActiveReplica
+                            ((HttpActiveReplicaRequest) request).setResponse(response.toString());
+                            log.log(Level.INFO, "{0} received response from underlying app {1}: {2}",
+                                    new Object[]{this, name, response});
+
+                            return true;
+
+                        } else {
+                            return false;
                         }
-                        in.close();
-
-                        log.log(Level.WARNING, "It takes {0}ms to get response:{1}",
-                                new Object[]{
-                                        (System.nanoTime()-start)/1000.0/1000.0,
-                                        response
-                                });
-
-                        // TODO: check whether the request comes from HttpActiveReplica
-                        ((HttpActiveReplicaRequest) request).setResponse(response.toString());
-                        log.log(Level.INFO, "{0} received response from underlying app {1}: {2}",
-                                new Object[]{this, name, response});
-
-                        return true;
-
-                    } else {
-                        return false;
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
+
                 }
-
-
             } else {
                 // TODO: put and get APIs
 
@@ -312,8 +339,130 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return false;
     }
 
+    /**
+     * Request is of format MySQL
+     *
+     * @param request
+     */
+    private boolean executeMySQLRequest(HttpActiveReplicaRequest request, String containerUrl) {
+        String name = request.getServiceName();
+        String value = this.extractValue(request.getValue());
+        Connection connect = null;
+
+        try {
+            JSONObject obj = new JSONObject(value);
+            String database = obj.getString("database");
+            String query = obj.getString("query");
+
+            if (!database.equals("")) {
+                containerUrl += "/" + database;
+            }
+
+            containerUrl += "?useSSL=false";
+
+            System.out.println("Container URL: " + containerUrl);
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connect = DriverManager.getConnection(containerUrl, "root", null);
+
+            if (connect != null) {
+                Statement statement = connect.createStatement();
+                boolean executed = statement.execute(query);
+                if (executed) {
+                    ResultSet rs = statement.getResultSet();
+                    String response = this.getJsonFromResultSet(rs);
+                    System.out.println("ResultSet: " + response);
+                    request.setResponse(response);
+                } else {
+                    request.setResponse("false");
+                }
+
+            } else {
+                return false;
+            }
+
+
+            connect.close();
+        } catch (JSONException | ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+            request.setResponse("false");
+        }
+        return false;
+    }
+
+    /**
+     * Return a JSON string from ResultSet
+     *
+     * @param resultSet ResultSet object
+     * @return
+     */
+    private String getJsonFromResultSet(ResultSet resultSet) throws SQLException {
+        ResultSetMetaData md = resultSet.getMetaData();
+        int numCols = md.getColumnCount();
+        List<String> colNames = IntStream.range(0, numCols)
+                .mapToObj(i -> {
+                    try {
+                        return md.getColumnName(i + 1);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        return "?";
+                    }
+                }).toList();
+
+        JSONArray result = new JSONArray();
+        while (resultSet.next()) {
+            JSONObject row = new JSONObject();
+            colNames.forEach(cn -> {
+                try {
+                    row.put(cn, resultSet.getObject(cn));
+                } catch (JSONException | SQLException e) {
+                    e.printStackTrace();
+                }
+            });
+            result.put(row);
+        }
+        return result.toString();
+    }
+
+    /**
+     * Extract the request value from a XDN custom formatted request
+     * <p>
+     * Eg.
+     * XDN_FORMAT:MYSQL;{"database":"test","query":"SELECT * FROM users"}
+     *
+     * @param value
+     * @return
+     */
+    private String extractValue(String value) {
+        return value.substring(value.indexOf(";") + 1);
+    }
+
+    /**
+     * Detect XDN format for custom implementations
+     * Value will start with XDN_FORMAT: and the format will be delimited by a semi-colon
+     * <p>
+     * Eg.
+     * XDN_FORMAT:MYSQL;{"database":"test","query":"SELECT * FROM users"}
+     *
+     * @param value
+     * @return
+     */
+    private XDNFormat detectFormat(String value) {
+        if (value.startsWith("XDN_FORMAT:")) {
+            String format = value.substring(11, value.indexOf(";"));
+            try {
+                return XDNFormat.valueOf(format);
+            } catch (IllegalArgumentException e) {
+                // invalid format, ignore
+                return null;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String checkpoint(String name) {
+        System.out.println("[" + myID + "] Checkpoint: " + name);
         if (DEBUG)
             return "";
 
@@ -321,12 +470,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         log.log(Level.INFO, ">>>>>>> Checkpoint: ServiceName={0}", new Object[]{name});
 
-        if (name.equals(PaxosConfig.getDefaultServiceName())){
+        if (name.equals(PaxosConfig.getDefaultServiceName())) {
             // return empty string for the default app
             return "";
         }
         // handle checkpoint for XDNApp's default user name, which represents a unique device, e.g., XDNApp0_AlvinRouter
-        else if (name.startsWith(PaxosConfig.getDefaultServiceName())){
+        else if (name.startsWith(PaxosConfig.getDefaultServiceName())) {
             /*
               Checkpoint XDN Agent state of this specific node: serviceNames and containerizedApps.
               Though containerizedApps can be retrieved from docker command, it's better to keep a copy by XDN itself.
@@ -335,12 +484,12 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             JSONObject apps = new JSONObject();
             JSONObject services = new JSONObject();
             try {
-                for (String appName: containerizedApps.keySet()){
-                        apps.put(appName, containerizedApps.get(appName).toJSONObject());
+                for (String appName : containerizedApps.keySet()) {
+                    apps.put(appName, containerizedApps.get(appName).toJSONObject());
                 }
                 xdnState.put(XDNAppKeys.APP.toString(), apps);
 
-                for (String serviceName: serviceNames.keySet()) {
+                for (String serviceName : serviceNames.keySet()) {
                     services.put(serviceName, serviceNames.get(serviceName));
                 }
                 xdnState.put(XDNAppKeys.SERVICE_NAME.toString(), services);
@@ -361,13 +510,26 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     ">>>>>>>> About to checkpoint for appName:{0}",
                     new Object[]{appName});
 
+            DockerContainer container = containerizedApps.get(serviceNames.get(name));
+            String xdnFormat = container.getXdnFormat();
+
+
             if (XDNConfig.volumeCheckpointEnabled) {
-                // checkpoint volume
-                String volume = getVolumeDir(appName);
-                List<String> tarCommand = getTarCommand(appName + ".tar.gz", volume, XDNConfig.checkpointDir);
-                // assert (run(tarCommand));
-                run(tarCommand);
-                File cp = new File(XDNConfig.checkpointDir + appName + ".tar.gz");
+                String filename = "";
+                if (xdnFormat != null) {
+                    if (xdnFormat.equals(XDNFormat.MYSQL.toString())) {
+                        filename = this.checkpointMySQL("127.0.0.1", appName);
+                    }
+                } else {
+                    // checkpoint volume
+                    String volume = getVolumeDir(appName);
+                    List<String> tarCommand = getTarCommand(appName + ".tar.gz", volume, XDNConfig.checkpointDir);
+                    // assert (run(tarCommand));
+                    run(tarCommand);
+                    filename = XDNConfig.checkpointDir + appName + ".tar.gz";
+                }
+
+                File cp = new File(filename);
 
                 String chkp = LargeCheckpointer.createCheckpointHandle(cp.getAbsolutePath());
                 // String chkp = cp.getAbsolutePath();
@@ -379,7 +541,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 try {
                     checkpointJson = new JSONObject(chkp);
                     Iterator key = checkpointJson.keys();
-                    while(key.hasNext()){
+                    while (key.hasNext()) {
                         String k = (String) key.next();
                         json.put(k, checkpointJson.get(k));
                     }
@@ -438,7 +600,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 try {
                     checkpointJson = new JSONObject(chkp);
                     Iterator key = checkpointJson.keys();
-                    while(key.hasNext()){
+                    while (key.hasNext()) {
                         String k = (String) key.next();
                         json.put(k, checkpointJson.get(k));
                     }
@@ -484,17 +646,25 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                         new Object[]{response});
                 // System.out.println("Content:"+response.body().string());
 
-                return response.body()!=null? response.body().string(): "";
+                return response.body() != null ? response.body().string() : "";
             } catch (IOException e) {
                 e.printStackTrace();
             }
             log.log(Level.WARNING,
                     "Checkpoint: something wrong with underlying app, no checkpoint is taken.");
             long elapsed = System.currentTimeMillis() - start;
-            System.out.println(">>>>>>> It takes "+elapsed+"ms to checkpoint.");
+            System.out.println(">>>>>>> It takes " + elapsed + "ms to checkpoint.");
             // underlying app may not implement checkpoint, return an empty string as a checkpoint
             return "";
         }
+    }
+
+    private String checkpointMySQL(String url, String appName) {
+        String dest = XDNConfig.checkpointDir + appName + ".sql";
+        List<String> dumpCommand = this.getMySQLCheckpointCommand(url, "root", null, dest);
+        System.out.println("dumpMySQL: " + dumpCommand);
+        run(dumpCommand);
+        return dest;
     }
 
     /**
@@ -504,11 +674,11 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
      */
     @Override
     public boolean restore(String name, String state) {
-
+        System.out.println("[" + myID + "] Restore: " + name + " " + state);
         // String appName = name.split(XDNConfig.xdnServiceDecimal)[0];
         String appName = name;
         // FIXME: don not derive appName based on name (serviceName)
-        if (name.contains(XDNConfig.xdnDomainName)){
+        if (name.contains(XDNConfig.xdnDomainName)) {
             String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
             // String userName = nameResult[0];
             appName = nameResult[1];
@@ -519,10 +689,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 new Object[]{name, appName, state});
 
         // handle XDN service restore
-        if (name.equals(PaxosConfig.getDefaultServiceName())){
+        if (name.equals(PaxosConfig.getDefaultServiceName())) {
             // Don't do any thing, this is the default app
             return true;
-        } else if (name.startsWith(PaxosConfig.getDefaultServiceName())){
+        } else if (name.startsWith(PaxosConfig.getDefaultServiceName())) {
             // this is the device service name, restore serviceNames and containerizedApps
             if (state == null) {
                 // clean up the state of this XDN app
@@ -533,7 +703,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     JSONObject xdnState = new JSONObject(state);
                     JSONObject apps = xdnState.getJSONObject(XDNAppKeys.APP.toString());
                     Iterator<?> iter = apps.keys();
-                    while(iter.hasNext()) {
+                    while (iter.hasNext()) {
                         String containerizedAppName = iter.next().toString();
                         containerizedApps.put(containerizedAppName,
                                 new DockerContainer(apps.getJSONObject(containerizedAppName)));
@@ -541,7 +711,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                     JSONObject services = xdnState.getJSONObject(XDNAppKeys.SERVICE_NAME.toString());
                     iter = services.keys();
-                    while(iter.hasNext()){
+                    while (iter.hasNext()) {
                         String serviceName = iter.next().toString();
                         serviceNames.put(serviceName, services.getString(serviceName));
                     }
@@ -559,14 +729,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 new Object[]{name, serviceNames, runningApps, containerizedApps});
 
         // Handle serviceName (name) restore
-        if (serviceNames.containsKey(name)){
+        if (serviceNames.containsKey(name)) {
             // if service name exists, app name must also exist
-            assert(containerizedApps.containsKey(appName));
+            assert (containerizedApps.containsKey(appName));
             // this is a registered service name
             DockerContainer container = containerizedApps.get(appName);
             assert (container != null);
 
-            if ( state == null ){ // || state.equals("")
+            if (state == null) { // || state.equals("")
                 // we do not need to remove name from serviceNames table
                 // serviceNames.remove(name);
                 // remove pointer from service name list in containerizedApps, must succeed
@@ -581,7 +751,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     boolean stopped = run(stopCommand);
                     // container must be stopped successfully
                     assert (stopped);
-                    System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis() - stopTime)+"ms to stop app "+container.getName());
+                    System.out.println(" >>>>>>>>> It takes " + (System.currentTimeMillis() - stopTime) + "ms to stop app " + container.getName());
 
                     // Remove the container's checkpoint
                     /*
@@ -592,9 +762,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
                     // We do not want to remove the image as in the future, we may still need to use it
                     /**
-                    List<String> removeImageCommand = getRemoveImageCommand(container.getUrl());
-                    removed = run(removeImageCommand);
-                    assert (removed);
+                     List<String> removeImageCommand = getRemoveImageCommand(container.getUrl());
+                     removed = run(removeImageCommand);
+                     assert (removed);
                      */
 
                     // Note: we must keep the docker info in containerizedApps
@@ -605,7 +775,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                 }
                 return true;
             } else {
-                System.out.println(">>>>>>>>>>>>>>>>>>> Restore from a non-empty state: "+state);
+                System.out.println(">>>>>>>>>>>>>>>>>>> Restore from a non-empty state: " + state);
 
                 // restore from a checkpoint which is either a docker checkpoint or a volume checkpoint
                 if (XDNConfig.largeCheckPointerEnabled) {
@@ -621,7 +791,10 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     String dest;
                     long checkpointTime = System.currentTimeMillis();
 
-                    if (XDNConfig.volumeCheckpointEnabled){
+                    String xdnFormat = container.getXdnFormat();
+                    if (Objects.equals(xdnFormat, XDNFormat.MYSQL.toString())) {
+                        dest = XDNConfig.checkpointDir + appName + ".sql";
+                    } else if (XDNConfig.volumeCheckpointEnabled) {
                         // checkpoint the external volume
                         // If the instance is running, stop and prepare to restart
                         dest = getVolumeDir(appName);
@@ -636,20 +809,26 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     }
 
 
-                    String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
-                    File cp = new File(filename);
-                    LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
-                    List<String> unTarCommand = getUntarCommand(filename, dest);
-                    assert (run(unTarCommand));
-                    // System.out.println(">>>>>>>>> It takes "+(System.currentTimeMillis()-checkpointTime)+"ms to get checkpoint for app "+container.getName());
-                    log.log(DEBUG_LEVEL, ">>>>>>>>> It takes {0}ms to get checkpoint for app {1}",
-                            new Object[]{(System.currentTimeMillis()-checkpointTime), container.getName()});
+                    if (xdnFormat == null) {
+                        String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
+                        File cp = new File(filename);
+                        LargeCheckpointer.restoreCheckpointHandle(state, cp.getAbsolutePath());
+                        List<String> unTarCommand = getUntarCommand(filename, dest);
+                        assert (run(unTarCommand));
+                        // System.out.println(">>>>>>>>> It takes "+(System.currentTimeMillis()-checkpointTime)+"ms to get checkpoint for app "+container.getName());
+                        log.log(DEBUG_LEVEL, ">>>>>>>>> It takes {0}ms to get checkpoint for app {1}",
+                                new Object[]{(System.currentTimeMillis() - checkpointTime), container.getName()});
+                    }
 
                     long startTime = System.currentTimeMillis();
                     List<String> startCommand = getStartCommand(appName);
                     assert (run(startCommand));
                     DockerContainer c = containerizedApps.get(appName);
                     // System.out.println(" >>>>>>>>> It takes "+(System.currentTimeMillis()-startTime)+"ms to start app "+container.getName());
+
+                    if (Objects.equals(xdnFormat, XDNFormat.MYSQL.toString())) {
+                        this.restoreMySQL("127.0.0.1", appName, state);
+                    }
 
                     updateServiceAndApps(appName, name, c);
 
@@ -684,7 +863,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 "Restore: received response from app: {0}",
                                 new Object[]{response});
 
-                        return response.code()==200;
+                        return response.code() == 200;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -699,7 +878,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     "Restore: service name {0} does not exist.",
                     new Object[]{name});
 
-            assert(state != null);
+            assert (state != null);
             log.log(DEBUG_LEVEL,
                     "Restore: service name {0} from state {1}.",
                     new Object[]{name, state});
@@ -723,7 +902,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
              * If still unable to boot-up the service, return false.
              * 5. restore user state
              */
-            if ( !containerizedApps.containsKey(appName) ) {
+            if (!containerizedApps.containsKey(appName)) {
                 try {
                     assert (json != null);
                     // 1. Extract the initial service information
@@ -744,6 +923,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     String url = dockerContainer.getUrl();
                     String vol = dockerContainer.getVolume();
                     int exposePort = dockerContainer.getExposePort();
+                    String xdnFormat = dockerContainer.getXdnFormat();
                     JSONArray jEnv = dockerContainer.getEnv();
 
                     List<String> env = new ArrayList<>();
@@ -772,9 +952,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     // need to start the docker first, then download the checkpoint
                     if (XDNConfig.largeCheckPointerEnabled) {
 
-                        if (XDNConfig.volumeCheckpointEnabled){
+                        if (XDNConfig.volumeCheckpointEnabled) {
                             // Check whether it's a large checkpoint
-                            if(LargeCheckpointer.isCheckpointHandle(json.toString())){
+                            if (LargeCheckpointer.isCheckpointHandle(json.toString())) {
                                 String dest = getVolumeDir(appName);
                                 String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
                                 log.log(DEBUG_LEVEL,
@@ -795,7 +975,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 log.log(DEBUG_LEVEL, "Not a valid checkpoint {0}", new Object[]{json});
                             }
                         } else {
-                            if(LargeCheckpointer.isCheckpointHandle(json.toString())){
+                            if (LargeCheckpointer.isCheckpointHandle(json.toString())) {
                                 String dest = XDNConfig.defaultCheckpointDir + containerizedApps.get(appName).getID() + "/checkpoints/";
                                 String filename = XDNConfig.checkpointDir + appName + ".tar.gz";
                                 log.log(DEBUG_LEVEL,
@@ -809,8 +989,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                 // state is restored successfully, we need to restart the docker
                                 List<String> restartCommand = getRestartCommand(appName);
                                 run(restartCommand);
-                            }
-                            else {
+                            } else {
                                 // This is OK as it only happens when the service name is first time created
                                 log.log(DEBUG_LEVEL, "Not a valid checkpoint {0}",
                                         new Object[]{json});
@@ -836,7 +1015,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                                     new Object[]{name, startCommand.toString()});
                             return false;
                         } else {
-                            DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
+                            DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol, xdnFormat);
                             updateServiceAndApps(appName, name, container);
                             log.log(DEBUG_LEVEL,
                                     ">>>>>>>>> Service name {0} has been created successfully after retry.\n appName: {1}",
@@ -846,7 +1025,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     } else {
                         if (result.getRetCode() != 0) {
                             // error or no enough resource, stop an unused container and retry
-                            if (!selectAndStopContainer()){
+                            if (!selectAndStopContainer()) {
                                 // if no container is stopped , then give up and return an error
                                 return false;
                             }
@@ -855,8 +1034,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             } catch (IOException | InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            if (result.getRetCode() == 0 ) {
-                                DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
+                            if (result.getRetCode() == 0) {
+                                DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol, xdnFormat);
                                 updateServiceAndApps(appName, name, container);
                                 log.log(Level.FINE,
                                         ">>>>>>>>> Service name {0} has been created successfully after stop and retry.\n appName: {1}",
@@ -866,7 +1045,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             return false;
                         } else {
                             // String id = result.getResult().trim();
-                            DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol);
+                            DockerContainer container = new DockerContainer(appName, url, port, exposePort, jEnv, vol, xdnFormat);
                             updateServiceAndApps(appName, name, container);
                             log.log(DEBUG_LEVEL,
                                     ">>>>>>>>> Service name {0} has been created successfully.\n appName:{1}",
@@ -881,7 +1060,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     e.printStackTrace();
                 }
                 return false;
-            } else if ( !runningApps.contains(appName) ) {
+            } else if (!runningApps.contains(appName)) {
 
                 // there is already an app instance, if it's not running, boot it up
                 List<String> startCommand = getStartCommand(appName);
@@ -905,10 +1084,17 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return true;
     }
 
+    private boolean restoreMySQL(String host, String appName, String state) {
+        String src = XDNConfig.checkpointDir + appName + ".sql";
+        List<String> restoreCommand = this.getMySQLRestoreCommand(host, "root", null, src);
+        System.out.println("restoreMySQL: " + restoreCommand);
+        return run(restoreCommand);
+    }
+
     /**
      * The method needs to be synchronized because we have a few map to update
      */
-    private synchronized void updateServiceAndApps(String appName, String name, DockerContainer container){
+    private synchronized void updateServiceAndApps(String appName, String name, DockerContainer container) {
         if (container != null) {
             List<String> inspectCommand = getInspectCommand(appName);
             try {
@@ -935,7 +1121,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         // select a container to stop
         Iterator<String> iter = runningApps.iterator();
         // TODO: select a running container based on the scheduling policy (rather than the first one) and stop it
-        if (iter.hasNext()){
+        if (iter.hasNext()) {
             DockerContainer container = containerizedApps.get(iter.next());
             List<String> stopCommand = getStopCommand(container.getName());
             return run(stopCommand);
@@ -944,6 +1130,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     }
 
     /* ========================= docker command ============================ */
+
     /**
      * Inspect a docker to get the information such as ip address
      */
@@ -988,11 +1175,11 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         if (vol != null) {
             command.add("-v");
-            command.add(vol+":/tmp");
+            command.add(vol + ":/tmp");
         }
 
         // FIXME: cpu and memory limit
-        if(cpus > 0) {
+        if (cpus > 0) {
             // command.add("--cpus=\"" + cpus + "\"");
             // command.add("--cpuset-cpus=0-3");
         }
@@ -1000,23 +1187,23 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         // command.add("8G");
 
         //FIXME: only works on cloud node
-        if (port > 0){
+        if (port > 0) {
             command.add("-p");
-            command.add(exportPort+":"+port);
+            command.add(exportPort + ":" + port);
         }
 
-        if (env != null ){
-            for (String e:env) {
+        if (env != null) {
+            for (String e : env) {
                 command.add("-e");
                 command.add(e);
             }
         }
 
         command.add("-e");
-        command.add("HOST="+gatewayIPAddress);
+        command.add("HOST=" + gatewayIPAddress);
 
         command.add("-e");
-        command.add("HOSTNAME="+myID);
+        command.add("HOSTNAME=" + myID);
 
         command.add("-d");
         command.add(url);
@@ -1024,7 +1211,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return command;
     }
 
-    private List<String> getCheckpointCreateCommand(String name){
+    private List<String> getCheckpointCreateCommand(String name) {
         return getCheckpointCreateCommand(name, false);
     }
 
@@ -1138,7 +1325,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
     private List<String> getTarCommand(String filename, String path, String dest) {
         List<String> command = getTar();
         command.add("zcf");
-        command.add(dest+"/"+filename);
+        command.add(dest + "/" + filename);
         command.add("-C");
         command.add(path);
         command.add(".");
@@ -1154,8 +1341,36 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         return command;
     }
 
+    private List<String> getMySQLDump(String host, String username, String password) {
+        List<String> command = new ArrayList<>();
+        command.add("mysqldump");
+        command.add("-u");
+        command.add(username);
+        if (password != null) {
+            command.add("-p");
+            command.add(password);
+        }
+        command.add("-h");
+        command.add(host);
+        return command;
+    }
+
+    private List<String> getMySQLCheckpointCommand(String host, String username, String password, String dest) {
+        List<String> command = getMySQLDump(host, username, password);
+        command.add(">");
+        command.add(dest);
+        return command;
+    }
+
+    private List<String> getMySQLRestoreCommand(String host, String username, String password, String src) {
+        List<String> command = getMySQLDump(host, username, password);
+        command.add("<");
+        command.add(src);
+        return command;
+    }
+
     private boolean run(List<String> command) {
-        log.log(Level.FINE, "Command: {0}", new Object[]{command});
+        log.log(Level.INFO, "Command: {0}", new Object[]{command});
         ProcessResult result;
         try {
             result = ProcessRuntime.executeCommand(command);
@@ -1163,22 +1378,22 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             e.printStackTrace();
             return false;
         }
-        log.log(Level.FINE, "Command return value: {0}", new Object[]{result});
+        log.log(Level.INFO, "Command return value: {0}", new Object[]{result});
         return result.getRetCode() == 0;
     }
 
     private String getVolumeDir(String appName) {
-        return XDNConfig.defaultVolumeDir+appName+"/_data/";
+        return XDNConfig.defaultVolumeDir + appName + "/_data/";
     }
 
     @Override
     public boolean execute(Request request) {
-        return execute(request,false);
+        return execute(request, false);
     }
 
     @Override
     public Request getRequest(byte[] message, NIOHeader header)
-            throws RequestParseException{
+            throws RequestParseException {
         try {
             return new HttpActiveReplicaRequest(message);
         } catch (UnsupportedEncodingException | UnknownHostException e) {
@@ -1212,7 +1427,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName()+"("+myID+")";
+        return this.getClass().getSimpleName() + "(" + myID + ")";
     }
 
     public static void main(String[] args) {
