@@ -136,6 +136,5 @@ public class MySQLQueryClient {
         MySQLQueryClient c = new MySQLQueryClient();
         c.sendRequest();
         c.close();
-        System.out.println("Exit main");
     }
 }

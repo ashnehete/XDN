@@ -90,7 +90,7 @@ public class CreateServiceClient {
         state.put(DockerKeys.VOL.toString(), this.imageName);
         state.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), this.exposePort);
 
-        if (!xdnFormat.equals(""))
+        if (xdnFormat != null)
             state.put(DockerKeys.XDN_FORMAT.toString(), this.xdnFormat);
 
         return new CreateServiceName(this.serviceName, state.toString(), this.initGroup);

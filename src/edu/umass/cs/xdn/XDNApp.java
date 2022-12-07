@@ -16,8 +16,8 @@ import edu.umass.cs.reconfiguration.http.HttpActiveReplicaRequest;
 import edu.umass.cs.reconfiguration.interfaces.Reconfigurable;
 import edu.umass.cs.reconfiguration.reconfigurationutils.RequestParseException;
 import edu.umass.cs.xdn.dns.LocalDNSResolver;
-import edu.umass.cs.xdn.docker.DockerKeys;
 import edu.umass.cs.xdn.docker.DockerContainer;
+import edu.umass.cs.xdn.docker.DockerKeys;
 import edu.umass.cs.xdn.util.ProcessResult;
 import edu.umass.cs.xdn.util.ProcessRuntime;
 import okhttp3.MediaType;
@@ -37,7 +37,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -266,76 +265,145 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                             request
                     });
 
-            long start = System.nanoTime();
-
 
             if (HttpActiveReplicaPacketType.EXECUTE.equals(r.getRequestType())) {
                 if (format == XDNFormat.MYSQL) {
                     return this.executeMySQLRequest(r, containerUrl);
                 } else {
-
-                    // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
-
-                    URL url = null;
-
-                    try {
-
-
-                        System.out.println(r.toJSONObject().toString());
-                        byte[] postData = r.toJSONObject().toString().getBytes();
-                        url = new URL(containerUrl);
-                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                        con.setRequestMethod("POST");
-                        con.setRequestProperty("User-Agent", USER_AGENT);
-                        con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                        con.setRequestProperty("Accept", "application/json");
-                        con.setRequestProperty("Content-Length", Integer.toString(postData.length));
-                        con.setDoOutput(true);
-                        OutputStream os = con.getOutputStream();
-                        // os.write(r.toString().getBytes());
-                        os.write(postData);
-                        os.flush();
-                        os.close();
-
-                        int responseCode = con.getResponseCode();
-                        if (responseCode == HttpURLConnection.HTTP_OK) { //success
-                            BufferedReader in = new BufferedReader(new InputStreamReader(
-                                    con.getInputStream()));
-                            String inputLine;
-                            StringBuilder response = new StringBuilder();
-
-                            while ((inputLine = in.readLine()) != null) {
-                                response.append(inputLine);
-                            }
-                            in.close();
-
-                            log.log(Level.WARNING, "It takes {0}ms to get response:{1}",
-                                    new Object[]{
-                                            (System.nanoTime() - start) / 1000.0 / 1000.0,
-                                            response
-                                    });
-
-                            // TODO: check whether the request comes from HttpActiveReplica
-                            ((HttpActiveReplicaRequest) request).setResponse(response.toString());
-                            log.log(Level.INFO, "{0} received response from underlying app {1}: {2}",
-                                    new Object[]{this, name, response});
-
-                            return true;
-
-                        } else {
-                            return false;
-                        }
-                    } catch (IOException | JSONException e) {
-                        e.printStackTrace();
-                    }
-
+                    return this.executeHttpProxyRequest(r, containerUrl);
                 }
             } else {
                 // TODO: put and get APIs
-
             }
 
         }
+        return false;
+    }
+
+    private boolean executeHttpProxyRequest(HttpActiveReplicaRequest r, String containerUrl) {
+        long start = System.nanoTime();
+        String value = r.getValue();
+        try {
+            JSONObject request = new JSONObject(value);
+            String method = request.getString("method");
+            String uri = request.getString("uri");
+            JSONArray headers = (JSONArray) request.get("headers");
+            String body = request.has("body") ? request.getString("body") : null;
+
+            log.log(Level.INFO, "HTTP Request: {0} {1}\nHeaders:\n{2}\nBody:\n{3}\n",
+                    new Object[]{
+                            method, uri, headers, body
+                    });
+
+            URL url = new URL(containerUrl + uri);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod(method);
+
+            for (int i = 0; i < headers.length(); i++) {
+                JSONObject json = headers.getJSONObject(i);
+                String key = json.keys().next().toString();
+                con.setRequestProperty(key, json.getString(key));
+            }
+
+            if (body != null) {
+                con.setDoOutput(true);
+                OutputStream os = con.getOutputStream();
+                os.write(body.getBytes());
+                os.flush();
+                os.close();
+            }
+
+            int responseCode = con.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) { //success
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        con.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                log.log(Level.WARNING, "It takes {0}ms to get response:{1}",
+                        new Object[]{
+                                (System.nanoTime() - start) / 1000.0 / 1000.0,
+                                response
+                        });
+
+                r.setResponse(response.toString());
+                log.log(Level.INFO, "{0} received response from underlying app {1}: {2}",
+                        new Object[]{this, r.getServiceName(), response});
+
+                return true;
+
+            } else {
+                return false;
+            }
+
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean executeHttpRequest(HttpActiveReplicaRequest r, String containerUrl) {
+        long start = System.nanoTime();
+        // use HttpURLConnection to maintain a persistent connection with underlying HTTP app automatically
+
+        URL url = null;
+
+        try {
+
+
+            System.out.println(r.toJSONObject().toString());
+            byte[] postData = r.toJSONObject().toString().getBytes();
+            url = new URL(containerUrl);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("User-Agent", USER_AGENT);
+            con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            con.setRequestProperty("Accept", "application/json");
+            con.setRequestProperty("Content-Length", Integer.toString(postData.length));
+            con.setDoOutput(true);
+            OutputStream os = con.getOutputStream();
+            // os.write(r.toString().getBytes());
+            os.write(postData);
+            os.flush();
+            os.close();
+
+            int responseCode = con.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) { //success
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        con.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                log.log(Level.WARNING, "It takes {0}ms to get response:{1}",
+                        new Object[]{
+                                (System.nanoTime() - start) / 1000.0 / 1000.0,
+                                response
+                        });
+
+                // TODO: check whether the request comes from HttpActiveReplica
+                r.setResponse(response.toString());
+                log.log(Level.INFO, "{0} received response from underlying app {1}: {2}",
+                        new Object[]{this, r.getServiceName(), response});
+
+                return true;
+
+            } else {
+                return false;
+            }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 
@@ -501,6 +569,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
         // Now let's handle app state and user state event
         if (XDNConfig.largeCheckPointerEnabled) {
+            System.out.println("largeCheckPointerEnabled");
             String[] nameResult = XDNConfig.extractNamesFromServiceName(name);
             // String userName = nameResult[0];
             String appName = nameResult[1];
@@ -515,11 +584,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
 
             if (XDNConfig.volumeCheckpointEnabled) {
+                System.out.println("volumeCheckpointEnabled");
                 String filename = "";
                 if (xdnFormat != null) {
+                    System.out.println("Checkpoint: xdnFormat " + xdnFormat);
                     if (xdnFormat.equals(XDNFormat.MYSQL.toString())) {
                         filename = this.checkpointMySQL("127.0.0.1", appName);
                     }
+                    System.out.println("Checkpoint: filename " + filename);
                 } else {
                     // checkpoint volume
                     String volume = getVolumeDir(appName);
@@ -528,6 +600,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     run(tarCommand);
                     filename = XDNConfig.checkpointDir + appName + ".tar.gz";
                 }
+
+                System.out.println("Checkpoint: filename " + filename);
 
                 File cp = new File(filename);
 
@@ -1357,8 +1431,8 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
 
     private List<String> getMySQLCheckpointCommand(String host, String username, String password, String dest) {
         List<String> command = getMySQLDump(host, username, password);
-        command.add(">");
-        command.add(dest);
+        command.add("--all-databases");
+        command.add("--result-file=" + dest);
         return command;
     }
 
