@@ -7,6 +7,7 @@ import edu.umass.cs.reconfiguration.reconfigurationpackets.CreateServiceName;
 import edu.umass.cs.xdn.XDNConfig;
 import edu.umass.cs.xdn.deprecated.XDNAgentClient;
 import edu.umass.cs.xdn.docker.DockerKeys;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,6 +25,11 @@ public class CreateServiceClient {
     final int port;
     final int exposePort;
     final String xdnFormat;
+    boolean httpInterface;
+    String httpImageUrl;
+    int httpPort;
+    int httpExposePort;
+    List<String> httpEnv;
 
     Set<InetSocketAddress> initGroup;
     static int received = 0;
@@ -36,7 +42,7 @@ public class CreateServiceClient {
         XDNConfig.load();
 
         // FIXME: get these values from XDNConfig directly
-        XDNConfig.xdnDomainName = XDNConfig.prop.getProperty(XDNConfig.XC.XDN_DOMAIN_NAME.toString()) == null?
+        XDNConfig.xdnDomainName = XDNConfig.prop.getProperty(XDNConfig.XC.XDN_DOMAIN_NAME.toString()) == null ?
                 XDNConfig.xdnDomainName :
                 XDNConfig.prop.getProperty(XDNConfig.XC.XDN_DOMAIN_NAME.toString());
 
@@ -49,8 +55,16 @@ public class CreateServiceClient {
         exposePort = Integer.parseInt(XDNConfig.prop.getProperty(XDNConfig.XC.PUBLIC_EXPOSE_PORT.toString()));
         serviceName = XDNConfig.generateServiceName(imageName, name);
         xdnFormat = XDNConfig.prop.getProperty(XDNConfig.XC.XDN_FORMAT.toString());
+        httpInterface = XDNConfig.prop.getProperty(XDNConfig.XC.HTTP_INTERFACE.toString()) != null && Boolean.parseBoolean(XDNConfig.prop.getProperty(XDNConfig.XC.HTTP_INTERFACE.toString()));
 
-        String initGroupString = XDNConfig.prop.getProperty(XDNConfig.XC.INIT_GROUP.toString()) == null?
+        if (httpInterface) {
+            httpImageUrl = XDNConfig.prop.getProperty(XDNConfig.XC.IMAGE_URL.toString());
+            httpPort = Integer.parseInt(XDNConfig.prop.getProperty(XDNConfig.XC.HTTP_DOCKER_PORT.toString()));
+            httpExposePort = Integer.parseInt(XDNConfig.prop.getProperty(XDNConfig.XC.HTTP_PUBLIC_EXPOSE_PORT.toString()));
+            httpEnv = XDNConfig.prop.getProperty(XDNConfig.XC.HTTP_ENV.toString()) != null ? getEnvList(XDNConfig.prop.getProperty(XDNConfig.XC.HTTP_ENV.toString())) : null;
+        }
+
+        String initGroupString = XDNConfig.prop.getProperty(XDNConfig.XC.INIT_GROUP.toString()) == null ?
                 "ALL" :
                 XDNConfig.prop.getProperty(XDNConfig.XC.INIT_GROUP.toString());
 
@@ -58,21 +72,21 @@ public class CreateServiceClient {
 
         initGroup = new HashSet<>();
         if (initGroupString.equals("ALL")) {
-            for(String name: servers.keySet()){
+            for (String name : servers.keySet()) {
                 initGroup.add(servers.get(name));
             }
         } else {
             String[] srvs = initGroupString.split(",");
-            for (String name: srvs) {
+            for (String name : srvs) {
                 if (servers.containsKey(name))
                     initGroup.add(servers.get(name));
                 else
-                    System.err.println("The key "+name+" in INIT_GROUP does not exist.");
+                    System.err.println("The key " + name + " in INIT_GROUP does not exist.");
             }
         }
 
-        System.out.println("initGroupString:"+initGroupString);
-        System.out.println("initGroup:"+initGroup);
+        System.out.println("initGroupString:" + initGroupString);
+        System.out.println("initGroup:" + initGroup);
 
         client = new XDNAgentClient();
     }
@@ -93,10 +107,17 @@ public class CreateServiceClient {
         if (xdnFormat != null)
             state.put(DockerKeys.XDN_FORMAT.toString(), this.xdnFormat);
 
+        if (httpInterface) {
+            state.put(DockerKeys.HTTP_IMAGE_URL.toString(), this.httpImageUrl);
+            state.put(DockerKeys.HTTP_PORT.toString(), this.httpPort);
+            state.put(DockerKeys.HTTP_PUBLIC_EXPOSE_PORT.toString(), this.httpExposePort);
+            state.put(DockerKeys.HTTP_ENV.toString(), this.httpEnv);
+        }
+
         return new CreateServiceName(this.serviceName, state.toString(), this.initGroup);
     }
 
-    private void close(){
+    private void close() {
         client.close();
     }
 
@@ -105,10 +126,11 @@ public class CreateServiceClient {
 
         CreateServiceName packet = generateCreateServiceNamePacket();
 
-        System.out.println("About to send create service name request packet:"+packet);
+        System.out.println("About to send create service name request packet:" + packet);
 
         client.sendRequest(packet, new RequestCallback() {
             final long createTime = System.currentTimeMillis();
+
             @Override
             public void handleResponse(Request response) {
                 System.out.println("Response to create service name ="

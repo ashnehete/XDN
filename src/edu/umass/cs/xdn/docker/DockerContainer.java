@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DockerContainer implements XDNContainer {
 
-    /*
+    /**
      * The name of the docker
      */
     final String name;
@@ -45,7 +45,36 @@ public class DockerContainer implements XDNContainer {
      */
     final private List<String> serviceNames;
 
+    /**
+     * Environment variables for container
+     */
     JSONArray env;
+
+    /**
+     * If there is a HTTP interface with the application
+     */
+    boolean httpInterface;
+
+    /**
+     * Docker image name of HTTP interface
+     */
+    String httpImageUrl;
+
+    /**
+     * Docker image port of HTTP interface
+     */
+    int httpPort;
+
+    /**
+     * Docker expose port of HTTP interface
+     */
+    int httpExposePort;
+
+    /**
+     * Env variables for the HTTP interface docker container
+     */
+    JSONArray httpEnv;
+
 
     /**
      * Indicate whether the docker uses a volume
@@ -57,7 +86,6 @@ public class DockerContainer implements XDNContainer {
     private String xdnFormat = null;
 
     /**
-     *
      * @param name
      * @param imageUrl
      * @param port
@@ -76,7 +104,6 @@ public class DockerContainer implements XDNContainer {
     }
 
     /**
-     *
      * @param name
      * @param imageUrl
      * @param port
@@ -88,6 +115,14 @@ public class DockerContainer implements XDNContainer {
     public DockerContainer(String name, String imageUrl, int port, int exposePort, JSONArray env, String volume, String xdnFormat) {
         this(name, imageUrl, port, exposePort, env, volume);
         this.xdnFormat = xdnFormat;
+    }
+
+    public DockerContainer(String name, String imageUrl, int port, int exposePort, JSONArray env, String volume, String xdnFormat, String httpImageUrl, int httpPort, int httpExposePort, JSONArray httpEnv) {
+        this(name, imageUrl, port, exposePort, env, volume, xdnFormat);
+        this.httpImageUrl = httpImageUrl;
+        this.httpPort = httpPort;
+        this.httpExposePort = httpExposePort;
+        this.httpEnv = httpEnv;
     }
 
 
@@ -102,9 +137,17 @@ public class DockerContainer implements XDNContainer {
         JSONArray users = json.getJSONArray(DockerKeys.SERVICE_NAMES.toString());
         this.serviceNames = new ArrayList<>();
         if (users != null) {
-            for (int i=0; i<users.length(); i++){
+            for (int i = 0; i < users.length(); i++) {
                 serviceNames.add(users.getString(i));
             }
+        }
+
+        this.httpInterface = json.getBoolean(DockerKeys.HTTP_INTERFACE.toString());
+        if (this.httpInterface) {
+            this.httpImageUrl = json.getString(DockerKeys.HTTP_IMAGE_URL.toString());
+            this.httpPort = json.getInt(DockerKeys.HTTP_PORT.toString());
+            this.httpExposePort = json.getInt(DockerKeys.HTTP_PUBLIC_EXPOSE_PORT.toString());
+            this.httpEnv = json.getJSONArray(DockerKeys.HTTP_ENV.toString());
         }
     }
 
@@ -135,7 +178,7 @@ public class DockerContainer implements XDNContainer {
         return port;
     }
 
-    public int getExposePort(){
+    public int getExposePort() {
         return exposePort;
     }
 
@@ -184,7 +227,7 @@ public class DockerContainer implements XDNContainer {
         serviceNames.add(name);
     }
 
-    public boolean removeServiceName(String name){
+    public boolean removeServiceName(String name) {
         return serviceNames.remove(name);
     }
 
@@ -219,8 +262,7 @@ public class DockerContainer implements XDNContainer {
             json.put(DockerKeys.PORT.toString(), container.port);
             json.put(DockerKeys.PUBLIC_EXPOSE_PORT.toString(), container.exposePort);
             json.put(DockerKeys.ENV.toString(), container.env);
-            if (container.xdnFormat != null)
-                json.put(DockerKeys.XDN_FORMAT.toString(), container.xdnFormat);
+            if (container.xdnFormat != null) json.put(DockerKeys.XDN_FORMAT.toString(), container.xdnFormat);
 
         } catch (Exception e) {
             e.printStackTrace();

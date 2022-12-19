@@ -10,5 +10,12 @@ public enum DockerKeys {
     ENV,
     VOL,
     PUBLIC_EXPOSE_PORT,
-    XDN_FORMAT
+    XDN_FORMAT,
+
+    HTTP_INTERFACE,
+
+    HTTP_IMAGE_URL,
+    HTTP_PORT,
+    HTTP_PUBLIC_EXPOSE_PORT,
+    HTTP_ENV
 }

@@ -825,6 +825,9 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     boolean stopped = run(stopCommand);
                     // container must be stopped successfully
                     assert (stopped);
+
+                    // TODO: Stop HTTP Interface if exists
+
                     System.out.println(" >>>>>>>>> It takes " + (System.currentTimeMillis() - stopTime) + "ms to stop app " + container.getName());
 
                     // Remove the container's checkpoint
@@ -979,6 +982,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (!containerizedApps.containsKey(appName)) {
                 try {
                     assert (json != null);
+                    // TODO: Start HTTP Interface if exists
                     // 1. Extract the initial service information
                     log.log(DEBUG_LEVEL,
                             "Restore: app {0} does not exist, restore from a new image.",

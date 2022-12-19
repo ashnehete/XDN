@@ -8,13 +8,13 @@ public class XDNConfig {
 
     public static void load() {
         String filename = defaultConfigFileName;
-        if (System.getProperty(appConfigName)!=null) {
+        if (System.getProperty(appConfigName) != null) {
             filename = System.getProperty(appConfigName);
         }
 
         File f = new File(filename);
         if (!f.exists()) {
-            System.err.println("Config file "+filename+" does not exist");
+            System.err.println("Config file " + filename + " does not exist");
             return;
             // System.exit(0);
         }
@@ -26,14 +26,14 @@ public class XDNConfig {
             e.printStackTrace();
         }
 
-        for (XC xc : XC.values()){
+        for (XC xc : XC.values()) {
             // System.out.println(">>>>>>>>>>"+xc+":"+xc.defaultValue);
         }
     }
 
     public static Properties prop = new Properties();
 
-    static{
+    static {
         load();
     }
 
@@ -100,8 +100,17 @@ public class XDNConfig {
         /**
          *
          */
-        XDN_FORMAT("")
-        ;
+        XDN_FORMAT(""),
+
+        HTTP_INTERFACE(false),
+
+        HTTP_IMAGE_URL(""),
+
+        HTTP_DOCKER_PORT(80),
+
+        HTTP_PUBLIC_EXPOSE_PORT(8000),
+
+        HTTP_ENV("");
 
         final Object defaultValue;
 
@@ -121,7 +130,7 @@ public class XDNConfig {
     /**
      * Docker's default checkpoint location
      */
-    public final static String defaultCheckpointDir =  "/var/lib/docker/containers/";
+    public final static String defaultCheckpointDir = "/var/lib/docker/containers/";
 
     public final static String defaultVolumeDir = "/var/lib/docker/volumes/";
 
@@ -142,7 +151,7 @@ public class XDNConfig {
     /**
      *
      */
-    public static String checkpointDir =  "checkpoints/";
+    public static String checkpointDir = "checkpoints/";
 
     /**
      * form service in a DNS domain name style to be compatible with DNS query
@@ -174,19 +183,18 @@ public class XDNConfig {
     public static boolean noopEnabled = false;
 
 
-    public static String generateServiceName(String imageName, String name){
+    public static String generateServiceName(String imageName, String name) {
         // FIXME: imageName or name could be null
-        return name+xdnServiceDecimal+imageName+xdnServiceDecimal+xdnDomainName;
+        return name + xdnServiceDecimal + imageName + xdnServiceDecimal + xdnDomainName;
     }
 
     /**
-     *
      * @param serviceName Service Name
      * @return a String array:
      */
-    public static String[] extractNamesFromServiceName(String serviceName){
+    public static String[] extractNamesFromServiceName(String serviceName) {
         String[] result = new String[]{null, null};
-        serviceName = serviceName.replace(xdnServiceDecimal+xdnDomainName, "");
+        serviceName = serviceName.replace(xdnServiceDecimal + xdnDomainName, "");
         String[] subs = serviceName.split(getEscapeDecimal(xdnServiceDecimal));
         // FIXME: imageName or name could be null
         // name
@@ -197,19 +205,19 @@ public class XDNConfig {
         return result;
     }
 
-    private static String getEscapeDecimal(String decimal){
-        return "\\"+decimal;
+    private static String getEscapeDecimal(String decimal) {
+        return "\\" + decimal;
     }
 
     public static void main(String[] args) throws IOException {
         String filename = defaultConfigFileName;
-        if (System.getProperty(appConfigName)!=null) {
+        if (System.getProperty(appConfigName) != null) {
             filename = System.getProperty(appConfigName);
         }
 
         File f = new File(filename);
         if (!f.exists()) {
-            System.out.println("Config file "+filename+" does not exist");
+            System.out.println("Config file " + filename + " does not exist");
             System.exit(0);
         }
 

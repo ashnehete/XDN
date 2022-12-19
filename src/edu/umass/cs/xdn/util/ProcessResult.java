@@ -24,6 +24,6 @@ public class ProcessResult {
 
     @Override
     public String toString() {
-        return "return code:"+ret+"\nresult:"+result;
+        return "return code:" + ret + "\nresult:" + result;
     }
 }
