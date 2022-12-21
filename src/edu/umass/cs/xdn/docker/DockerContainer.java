@@ -53,27 +53,27 @@ public class DockerContainer implements XDNContainer {
     /**
      * If there is a HTTP interface with the application
      */
-    boolean httpInterface;
+    private boolean httpInterface;
 
     /**
      * Docker image name of HTTP interface
      */
-    String httpImageUrl;
+    private String httpImageUrl;
 
     /**
      * Docker image port of HTTP interface
      */
-    int httpPort;
+    private int httpPort;
 
     /**
      * Docker expose port of HTTP interface
      */
-    int httpExposePort;
+    private int httpExposePort;
 
     /**
      * Env variables for the HTTP interface docker container
      */
-    JSONArray httpEnv;
+    private JSONArray httpEnv;
 
 
     /**
@@ -249,6 +249,30 @@ public class DockerContainer implements XDNContainer {
 
     public JSONArray getEnv() {
         return env;
+    }
+
+    public String getHttpName() {
+        return name + "-http";
+    }
+
+    public boolean hasHttpInterface() {
+        return httpInterface;
+    }
+
+    public String getHttpImageUrl() {
+        return httpImageUrl;
+    }
+
+    public int getHttpPort() {
+        return httpPort;
+    }
+
+    public int getHttpExposePort() {
+        return httpExposePort;
+    }
+
+    public JSONArray getHttpEnv() {
+        return httpEnv;
     }
 
     public static JSONObject dockerToJsonState(DockerContainer container) {

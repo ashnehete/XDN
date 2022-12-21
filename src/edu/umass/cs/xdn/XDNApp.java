@@ -826,7 +826,14 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     // container must be stopped successfully
                     assert (stopped);
 
-                    // TODO: Stop HTTP Interface if exists
+                    if (container.hasHttpInterface()) {
+                        // Stop the container
+                        List<String> stopHttpCommand = getStopCommand(container.getName());
+                        boolean stoppedHttp = run(stopHttpCommand);
+                        // container must be stopped successfully
+                        assert (stoppedHttp);
+                    }
+
 
                     System.out.println(" >>>>>>>>> It takes " + (System.currentTimeMillis() - stopTime) + "ms to stop app " + container.getName());
 
@@ -982,7 +989,6 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
             if (!containerizedApps.containsKey(appName)) {
                 try {
                     assert (json != null);
-                    // TODO: Start HTTP Interface if exists
                     // 1. Extract the initial service information
                     log.log(DEBUG_LEVEL,
                             "Restore: app {0} does not exist, restore from a new image.",
@@ -1003,13 +1009,7 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     int exposePort = dockerContainer.getExposePort();
                     String xdnFormat = dockerContainer.getXdnFormat();
                     JSONArray jEnv = dockerContainer.getEnv();
-
-                    List<String> env = new ArrayList<>();
-                    if (jEnv != null) {
-                        for (int i = 0; i < jEnv.length(); i++) {
-                            env.add(jEnv.getString(i));
-                        }
-                    }
+                    List<String> env = getListFromJSONArray(jEnv);
 
                     log.log(DEBUG_LEVEL, "\n >>>>>>>>>> container info: name={0},state={1},json={2}\n",
                             new String[]{name, state, json.toString()});
@@ -1021,11 +1021,45 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
                     // 3. Boot up the service
                     List<String> startCommand = getRunCommand(appName, port, exposePort, env, url, vol);
                     ProcessResult result = null;
+
                     try {
                         result = ProcessRuntime.executeCommand(startCommand);
                     } catch (IOException | InterruptedException e) {
                         e.printStackTrace();
                     }
+
+                    List<String> httpStartCommand = null;
+                    ProcessResult httpResult = null;
+
+                    // Start HTTP interface if it exists
+                    if (dockerContainer.hasHttpInterface()) {
+                        // 1. Extract information
+                        String httpName = dockerContainer.getHttpName();
+                        int httpPort = dockerContainer.getHttpPort();
+                        String httpUrl = dockerContainer.getHttpImageUrl();
+                        int httpExposePort = dockerContainer.getHttpExposePort();
+                        List<String> httpEnv = getListFromJSONArray(dockerContainer.getHttpEnv());
+
+                        log.log(DEBUG_LEVEL, "\n >>>>>>>>>> container http interface info: name={0},state={1},json={2}\n",
+                                new String[]{name, state, json.toString()});
+
+                        // 2. Pull http interface and boot-up
+                        List<String> httpPullCommand = getPullCommand(httpUrl);
+                        ProcessRuntime.executeCommand(httpPullCommand);
+
+                        // 3. Boot up http interface
+                        try {
+                            httpStartCommand = getRunCommand(httpName, httpPort, httpExposePort, httpEnv, httpUrl, null);
+                            httpResult = ProcessRuntime.executeCommand(httpStartCommand);
+
+                            log.log(DEBUG_LEVEL, "Restore: start http interface command result is {0}",
+                                    new Object[]{httpResult});
+                        } catch (IOException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // TODO: Handle checkpointer for HTTP interface
 
                     // need to start the docker first, then download the checkpoint
                     if (XDNConfig.largeCheckPointerEnabled) {
@@ -1458,6 +1492,16 @@ public class XDNApp extends AbstractReconfigurablePaxosApp<String>
         }
         log.log(Level.INFO, "Command return value: {0}", new Object[]{result});
         return result.getRetCode() == 0;
+    }
+
+    private List<String> getListFromJSONArray(JSONArray array) throws JSONException {
+        List<String> list = new ArrayList<>();
+        if (array != null) {
+            for (int i = 0; i < array.length(); i++) {
+                list.add(array.getString(i));
+            }
+        }
+        return list;
     }
 
     private String getVolumeDir(String appName) {
